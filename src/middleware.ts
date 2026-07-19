@@ -1,0 +1,63 @@
+import { auth } from '@/lib/auth'
+import createMiddleware from 'next-intl/middleware'
+import { routing } from '@/i18n/routing'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+const intlMiddleware = createMiddleware(routing)
+
+// Rate limiting simple via Edge — contadores en memoria por IP
+const rateLimitMap = new Map<string, { count: number; ts: number }>()
+const RATE_LIMIT_WINDOW = 60 * 1000  // 1 minuto
+const RATE_LIMIT_MAX    = 10         // max intentos de login por minuto
+
+function rateLimit(ip: string): boolean {
+  const now  = Date.now()
+  const data = rateLimitMap.get(ip)
+
+  if (!data || now - data.ts > RATE_LIMIT_WINDOW) {
+    rateLimitMap.set(ip, { count: 1, ts: now })
+    return true
+  }
+
+  if (data.count >= RATE_LIMIT_MAX) return false
+
+  data.count++
+  return true
+}
+
+export default async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Rate limit en login
+  if (pathname === '/admin/login' && request.method === 'POST') {
+    const ip = request.headers.get('x-forwarded-for') ?? 'unknown'
+    if (!rateLimit(ip)) {
+      return new NextResponse('Too Many Requests', { status: 429 })
+    }
+  }
+
+  // Rutas admin — verificar sesión
+  if (pathname.startsWith('/admin')) {
+    const session = await auth()
+    if (!session && pathname !== '/admin/login') {
+      return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
+    // Ya autenticado intentando acceder al login → redirigir al dashboard
+    if (session && pathname === '/admin/login') {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
+    return NextResponse.next()
+  }
+
+  // Rutas públicas — i18n
+  return intlMiddleware(request)
+}
+
+export const config = {
+  matcher: [
+    '/admin/:path*',
+    '/(es|en)/:path*',
+    '/((?!_next|api|favicon\\.ico|images|fonts|robots\\.txt|sitemap\\.xml).*)',
+  ],
+}

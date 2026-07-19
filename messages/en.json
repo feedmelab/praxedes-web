@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "commercials": "Commercials",
+    "film":        "Film & TV",
+    "gallery":     "Gallery",
+    "rental":      "Rental",
+    "about":       "About",
+    "contact":     "Contact"
+  },
+  "home": {
+    "claim": "Stylist · Costume designer · Costume rental"
+  },
+  "commercials": { "title": "Commercials",   "subtitle": "Spots & campaigns" },
+  "film":        { "title": "Film & TV",      "subtitle": "Feature films & series" },
+  "gallery":     { "title": "Gallery",        "subtitle": "Production stills" },
+  "rental": {
+    "title":    "Costume rental",
+    "subtitle": "Costume stock for film and advertising",
+    "cta":      "Check availability"
+  },
+  "about":   { "title": "About" },
+  "contact": {
+    "title":   "Contact",
+    "name":    "Name",
+    "email":   "Email",
+    "message": "Message",
+    "submit":  "Send",
+    "success": "Message sent. I'll get back to you shortly.",
+    "error":   "Something went wrong. Please try again."
+  },
+  "common": {
+    "back":        "Back",
+    "viewProject": "View project",
+    "loading":     "Loading…",
+    "noResults":   "No results"
+  }
+}

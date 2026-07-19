@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { color-scheme: dark; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #0a0a0a;
+    color: #e8e8e8;
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background-color: #c8a96e33;
+    color: #ffffff;
+  }
+
+  ::-webkit-scrollbar       { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-cormorant), Georgia, serif; }
+
+  /* Parallax container — GPU-accelerated via transform */
+  .parallax-container {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .parallax-layer {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  /* Fade-up animation trigger via Intersection Observer */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Underline hover effect */
+  .underline-hover {
+    position: relative;
+  }
+  .underline-hover::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: currentColor;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .underline-hover:hover::after { width: 100%; }
+}

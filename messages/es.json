@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "commercials": "Publicidad",
+    "film":        "Cine y TV",
+    "gallery":     "Galería",
+    "rental":      "Alquiler",
+    "about":       "Sobre mí",
+    "contact":     "Contacto"
+  },
+  "home": {
+    "claim": "Estilista · Diseñadora de vestuario · Costume rental"
+  },
+  "commercials": { "title": "Publicidad",       "subtitle": "Spots y campañas" },
+  "film":        { "title": "Cine y TV",         "subtitle": "Largometrajes y series" },
+  "gallery":     { "title": "Galería",           "subtitle": "Imágenes de producción" },
+  "rental": {
+    "title":    "Alquiler de vestuario",
+    "subtitle": "Fondo de vestuario para cine y publicidad",
+    "cta":      "Consultar disponibilidad"
+  },
+  "about":   { "title": "Sobre mí" },
+  "contact": {
+    "title":   "Contacto",
+    "name":    "Nombre",
+    "email":   "Email",
+    "message": "Mensaje",
+    "submit":  "Enviar",
+    "success": "Mensaje enviado. Responderé en breve.",
+    "error":   "Ha ocurrido un error. Inténtalo de nuevo."
+  },
+  "common": {
+    "back":        "Volver",
+    "viewProject": "Ver proyecto",
+    "loading":     "Cargando…",
+    "noResults":   "Sin resultados"
+  }
+}

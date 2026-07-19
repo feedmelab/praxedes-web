@@ -1,0 +1,132 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Neon requiere esta para migraciones
+}
+
+// ── Auth ──────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // bcrypt hash
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ── Projects ──────────────────────────────────────────────────
+
+enum ProjectCategory {
+  COMMERCIALS
+  FILM_TV
+  EDITORIAL
+}
+
+model Project {
+  id         String          @id @default(cuid())
+  slug       String          @unique
+  category   ProjectCategory
+  client     String
+  year       Int
+  titleEs    String
+  titleEn    String
+  descEs     String?         @db.Text
+  descEn     String?         @db.Text
+  vimeoId    String?
+  coverImage String?         // ImageKit URL
+  published  Boolean         @default(false)
+  featured   Boolean         @default(false)
+  order      Int             @default(0)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  images ProjectImage[]
+  frames VideoFrame[]
+
+  @@index([category, published])
+  @@index([featured, published])
+}
+
+// ── Project images ────────────────────────────────────────────
+
+model ProjectImage {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fileId    String   // ImageKit fileId para borrado
+  url       String   // ImageKit URL base (sin transformaciones)
+  width     Int
+  height    Int
+  altEs     String?
+  altEn     String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([projectId, order])
+}
+
+// ── Video frames ──────────────────────────────────────────────
+
+model VideoFrame {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fileId    String   // ImageKit fileId
+  url       String   // ImageKit URL base
+  width     Int
+  height    Int
+  timecode  Float    // segundos en el vídeo fuente
+  labelEs   String?
+  labelEn   String?
+  order     Int      @default(0)
+  published Boolean  @default(false) // false = solo documentación interna
+  createdAt DateTime @default(now())
+
+  @@index([projectId, order])
+}
+
+// ── Rental ────────────────────────────────────────────────────
+
+enum RentalCategory {
+  PERIOD
+  CONTEMPORARY
+  ACCESSORIES
+  PROPS
+  OTHER
+}
+
+model RentalItem {
+  id        String         @id @default(cuid())
+  nameEs    String
+  nameEn    String
+  descEs    String?        @db.Text
+  descEn    String?        @db.Text
+  category  RentalCategory
+  images    Json           @default("[]") // array de { fileId, url, width, height }
+  available Boolean        @default(true)
+  order     Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+// ── Site settings (singleton) ─────────────────────────────────
+
+model SiteSettings {
+  id           String   @id @default("singleton")
+  reelVimeoId  String?
+  claimEs      String?
+  claimEn      String?
+  bioEs        String?  @db.Text
+  bioEn        String?  @db.Text
+  contactEmail String?
+  instagramUrl String?
+  vimeoUrl     String?
+  updatedAt    DateTime @updatedAt
+}
