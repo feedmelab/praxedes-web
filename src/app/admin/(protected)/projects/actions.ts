@@ -1,0 +1,226 @@
+'use server'
+
+import { z } from 'zod'
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
+import { uploadFile, deleteFile } from '@/lib/imagekit'
+import { slugify } from '@/lib/utils'
+import type { ProjectCategory } from '@prisma/client'
+
+async function requireAuth() {
+  const session = await auth()
+  if (!session) throw new Error('No autorizado')
+}
+
+const projectSchema = z.object({
+  category: z.enum(['COMMERCIALS', 'FILM_TV', 'EDITORIAL']),
+  client: z.string().min(1, 'Cliente requerido'),
+  year: z.coerce.number().int().min(1950).max(2100),
+  titleEs: z.string().min(1, 'Título (ES) requerido'),
+  titleEn: z.string().min(1, 'Título (EN) requerido'),
+  descEs: z.string().optional(),
+  descEn: z.string().optional(),
+  vimeoId: z.string().optional(),
+})
+
+/* ── Crear ───────────────────────────────────────────────────── */
+
+export async function createProject(formData: FormData) {
+  await requireAuth()
+  const parsed = projectSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) {
+    return { error: parsed.error.errors[0]?.message ?? 'Datos inválidos' }
+  }
+
+  // Slug único a partir de cliente + título
+  const base = slugify(`${parsed.data.client}-${parsed.data.titleEs}`)
+  let slug = base
+  let n = 1
+  while (await prisma.project.findUnique({ where: { slug } })) {
+    slug = `${base}-${++n}`
+  }
+
+  const project = await prisma.project.create({
+    data: {
+      ...parsed.data,
+      category: parsed.data.category as ProjectCategory,
+      vimeoId: parsed.data.vimeoId || null,
+      descEs: parsed.data.descEs || null,
+      descEn: parsed.data.descEn || null,
+      slug,
+    },
+  })
+
+  revalidatePath('/admin/projects')
+  redirect(`/admin/projects/${project.id}`)
+}
+
+/* ── Actualizar ──────────────────────────────────────────────── */
+
+export async function updateProject(id: string, formData: FormData) {
+  await requireAuth()
+  const parsed = projectSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) {
+    return { error: parsed.error.errors[0]?.message ?? 'Datos inválidos' }
+  }
+
+  await prisma.project.update({
+    where: { id },
+    data: {
+      ...parsed.data,
+      category: parsed.data.category as ProjectCategory,
+      vimeoId: parsed.data.vimeoId || null,
+      descEs: parsed.data.descEs || null,
+      descEn: parsed.data.descEn || null,
+    },
+  })
+
+  revalidatePath('/admin/projects')
+  revalidatePath(`/admin/projects/${id}`)
+  return { ok: true }
+}
+
+/* ── Toggles ─────────────────────────────────────────────────── */
+
+export async function togglePublished(id: string, value: boolean) {
+  await requireAuth()
+  await prisma.project.update({ where: { id }, data: { published: value } })
+  revalidatePath('/admin/projects')
+  revalidatePath(`/admin/projects/${id}`)
+}
+
+export async function toggleFeatured(id: string, value: boolean) {
+  await requireAuth()
+  await prisma.project.update({ where: { id }, data: { featured: value } })
+  revalidatePath('/admin/projects')
+  revalidatePath(`/admin/projects/${id}`)
+}
+
+/* ── Borrar (con limpieza de ImageKit) ───────────────────────── */
+
+export async function deleteProject(id: string) {
+  await requireAuth()
+  const project = await prisma.project.findUnique({
+    where: { id },
+    include: { images: true, frames: true },
+  })
+  if (!project) return
+
+  // Borrar ficheros de ImageKit (best-effort)
+  const fileIds = [...project.images.map((i) => i.fileId), ...project.frames.map((f) => f.fileId)]
+  await Promise.allSettled(fileIds.map((fid) => deleteFile(fid)))
+
+  await prisma.project.delete({ where: { id } })
+  revalidatePath('/admin/projects')
+  redirect('/admin/projects')
+}
+
+/* ── Imágenes ────────────────────────────────────────────────── */
+
+export async function addProjectImage(projectId: string, formData: FormData) {
+  await requireAuth()
+  const file = formData.get('file')
+  if (!(file instanceof File) || file.size === 0) return { error: 'Archivo requerido' }
+
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const uploaded = await uploadFile(buffer, file.name, `projects/${projectId}`, [projectId])
+
+  const count = await prisma.projectImage.count({ where: { projectId } })
+  const image = await prisma.projectImage.create({
+    data: {
+      projectId,
+      fileId: uploaded.fileId,
+      url: uploaded.url,
+      width: uploaded.width,
+      height: uploaded.height,
+      order: count,
+    },
+  })
+
+  // Primera imagen → portada automática
+  const project = await prisma.project.findUnique({ where: { id: projectId } })
+  if (project && !project.coverImage) {
+    await prisma.project.update({ where: { id: projectId }, data: { coverImage: image.url } })
+  }
+
+  revalidatePath(`/admin/projects/${projectId}`)
+  return { ok: true }
+}
+
+export async function deleteProjectImage(imageId: string) {
+  await requireAuth()
+  const image = await prisma.projectImage.findUnique({ where: { id: imageId } })
+  if (!image) return
+
+  await Promise.allSettled([deleteFile(image.fileId)])
+  await prisma.projectImage.delete({ where: { id: imageId } })
+
+  // Si era la portada, reasignar a otra imagen si existe
+  const project = await prisma.project.findUnique({ where: { id: image.projectId } })
+  if (project?.coverImage === image.url) {
+    const next = await prisma.projectImage.findFirst({
+      where: { projectId: image.projectId },
+      orderBy: { order: 'asc' },
+    })
+    await prisma.project.update({
+      where: { id: image.projectId },
+      data: { coverImage: next?.url ?? null },
+    })
+  }
+
+  revalidatePath(`/admin/projects/${image.projectId}`)
+}
+
+export async function setCoverImage(projectId: string, url: string) {
+  await requireAuth()
+  await prisma.project.update({ where: { id: projectId }, data: { coverImage: url } })
+  revalidatePath(`/admin/projects/${projectId}`)
+}
+
+/* ── Frames de vídeo ─────────────────────────────────────────── */
+
+export async function addFrame(projectId: string, formData: FormData) {
+  await requireAuth()
+  const file = formData.get('file')
+  if (!(file instanceof File) || file.size === 0) return { error: 'Archivo requerido' }
+  const timecode = Number(formData.get('timecode') ?? 0)
+
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const uploaded = await uploadFile(buffer, file.name, `frames/${projectId}`, [projectId, 'frame'])
+
+  const count = await prisma.videoFrame.count({ where: { projectId } })
+  await prisma.videoFrame.create({
+    data: {
+      projectId,
+      fileId: uploaded.fileId,
+      url: uploaded.url,
+      width: uploaded.width,
+      height: uploaded.height,
+      timecode: Number.isFinite(timecode) ? timecode : 0,
+      order: count,
+    },
+  })
+
+  revalidatePath(`/admin/projects/${projectId}`)
+  return { ok: true }
+}
+
+export async function deleteFrame(frameId: string) {
+  await requireAuth()
+  const frame = await prisma.videoFrame.findUnique({ where: { id: frameId } })
+  if (!frame) return
+  await Promise.allSettled([deleteFile(frame.fileId)])
+  await prisma.videoFrame.delete({ where: { id: frameId } })
+  revalidatePath(`/admin/projects/${frame.projectId}`)
+}
+
+export async function toggleFramePublished(frameId: string, value: boolean) {
+  await requireAuth()
+  const frame = await prisma.videoFrame.update({
+    where: { id: frameId },
+    data: { published: value },
+  })
+  revalidatePath(`/admin/projects/${frame.projectId}`)
+}
