@@ -9,13 +9,15 @@ export default async function LoginPage() {
   if (session) redirect('/admin')
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-10 text-center">
-          <h1 className="font-display text-2xl tracking-widest text-accent uppercase">
-            Práxedes de Vilallonga
+    <div className="flex min-h-screen items-center justify-center bg-bg px-6">
+      <div className="w-full max-w-[20rem] animate-fade-up">
+        <div className="mb-14 text-center">
+          <h1 className="font-display text-3xl leading-tight tracking-wide text-light">
+            Práxedes
+            <span className="block italic text-accent">de Vilallonga</span>
           </h1>
-          <p className="text-xs text-muted tracking-widest uppercase mt-2">
+          <span className="mx-auto my-6 block h-px w-8 bg-accent/60" />
+          <p className="text-[11px] uppercase tracking-[0.3em] text-muted">
             Panel de administración
           </p>
         </div>

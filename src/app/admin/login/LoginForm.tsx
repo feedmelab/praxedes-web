@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 export default function LoginForm() {
   const router = useRouter()
-  const [error,   setError]   = useState('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -14,9 +14,9 @@ export default function LoginForm() {
     setError('')
     setLoading(true)
 
-    const fd  = new FormData(e.currentTarget)
+    const fd = new FormData(e.currentTarget)
     const res = await signIn('credentials', {
-      email:    fd.get('email'),
+      email: fd.get('email'),
       password: fd.get('password'),
       redirect: false,
     })
@@ -31,9 +31,9 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-xs text-muted mb-1.5 tracking-wider uppercase">
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="group">
+        <label className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-muted transition-colors group-focus-within:text-accent">
           Email
         </label>
         <input
@@ -41,12 +41,11 @@ export default function LoginForm() {
           type="email"
           required
           autoComplete="email"
-          className="w-full bg-surface border border-border rounded px-4 py-3 text-sm
-                     text-light focus:outline-none focus:border-accent transition-colors"
+          className="w-full border-b border-border bg-transparent py-2 text-sm text-light transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
         />
       </div>
-      <div>
-        <label className="block text-xs text-muted mb-1.5 tracking-wider uppercase">
+      <div className="group">
+        <label className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-muted transition-colors group-focus-within:text-accent">
           Contraseña
         </label>
         <input
@@ -54,21 +53,16 @@ export default function LoginForm() {
           type="password"
           required
           autoComplete="current-password"
-          className="w-full bg-surface border border-border rounded px-4 py-3 text-sm
-                     text-light focus:outline-none focus:border-accent transition-colors"
+          className="w-full border-b border-border bg-transparent py-2 text-sm text-light transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
         />
       </div>
 
-      {error && (
-        <p className="text-xs text-red-400 pt-1">{error}</p>
-      )}
+      {error && <p className="text-xs tracking-wide text-red-400/90">{error}</p>}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-accent text-[#0a0a0a] text-sm font-semibold py-3 rounded
-                   hover:bg-[#d4b87a] transition-colors disabled:opacity-50 mt-2
-                   tracking-wide uppercase"
+        className="mt-4 w-full rounded-sm border border-accent/50 py-3.5 text-xs font-medium uppercase tracking-[0.25em] text-accent transition-all duration-300 hover:bg-accent hover:text-bg disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-accent"
       >
         {loading ? 'Entrando…' : 'Acceder'}
       </button>

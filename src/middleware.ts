@@ -5,7 +5,6 @@ import { routing } from '@/i18n/routing'
 
 const intlMiddleware = createMiddleware(routing)
 
-// Rate limiting simple — contadores en memoria por IP
 const rateLimitMap = new Map<string, { count: number; ts: number }>()
 const RATE_LIMIT_WINDOW = 60 * 1000
 const RATE_LIMIT_MAX = 10
@@ -33,18 +32,19 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  // Rutas admin — verificar sesión via cookie JWT de NextAuth
+  // Rutas admin
   if (pathname.startsWith('/admin')) {
+    // Login siempre accesible
+    if (pathname === '/admin/login') {
+      return NextResponse.next()
+    }
+
     const token =
       request.cookies.get('authjs.session-token') ??
       request.cookies.get('__Secure-authjs.session-token')
 
-    if (!token && pathname !== '/admin/login') {
+    if (!token) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
-    }
-
-    if (token && pathname === '/admin/login') {
-      return NextResponse.redirect(new URL('/admin', request.url))
     }
 
     return NextResponse.next()
