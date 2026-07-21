@@ -4,14 +4,22 @@ import { useTransition } from 'react'
 import Image from 'next/image'
 import SubmitButton from '../../_components/SubmitButton'
 import { Field, TextInput } from '../../_components/ui'
-import { formatTimecode } from '@/lib/utils'
-import { addFrame, deleteFrame, toggleFramePublished } from '../actions'
+import { useSortableList, SortableArea, SortableItem, DragHandle } from '../../_components/sortable'
+import {
+  addFrame,
+  deleteFrame,
+  toggleFramePublished,
+  updateFrameMeta,
+  reorderFrames,
+} from '../actions'
 
 export type FrameVM = {
   id: string
   thumb: string
   timecode: number
   published: boolean
+  labelEs: string
+  labelEn: string
 }
 
 export default function FrameManager({
@@ -23,6 +31,22 @@ export default function FrameManager({
 }) {
   const [pending, startTransition] = useTransition()
   const upload = addFrame.bind(null, projectId)
+  const byId = new Map(frames.map((f) => [f.id, f]))
+
+  const { ids, sensors, handleDragEnd } = useSortableList(
+    frames.map((f) => f.id),
+    (next) => startTransition(() => reorderFrames(projectId, next))
+  )
+
+  function saveMeta(f: FrameVM, patch: Partial<Pick<FrameVM, 'timecode' | 'labelEs' | 'labelEn'>>) {
+    startTransition(() =>
+      updateFrameMeta(f.id, {
+        timecode: patch.timecode ?? f.timecode,
+        labelEs: patch.labelEs ?? f.labelEs,
+        labelEn: patch.labelEn ?? f.labelEn,
+      })
+    )
+  }
 
   return (
     <div className="space-y-5">
@@ -50,40 +74,82 @@ export default function FrameManager({
       {frames.length === 0 ? (
         <p className="text-sm text-muted">Sin frames documentados.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {frames.map((f) => (
-            <div key={f.id} className="group relative overflow-hidden rounded border border-border">
-              <Image
-                src={f.thumb}
-                alt=""
-                width={300}
-                height={200}
-                className="aspect-video w-full object-cover"
-              />
-              <span className="absolute left-2 top-2 rounded bg-bg/80 px-1.5 py-0.5 font-mono text-[9px] text-light">
-                {formatTimecode(f.timecode)}
-              </span>
-              <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-bg/85 p-2 opacity-0 transition-opacity group-hover:opacity-100">
-                <button
-                  disabled={pending}
-                  onClick={() => startTransition(() => toggleFramePublished(f.id, !f.published))}
-                  className={`text-[10px] uppercase tracking-wider hover:underline disabled:opacity-40 ${
-                    f.published ? 'text-green-400' : 'text-muted'
-                  }`}
-                >
-                  {f.published ? 'Público' : 'Interno'}
-                </button>
-                <button
-                  disabled={pending}
-                  onClick={() => startTransition(() => deleteFrame(f.id))}
-                  className="text-[10px] uppercase tracking-wider text-red-400 hover:underline disabled:opacity-40"
-                >
-                  Borrar
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <SortableArea ids={ids} sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {ids.map((id) => {
+              const f = byId.get(id)
+              if (!f) return null
+              return (
+                <SortableItem key={id} id={id}>
+                  {(handle) => (
+                    <div className="flex gap-3 rounded border border-border bg-bg/40 p-3">
+                      <div className="flex flex-col items-center gap-2">
+                        <DragHandle handle={handle} />
+                      </div>
+                      <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded">
+                        <Image src={f.thumb} alt="" fill sizes="128px" className="object-cover" />
+                      </div>
+                      <div className="flex min-w-0 flex-1 flex-col gap-2">
+                        <div className="flex gap-2">
+                          <TextInput
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            defaultValue={f.timecode}
+                            title="Timecode (s)"
+                            className="w-24 py-1.5 text-xs"
+                            onBlur={(e) => {
+                              const v = Number(e.target.value)
+                              if (v !== f.timecode) saveMeta(f, { timecode: v })
+                            }}
+                          />
+                          <TextInput
+                            defaultValue={f.labelEs}
+                            placeholder="Etiqueta (ES)"
+                            className="py-1.5 text-xs"
+                            onBlur={(e) => {
+                              if (e.target.value !== f.labelEs)
+                                saveMeta(f, { labelEs: e.target.value })
+                            }}
+                          />
+                        </div>
+                        <TextInput
+                          defaultValue={f.labelEn}
+                          placeholder="Label (EN)"
+                          className="py-1.5 text-xs"
+                          onBlur={(e) => {
+                            if (e.target.value !== f.labelEn)
+                              saveMeta(f, { labelEn: e.target.value })
+                          }}
+                        />
+                        <div className="mt-auto flex items-center gap-3 text-[10px] uppercase tracking-wider">
+                          <button
+                            disabled={pending}
+                            onClick={() =>
+                              startTransition(() => toggleFramePublished(f.id, !f.published))
+                            }
+                            className={`hover:underline disabled:opacity-40 ${
+                              f.published ? 'text-green-400' : 'text-muted'
+                            }`}
+                          >
+                            {f.published ? 'Público' : 'Interno'}
+                          </button>
+                          <button
+                            disabled={pending}
+                            onClick={() => startTransition(() => deleteFrame(f.id))}
+                            className="ml-auto text-red-400 hover:underline disabled:opacity-40"
+                          >
+                            Borrar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </SortableItem>
+              )
+            })}
+          </div>
+        </SortableArea>
       )}
     </div>
   )

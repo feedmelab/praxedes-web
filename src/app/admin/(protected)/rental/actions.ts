@@ -107,6 +107,31 @@ export async function addRentalImage(id: string, formData: FormData) {
   return { ok: true }
 }
 
+export async function reorderRentalItems(ids: string[]) {
+  await requireAuth()
+  await prisma.$transaction(
+    ids.map((id, index) => prisma.rentalItem.update({ where: { id }, data: { order: index } }))
+  )
+  revalidatePath('/admin/rental')
+}
+
+export async function reorderRentalImages(id: string, fileIds: string[]) {
+  await requireAuth()
+  const item = await prisma.rentalItem.findUnique({ where: { id } })
+  if (!item) return
+  const images = (item.images as unknown as RentalImage[]) ?? []
+  const byId = new Map(images.map((img) => [img.fileId, img]))
+  const reordered = fileIds.map((fid) => byId.get(fid)).filter(Boolean) as RentalImage[]
+  // Conserva cualquier imagen que no estuviera en la lista (por seguridad)
+  for (const img of images) if (!fileIds.includes(img.fileId)) reordered.push(img)
+
+  await prisma.rentalItem.update({
+    where: { id },
+    data: { images: reordered as unknown as object[] },
+  })
+  revalidatePath(`/admin/rental/${id}`)
+}
+
 export async function deleteRentalImage(id: string, fileId: string) {
   await requireAuth()
   const item = await prisma.rentalItem.findUnique({ where: { id } })

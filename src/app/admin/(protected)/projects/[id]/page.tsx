@@ -31,6 +31,8 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     url: img.url,
     thumb: getThumbUrl(img.url, 400),
     isCover: project.coverImage === img.url,
+    altEs: img.altEs ?? '',
+    altEn: img.altEn ?? '',
   }))
 
   const frames = project.frames.map((f) => ({
@@ -38,11 +40,23 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     thumb: getThumbUrl(f.url, 400),
     timecode: f.timecode,
     published: f.published,
+    labelEs: f.labelEs ?? '',
+    labelEn: f.labelEn ?? '',
   }))
+
+  const previewUrl = `/es/proyectos/${project.slug}`
 
   return (
     <div className="space-y-10">
       <PageHeader title={project.titleEs} back={{ href: '/admin/projects', label: 'Proyectos' }}>
+        <a
+          href={previewUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[11px] uppercase tracking-[0.15em] text-muted transition-colors hover:text-accent"
+        >
+          Vista previa ↗
+        </a>
         <ProjectActions id={project.id} published={project.published} featured={project.featured} />
       </PageHeader>
 

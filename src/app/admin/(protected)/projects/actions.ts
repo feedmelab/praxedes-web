@@ -224,3 +224,56 @@ export async function toggleFramePublished(frameId: string, value: boolean) {
   })
   revalidatePath(`/admin/projects/${frame.projectId}`)
 }
+
+/* ── Textos alternativos / metadatos ─────────────────────────── */
+
+export async function updateImageAlt(imageId: string, altEs: string, altEn: string) {
+  await requireAuth()
+  const image = await prisma.projectImage.update({
+    where: { id: imageId },
+    data: { altEs: altEs || null, altEn: altEn || null },
+  })
+  revalidatePath(`/admin/projects/${image.projectId}`)
+}
+
+export async function updateFrameMeta(
+  frameId: string,
+  data: { timecode: number; labelEs: string; labelEn: string }
+) {
+  await requireAuth()
+  const frame = await prisma.videoFrame.update({
+    where: { id: frameId },
+    data: {
+      timecode: Number.isFinite(data.timecode) ? data.timecode : 0,
+      labelEs: data.labelEs || null,
+      labelEn: data.labelEn || null,
+    },
+  })
+  revalidatePath(`/admin/projects/${frame.projectId}`)
+}
+
+/* ── Reordenación ────────────────────────────────────────────── */
+
+export async function reorderProjects(ids: string[]) {
+  await requireAuth()
+  await prisma.$transaction(
+    ids.map((id, index) => prisma.project.update({ where: { id }, data: { order: index } }))
+  )
+  revalidatePath('/admin/projects')
+}
+
+export async function reorderProjectImages(projectId: string, ids: string[]) {
+  await requireAuth()
+  await prisma.$transaction(
+    ids.map((id, index) => prisma.projectImage.update({ where: { id }, data: { order: index } }))
+  )
+  revalidatePath(`/admin/projects/${projectId}`)
+}
+
+export async function reorderFrames(projectId: string, ids: string[]) {
+  await requireAuth()
+  await prisma.$transaction(
+    ids.map((id, index) => prisma.videoFrame.update({ where: { id }, data: { order: index } }))
+  )
+  revalidatePath(`/admin/projects/${projectId}`)
+}

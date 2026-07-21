@@ -10,6 +10,7 @@ const links = [
   { href: '/admin/projects', label: 'Proyectos' },
   { href: '/admin/rental', label: 'Alquiler' },
   { href: '/admin/settings', label: 'Ajustes' },
+  { href: '/admin/account', label: 'Cuenta' },
 ]
 
 export default function AdminNav() {
