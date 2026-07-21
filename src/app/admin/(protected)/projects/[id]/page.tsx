@@ -6,6 +6,7 @@ import ProjectForm from '../ProjectForm'
 import ProjectActions from './ProjectActions'
 import ImageManager from './ImageManager'
 import FrameManager from './FrameManager'
+import VimeoCapture from './VimeoCapture'
 import { updateProject } from '../actions'
 
 export const metadata = { title: 'Editar proyecto' }
@@ -89,6 +90,18 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         <h2 className="mb-6 text-[11px] uppercase tracking-[0.2em] text-muted">
           Frames de vídeo ({frames.length})
         </h2>
+        {project.vimeoId ? (
+          <div className="mb-8">
+            <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-soft">
+              Extraer de Vimeo
+            </p>
+            <VimeoCapture projectId={project.id} vimeoId={project.vimeoId} />
+          </div>
+        ) : (
+          <p className="mb-6 text-[11px] text-muted">
+            Añade un Vimeo ID en los datos para extraer fotogramas del vídeo.
+          </p>
+        )}
         <FrameManager projectId={project.id} frames={frames} />
       </Card>
     </div>

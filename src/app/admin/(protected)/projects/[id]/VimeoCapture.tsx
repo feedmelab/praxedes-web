@@ -1,0 +1,355 @@
+'use client'
+
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import Script from 'next/script'
+import { formatTimecode } from '@/lib/utils'
+import { addFrame, addFrameFromVimeoThumb } from '../actions'
+
+const FPS = 25 // estimación para el salto por fotograma
+
+type VimeoPlayer = {
+  on: (ev: string, cb: (data?: { seconds: number }) => void) => void
+  getDuration: () => Promise<number>
+  getCurrentTime: () => Promise<number>
+  setCurrentTime: (t: number) => Promise<number>
+  play: () => Promise<void>
+  pause: () => Promise<void>
+  destroy: () => Promise<void>
+}
+
+declare global {
+  interface Window {
+    Vimeo?: {
+      Player: new (el: HTMLElement, opts: Record<string, unknown>) => VimeoPlayer
+    }
+  }
+}
+
+type CaptureMode = 'progressive' | 'thumbnail'
+type Captured =
+  | { kind: 'blob'; blob: Blob; t: number; w: number; h: number }
+  | { kind: 'url'; url: string; t: number; w: number; h: number }
+type Status = { msg: string; kind: 'idle' | 'loading' | 'ok' | 'error' }
+
+export default function VimeoCapture({
+  projectId,
+  vimeoId,
+}: {
+  projectId: string
+  vimeoId: string
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const playerRef = useRef<VimeoPlayer | null>(null)
+  const scrubbingRef = useRef(false)
+
+  const [sdkReady, setSdkReady] = useState(false)
+  const [mode, setMode] = useState<CaptureMode | null>(null)
+  const [duration, setDuration] = useState(0)
+  const [current, setCurrent] = useState(0)
+  const [playing, setPlaying] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [captured, setCaptured] = useState<Captured | null>(null)
+  const [status, setStatus] = useState<Status>({ msg: '', kind: 'idle' })
+  const [saving, startSave] = useTransition()
+
+  // Modo de captura disponible + aviso temprano si falta token
+  useEffect(() => {
+    fetch(`/api/admin/vimeo/${vimeoId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.ok) {
+          setMode(d.mode)
+          if (d.mode === 'thumbnail') {
+            setStatus({
+              msg: 'Sin MP4 progresivo: se usará la API de miniaturas (calidad algo menor).',
+              kind: 'idle',
+            })
+          }
+        } else {
+          const hint =
+            d.code === 'NO_TOKEN' ? 'Falta VIMEO_ACCESS_TOKEN en el entorno.' : `Vimeo: ${d.error}`
+          setStatus({ msg: hint, kind: 'error' })
+        }
+      })
+      .catch(() => {})
+  }, [vimeoId])
+
+  useEffect(() => {
+    if (!sdkReady || !window.Vimeo || !containerRef.current) return
+    const player = new window.Vimeo.Player(containerRef.current, {
+      id: Number(vimeoId),
+      controls: false,
+      autopause: false,
+      playsinline: true,
+      dnt: true,
+    })
+    playerRef.current = player
+
+    player.on('loaded', async () => setDuration(await player.getDuration()))
+    player.on('timeupdate', (data) => {
+      if (!scrubbingRef.current && data) setCurrent(data.seconds)
+    })
+    player.on('play', () => setPlaying(true))
+    player.on('pause', () => setPlaying(false))
+    player.on('error', () =>
+      setStatus({
+        msg: 'El reproductor no pudo cargar el vídeo (privacidad/domain-embed de Vimeo).',
+        kind: 'error',
+      })
+    )
+
+    return () => {
+      player.destroy().catch(() => {})
+      playerRef.current = null
+    }
+  }, [sdkReady, vimeoId])
+
+  const seekTo = useCallback(async (t: number) => {
+    const player = playerRef.current
+    if (!player) return
+    const clamped = Math.max(0, t)
+    await player.setCurrentTime(clamped)
+    await player.pause()
+    setCurrent(clamped)
+  }, [])
+
+  async function step(delta: number) {
+    const player = playerRef.current
+    if (!player) return
+    await seekTo((await player.getCurrentTime()) + delta)
+  }
+
+  async function togglePlay() {
+    const player = playerRef.current
+    if (!player) return
+    if (playing) await player.pause()
+    else await player.play()
+  }
+
+  function setPreview(url: string | null) {
+    setPreviewUrl((prev) => {
+      if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev)
+      return url
+    })
+  }
+
+  // Captura nativa (canvas) desde el MP4 progresivo por el proxy same-origin.
+  async function captureProgressive(t: number): Promise<Captured> {
+    const video = document.createElement('video')
+    video.crossOrigin = 'anonymous'
+    video.muted = true
+    video.preload = 'auto'
+    video.src = `/api/admin/vimeo/${vimeoId}/file`
+    try {
+      await new Promise<void>((resolve, reject) => {
+        video.onloadedmetadata = () => resolve()
+        video.onerror = () => reject(new Error('No se pudo cargar el vídeo'))
+      })
+      await new Promise<void>((resolve, reject) => {
+        video.onseeked = () => resolve()
+        video.onerror = () => reject(new Error('No se pudo posicionar en el timecode'))
+        video.currentTime = t
+      })
+      const canvas = document.createElement('canvas')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('Canvas no disponible')
+      ctx.drawImage(video, 0, 0)
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', 0.92))
+      if (!blob) throw new Error('canvas bloqueado por CORS')
+      return { kind: 'blob', blob, t, w: canvas.width, h: canvas.height }
+    } finally {
+      video.removeAttribute('src')
+      video.load()
+    }
+  }
+
+  // Fallback: fotograma por timecode vía Pictures API (planes sin progresivo).
+  async function captureThumbnail(t: number): Promise<Captured> {
+    const r = await fetch(`/api/admin/vimeo/${vimeoId}/thumb?t=${encodeURIComponent(t)}`)
+    const d = await r.json()
+    if (!d.ok) throw new Error(d.error || 'No se pudo generar la miniatura')
+    return { kind: 'url', url: d.url, t, w: d.width, h: d.height }
+  }
+
+  async function capture() {
+    setStatus({ msg: 'Capturando fotograma…', kind: 'loading' })
+    const player = playerRef.current
+    const t = player ? await player.getCurrentTime() : current
+
+    try {
+      let result: Captured
+      if (mode === 'progressive') {
+        try {
+          result = await captureProgressive(t)
+        } catch {
+          // Fallback automático a miniatura si el progresivo falla.
+          setStatus({ msg: 'Progresivo no disponible, usando miniatura…', kind: 'loading' })
+          result = await captureThumbnail(t)
+        }
+      } else {
+        result = await captureThumbnail(t)
+      }
+
+      setCaptured(result)
+      setPreview(result.kind === 'blob' ? URL.createObjectURL(result.blob) : result.url)
+      setStatus({
+        msg: `Fotograma capturado (${result.w}×${result.h}) · ${formatTimecode(result.t)}`,
+        kind: 'ok',
+      })
+    } catch (e) {
+      setStatus({ msg: e instanceof Error ? e.message : 'Error al capturar', kind: 'error' })
+    }
+  }
+
+  function save() {
+    if (!captured) return
+    startSave(async () => {
+      let r: { error?: string; ok?: boolean } | undefined
+      if (captured.kind === 'blob') {
+        const fd = new FormData()
+        fd.set(
+          'file',
+          new File([captured.blob], `vimeo-${vimeoId}-${captured.t.toFixed(2)}.jpg`, {
+            type: 'image/jpeg',
+          })
+        )
+        fd.set('timecode', String(captured.t))
+        r = await addFrame(projectId, fd)
+      } else {
+        r = await addFrameFromVimeoThumb(projectId, captured.t, captured.url)
+      }
+
+      if (r && 'error' in r && r.error) {
+        setStatus({ msg: r.error, kind: 'error' })
+      } else {
+        setStatus({ msg: 'Fotograma añadido al proyecto.', kind: 'ok' })
+        setPreview(null)
+        setCaptured(null)
+      }
+    })
+  }
+
+  const btn =
+    'rounded-sm border border-border px-3 py-1.5 text-xs text-soft transition-colors hover:border-accent hover:text-accent disabled:opacity-40'
+
+  return (
+    <div className="space-y-4">
+      <Script
+        src="https://player.vimeo.com/api/player.js"
+        onLoad={() => setSdkReady(true)}
+        strategy="afterInteractive"
+      />
+
+      <div className="relative aspect-video w-full overflow-hidden rounded border border-border bg-black">
+        <div ref={containerRef} className="h-full w-full [&_iframe]:h-full [&_iframe]:w-full" />
+      </div>
+
+      <div className="flex items-center gap-3">
+        <input
+          type="range"
+          min={0}
+          max={duration || 0}
+          step={1 / FPS}
+          value={current}
+          onChange={(e) => {
+            scrubbingRef.current = false
+            seekTo(Number(e.target.value))
+          }}
+          onInput={(e) => {
+            scrubbingRef.current = true
+            setCurrent(Number((e.target as HTMLInputElement).value))
+          }}
+          className="h-1 flex-1 cursor-pointer accent-accent"
+        />
+        <span className="w-40 text-right font-mono text-[11px] text-muted">
+          {formatTimecode(current)} / {formatTimecode(duration)}
+        </span>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button type="button" className={btn} onClick={() => step(-1 / FPS)}>
+          ‹ 1f
+        </button>
+        <button type="button" className={btn} onClick={() => step(1 / FPS)}>
+          1f ›
+        </button>
+        <button type="button" className={btn} onClick={() => step(-1)}>
+          −1s
+        </button>
+        <button type="button" className={btn} onClick={() => step(1)}>
+          +1s
+        </button>
+        <button type="button" className={btn} onClick={() => step(-5)}>
+          −5s
+        </button>
+        <button type="button" className={btn} onClick={() => step(5)}>
+          +5s
+        </button>
+        <button type="button" className={btn} onClick={togglePlay}>
+          {playing ? '❚❚ Pausa' : '▶ Play'}
+        </button>
+        <button
+          type="button"
+          onClick={capture}
+          className="ml-auto rounded-sm border border-accent/50 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.15em] text-accent transition-all hover:bg-accent hover:text-bg"
+        >
+          Capturar fotograma
+        </button>
+      </div>
+
+      {status.msg && (
+        <p
+          className={`text-[11px] ${
+            status.kind === 'error'
+              ? 'text-red-400'
+              : status.kind === 'ok'
+                ? 'text-green-400'
+                : 'text-muted'
+          }`}
+        >
+          {status.msg}
+        </p>
+      )}
+
+      {previewUrl && captured && (
+        <div className="flex flex-wrap items-start gap-4 rounded border border-border bg-bg/40 p-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={previewUrl}
+            alt="Fotograma capturado"
+            className="h-28 w-auto rounded border border-border"
+          />
+          <div className="flex flex-col gap-2">
+            <p className="font-mono text-[11px] text-muted">
+              {captured.w}×{captured.h} · {formatTimecode(captured.t)}
+              {captured.kind === 'url' && ' · miniatura'}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={saving}
+                onClick={save}
+                className="rounded-sm bg-accent px-4 py-1.5 text-xs font-medium uppercase tracking-[0.15em] text-bg transition-all hover:bg-accent/90 disabled:opacity-40"
+              >
+                {saving ? 'Guardando…' : 'Guardar en el proyecto'}
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => {
+                  setPreview(null)
+                  setCaptured(null)
+                }}
+                className="rounded-sm border border-border px-4 py-1.5 text-xs uppercase tracking-[0.15em] text-muted transition-colors hover:text-light disabled:opacity-40"
+              >
+                Descartar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

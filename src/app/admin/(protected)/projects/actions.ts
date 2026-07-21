@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { uploadFile, deleteFile } from '@/lib/imagekit'
+import { isVimeoImageHost } from '@/lib/vimeo'
 import { slugify } from '@/lib/utils'
 import type { ProjectCategory } from '@prisma/client'
 
@@ -189,6 +190,43 @@ export async function addFrame(projectId: string, formData: FormData) {
 
   const buffer = Buffer.from(await file.arrayBuffer())
   const uploaded = await uploadFile(buffer, file.name, `frames/${projectId}`, [projectId, 'frame'])
+
+  const count = await prisma.videoFrame.count({ where: { projectId } })
+  await prisma.videoFrame.create({
+    data: {
+      projectId,
+      fileId: uploaded.fileId,
+      url: uploaded.url,
+      width: uploaded.width,
+      height: uploaded.height,
+      timecode: Number.isFinite(timecode) ? timecode : 0,
+      order: count,
+    },
+  })
+
+  revalidatePath(`/admin/projects/${projectId}`)
+  return { ok: true }
+}
+
+/**
+ * Guarda como frame una imagen generada por la Pictures API de Vimeo (modo
+ * 'thumbnail', para planes sin MP4 progresivo). La URL debe ser de la CDN de
+ * Vimeo (allowlist anti-SSRF).
+ */
+export async function addFrameFromVimeoThumb(projectId: string, timecode: number, url: string) {
+  await requireAuth()
+  if (!isVimeoImageHost(url)) return { error: 'URL de imagen no permitida' }
+
+  const res = await fetch(url, { cache: 'no-store' })
+  if (!res.ok) return { error: `No se pudo descargar la imagen (${res.status})` }
+  const buffer = Buffer.from(await res.arrayBuffer())
+
+  const uploaded = await uploadFile(
+    buffer,
+    `vimeo-frame-${timecode.toFixed(2)}.jpg`,
+    `frames/${projectId}`,
+    [projectId, 'frame']
+  )
 
   const count = await prisma.videoFrame.count({ where: { projectId } })
   await prisma.videoFrame.create({
