@@ -1,7 +1,13 @@
 import { prisma } from '@/lib/prisma'
+import { signedDisplayUrl } from '@/lib/imagekit'
 import type { ProjectCategory, RentalCategory } from '@prisma/client'
 
 export type RentalImage = { fileId: string; url: string; width: number; height: number }
+
+// Firma la portada de un proyecto (URLs de ImageKit); deja intactas las demo.
+function signCover<T extends { coverImage: string | null }>(p: T): T {
+  return p.coverImage ? { ...p, coverImage: signedDisplayUrl(p.coverImage) } : p
+}
 
 // Etiquetas de categoría por idioma para la web pública.
 export const CATEGORY_LABELS: Record<'es' | 'en', Record<ProjectCategory, string>> = {
@@ -23,11 +29,12 @@ export async function getSettings() {
 /** Proyectos destacados y publicados, ordenados. */
 export async function getFeaturedProjects() {
   try {
-    return await prisma.project.findMany({
+    const rows = await prisma.project.findMany({
       where: { published: true, featured: true },
       orderBy: { order: 'asc' },
       take: 6,
     })
+    return rows.map(signCover)
   } catch {
     return []
   }
@@ -36,10 +43,11 @@ export async function getFeaturedProjects() {
 /** Proyectos publicados de una categoría, ordenados. */
 export async function getProjectsByCategory(category: ProjectCategory) {
   try {
-    return await prisma.project.findMany({
+    const rows = await prisma.project.findMany({
       where: { published: true, category },
       orderBy: { order: 'asc' },
     })
+    return rows.map(signCover)
   } catch {
     return []
   }
@@ -58,16 +66,22 @@ export async function getPublishedSlugs() {
   }
 }
 
-/** Ficha de proyecto: proyecto + imágenes + frames publicados. */
+/** Ficha de proyecto: proyecto + imágenes + frames publicados (URLs firmadas). */
 export async function getProjectBySlug(slug: string) {
   try {
-    return await prisma.project.findFirst({
+    const project = await prisma.project.findFirst({
       where: { slug, published: true },
       include: {
         images: { orderBy: { order: 'asc' } },
         frames: { where: { published: true }, orderBy: { order: 'asc' } },
       },
     })
+    if (!project) return null
+    return {
+      ...signCover(project),
+      images: project.images.map((img) => ({ ...img, url: signedDisplayUrl(img.url) })),
+      frames: project.frames.map((f) => ({ ...f, url: signedDisplayUrl(f.url) })),
+    }
   } catch {
     return null
   }

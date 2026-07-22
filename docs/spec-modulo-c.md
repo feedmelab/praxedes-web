@@ -113,6 +113,22 @@ Footer: solo Vimeo e Instagram (brief §2), desde `SiteSettings`.
   `RESEND_API_KEY` + dominio verificado en Resend.
 - **Selector de idioma** ES/EN visible en el nav (next-intl, ya montado).
 
+## 4b. Protección de imágenes
+
+Dos capas (100% infalible no existe: una captura de pantalla siempre es
+posible):
+
+- **Fricción** (`MediaProtection` + CSS `.protected-media`): bloquea clic
+  derecho → guardar, arrastre y "guardar imagen" por pulsación larga en móvil.
+- **URLs firmadas de ImageKit** (`signedDisplayUrl`): las fotos reales se
+  sirven con firma y caducidad (bucket diario para poder cachear). Impide
+  hotlinking y descarga por URL directa. Las imágenes de demo (Picsum) se
+  sirven sin firmar.
+
+> Paso manual imprescindible para que la firma proteja de verdad: en ImageKit
+> → Settings → Restrictions, activar **"Restrict unsigned URLs"**. Si no, las
+> URLs sin firma siguen sirviéndose.
+
 ## 5. Requisitos técnicos (brief §7)
 
 - **Responsive 100%**, prioridad móvil (muchos clientes ven portfolios en el

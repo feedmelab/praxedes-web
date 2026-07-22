@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 @layer base {
-  :root { color-scheme: dark; }
+  :root {
+    color-scheme: dark;
+  }
 
   html {
     scroll-behavior: smooth;
@@ -22,13 +24,32 @@
     color: #ffffff;
   }
 
-  ::-webkit-scrollbar       { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 2px;
+  }
 }
 
 @layer utilities {
-  .font-display { font-family: var(--font-cormorant), Georgia, serif; }
+  .font-display {
+    font-family: var(--font-cormorant), Georgia, serif;
+  }
+
+  /* Protección de imágenes en la web pública: sin arrastrar, sin selección y
+     sin "guardar imagen" por pulsación larga en móvil (iOS/Android). No
+     impide capturas de pantalla, pero frena el guardado casual. */
+  .protected-media img {
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
 
   /* Parallax container — GPU-accelerated via transform */
   .parallax-container {
@@ -69,5 +90,7 @@
     background: currentColor;
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .underline-hover:hover::after { width: 100%; }
+  .underline-hover:hover::after {
+    width: 100%;
+  }
 }

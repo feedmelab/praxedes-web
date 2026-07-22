@@ -5,6 +5,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import BookingWidget from '@/components/public/BookingWidget'
 import Reveal from '@/components/public/Reveal'
+import { signedDisplayUrl } from '@/lib/imagekit'
 import {
   getRentalItem,
   getRentalItemIds,
@@ -45,7 +46,10 @@ export default async function RentalItemPage({
   const tc = await getTranslations('common')
   const name = locale === 'en' ? item.nameEn : item.nameEs
   const desc = locale === 'en' ? item.descEn : item.descEs
-  const images = (item.images as unknown as RentalImage[]) ?? []
+  const images = ((item.images as unknown as RentalImage[]) ?? []).map((img) => ({
+    ...img,
+    url: signedDisplayUrl(img.url),
+  }))
 
   return (
     <div className="px-6 pb-24 pt-32 sm:px-10 lg:px-16 lg:pt-44">

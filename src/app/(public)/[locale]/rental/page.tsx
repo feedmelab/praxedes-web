@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import RentalGrid from '@/components/public/RentalGrid'
 import { getRentalItems, RENTAL_LABELS, type Locale, type RentalImage } from '@/lib/public-data'
+import { signedDisplayUrl } from '@/lib/imagekit'
 
 export async function generateMetadata({
   params,
@@ -30,7 +31,9 @@ export default async function RentalPage({ params }: { params: Promise<{ locale:
     descEs: r.descEs,
     descEn: r.descEn,
     category: r.category,
-    images: ((r.images as unknown as RentalImage[]) ?? []).map((img) => ({ url: img.url })),
+    images: ((r.images as unknown as RentalImage[]) ?? []).map((img) => ({
+      url: signedDisplayUrl(img.url),
+    })),
   }))
 
   return (
