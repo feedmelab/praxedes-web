@@ -182,9 +182,20 @@ navegador (hls.js) o póster por timecode vía API como último recurso.
 
 Bloqueantes (sin esto no se puede construir ni validar la extracción):
 
-1. **`VIMEO_ACCESS_TOKEN`** de la cuenta Vimeo Pro con scope `video_files`
-   (developer.vimeo.com → My Apps → Authentication). El token debe pertenecer al
-   propietario de los vídeos privados.
+1. **`VIMEO_ACCESS_TOKEN`** de la cuenta Vimeo Pro con scopes `private`,
+   `video_files`, `edit`, `upload` (developer.vimeo.com → My Apps →
+   Authentication). El token debe pertenecer al propietario de los vídeos
+   privados.
+   - `upload` requiere aprobación manual de Vimeo (My Apps → Permissions →
+     Upload Access → Request Additional Access → ticket de soporte), hasta 5
+     días laborables.
+   - **`video_files` (modo `progressive`) solo se sirve en cuentas Pro o
+     superior** — con Free/Plus la API devuelve "Video File Access: upgrade
+     your membership". Sin esto, y mientras `upload` esté en revisión, la
+     herramienta no puede capturar en ningún modo.
+   - **Estado real (21 jul 2026): la cuenta usada para las pruebas no es Pro.**
+     Bloqueado hasta que la clienta (Práxedes) ceda acceso a una cuenta Vimeo
+     Pro+ real para pruebas, o suba de plan la que se esté usando.
 2. **Un `vimeoId` privado real** para el spike (uno de los vídeos de Práxedes).
 3. **Domain-embed** en Vimeo: permitir el embed en
    `admin.praxedesdevilallonga.com` (y `localhost` para desarrollo) para que el
@@ -192,8 +203,8 @@ Bloqueantes (sin esto no se puede construir ni validar la extracción):
 
 Decisión menor:
 
-4. **Rama de trabajo**: el DoD del módulo A pedía `develop` + PRs; hasta ahora
-   hemos hecho push directo a `main`. ¿Seguimos en `main` o formalizamos `develop`?
+4. ~~**Rama de trabajo**~~ — resuelto: se formaliza `develop` (push ahí, merge a
+   `main` vía PR cuando esté validado).
 
 Ya resuelto por el prototipo: la UX de captura ofrece **scrub + timecode exacto +
 salto por fotograma** (ambos), no hace falta elegir.

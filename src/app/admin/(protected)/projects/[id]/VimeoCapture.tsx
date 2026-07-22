@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import Script from 'next/script'
-import { formatTimecode } from '@/lib/utils'
+import { formatTimecode, parseTimecode } from '@/lib/utils'
 import { addFrame, addFrameFromVimeoThumb } from '../actions'
 
 const FPS = 25 // estimación para el salto por fotograma
@@ -51,6 +51,7 @@ export default function VimeoCapture({
   const [captured, setCaptured] = useState<Captured | null>(null)
   const [status, setStatus] = useState<Status>({ msg: '', kind: 'idle' })
   const [saving, startSave] = useTransition()
+  const [timecodeInput, setTimecodeInput] = useState('')
 
   // Modo de captura disponible + aviso temprano si falta token
   useEffect(() => {
@@ -203,6 +204,43 @@ export default function VimeoCapture({
     }
   }
 
+  function jumpToTimecode() {
+    const t = parseTimecode(timecodeInput)
+    if (t === null) {
+      setStatus({ msg: 'Timecode inválido. Usa ss, mm:ss o hh:mm:ss.', kind: 'error' })
+      return
+    }
+    seekTo(duration ? Math.min(t, duration) : t)
+  }
+
+  // Atajos de teclado: ←/→ fotograma, espacio play/pausa, C capturar.
+  // Se ignoran si el foco está en un campo de texto (p.ej. el timecode).
+  const handlersRef = useRef({ step, togglePlay, capture })
+  handlersRef.current = { step, togglePlay, capture }
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        handlersRef.current.step(-1 / FPS)
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        handlersRef.current.step(1 / FPS)
+      } else if (e.code === 'Space') {
+        e.preventDefault()
+        handlersRef.current.togglePlay()
+      } else if (e.key.toLowerCase() === 'c') {
+        e.preventDefault()
+        handlersRef.current.capture()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   function save() {
     if (!captured) return
     startSave(async () => {
@@ -265,6 +303,28 @@ export default function VimeoCapture({
         />
         <span className="w-40 text-right font-mono text-[11px] text-muted">
           {formatTimecode(current)} / {formatTimecode(duration)}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={timecodeInput}
+          onChange={(e) => setTimecodeInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              jumpToTimecode()
+            }
+          }}
+          placeholder="mm:ss o hh:mm:ss"
+          className="w-32 rounded-sm border border-border bg-bg/40 px-2 py-1 font-mono text-[11px] text-light placeholder:text-muted focus:border-accent focus:outline-none"
+        />
+        <button type="button" className={btn} onClick={jumpToTimecode}>
+          Ir a timecode
+        </button>
+        <span className="text-[11px] text-muted">
+          Atajos: ← → fotograma · espacio play/pausa · C capturar
         </span>
       </div>
 

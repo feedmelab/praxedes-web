@@ -42,13 +42,23 @@ function authHeaders(): Record<string, string> {
   return { Authorization: `bearer ${token}` }
 }
 
+/** Extrae el mensaje de error de una respuesta fallida de la API de Vimeo. */
+async function vimeoErrorMessage(res: Response): Promise<string> {
+  try {
+    const body = (await res.json()) as { error?: string; developer_message?: string }
+    return body.developer_message || body.error || `Vimeo API ${res.status}`
+  } catch {
+    return `Vimeo API ${res.status}`
+  }
+}
+
 /** Metadatos + modo de captura disponible para el vídeo. */
 export async function getVimeoMeta(id: string): Promise<VimeoMeta> {
   const res = await fetch(`${API}/videos/${id}?fields=name,width,height,duration,files`, {
     headers: authHeaders(),
     cache: 'no-store',
   })
-  if (!res.ok) throw new VimeoError('API', `Vimeo API ${res.status}`)
+  if (!res.ok) throw new VimeoError('API', await vimeoErrorMessage(res))
 
   const data = (await res.json()) as {
     name?: string
@@ -103,7 +113,7 @@ export async function generateVimeoThumbnail(
     body: JSON.stringify({ time: Math.max(0, time), active: false }),
     cache: 'no-store',
   })
-  if (!res.ok) throw new VimeoError('API', `Vimeo Pictures API ${res.status}`)
+  if (!res.ok) throw new VimeoError('API', `Vimeo Pictures API: ${await vimeoErrorMessage(res)}`)
 
   const pic = (await res.json()) as { sizes?: VimeoSize[] }
   const best = (pic.sizes ?? []).sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]

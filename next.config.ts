@@ -22,7 +22,7 @@ const securityHeaders = [
       "font-src 'self' fonts.gstatic.com",
       "img-src 'self' data: blob: *.imagekit.io i.vimeocdn.com",
       'frame-src player.vimeo.com',
-      "connect-src 'self' *.neon.tech api.imagekit.io",
+      "connect-src 'self' *.neon.tech api.imagekit.io vimeo.com player.vimeo.com",
       "media-src 'self' *.vimeocdn.com",
     ].join('; '),
   },
