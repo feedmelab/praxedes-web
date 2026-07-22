@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nike — Air Max Campaign · Práxedes de Vilallonga</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0a0a; --surface:#111111; --border:#222222;
+    --muted:#666666; --soft:#999999; --light:#e8e8e8; --accent:#c8a96e;
+    --sans:'Inter',system-ui,sans-serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --ease:cubic-bezier(0.16,1,0.3,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--light);font-family:var(--sans);font-weight:300;
+    -webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--accent);color:var(--bg)}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
+    justify-content:space-between;padding:1rem clamp(1.5rem,5vw,4rem);
+    background:rgba(10,10,10,.7);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  .wordmark{font-family:var(--display);font-size:1.35rem;font-weight:500;letter-spacing:.02em}
+  .back{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);
+    display:inline-flex;align-items:center;gap:.6rem;transition:color .3s}
+  .back:hover{color:var(--accent)}
+  .back .arrow{width:24px;height:1px;background:currentColor;transition:width .4s var(--ease)}
+  .back:hover .arrow{width:36px}
+
+  /* ── Project hero ── */
+  .p-hero{position:relative;height:82vh;min-height:520px;overflow:hidden;display:flex;
+    align-items:flex-end;padding:clamp(2rem,6vw,5rem) clamp(1.5rem,5vw,4rem)}
+  .p-hero-media{position:absolute;inset:0;z-index:0;
+    background:linear-gradient(135deg,#1a1714,#2a2118 55%,#0e0d0c);
+    filter:brightness(.7);transform:scale(1.02)}
+  .p-hero-media::after{content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(115deg,transparent 0 44px,rgba(200,169,110,.012) 44px 45px)}
+  .p-hero-grad{position:absolute;inset:0;z-index:1;
+    background:linear-gradient(0deg,rgba(10,10,10,.85),transparent 60%)}
+  .p-hero-inner{position:relative;z-index:2;max-width:1100px;width:100%}
+  .p-hero .client{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:1rem;opacity:0;animation:fadeUp .8s var(--ease) .1s forwards}
+  .p-hero h1{font-family:var(--display);font-weight:400;font-size:clamp(2.4rem,7vw,5rem);
+    line-height:1;opacity:0;animation:fadeUp .9s var(--ease) .25s forwards}
+  .p-hero .meta{display:flex;gap:2rem;margin-top:1.4rem;font-size:.72rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--soft);opacity:0;animation:fadeUp .9s var(--ease) .4s forwards}
+
+  .section{padding:clamp(3.5rem,8vw,7rem) clamp(1.5rem,5vw,4rem);max-width:1200px;margin:0 auto}
+  .intro{display:grid;grid-template-columns:1fr 1.4fr;gap:clamp(2rem,6vw,5rem);
+    padding-top:clamp(3.5rem,8vw,6rem)}
+  .intro .lbl{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+  .intro p{color:var(--soft);font-size:clamp(1rem,1.6vw,1.15rem);max-width:60ch}
+  .intro p+p{margin-top:1.2rem}
+
+  /* ── Video ── */
+  .video-block{padding-top:0}
+  .video{position:relative;aspect-ratio:16/9;background:#0d0c0b;border:1px solid var(--border);
+    overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .video::before{content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg,#151310,#221b13 60%,#0d0b09);filter:brightness(.8)}
+  .play{position:relative;z-index:2;width:74px;height:74px;border:1px solid rgba(232,232,232,.5);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    transition:border-color .4s var(--ease),transform .4s var(--ease);cursor:pointer}
+  .play:hover{border-color:var(--accent);transform:scale(1.06)}
+  .play::after{content:'';border-left:14px solid var(--light);border-top:9px solid transparent;
+    border-bottom:9px solid transparent;margin-left:4px}
+  .play:hover::after{border-left-color:var(--accent)}
+
+  .head-row{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;
+    gap:1rem;margin-bottom:clamp(1.6rem,4vw,2.6rem)}
+  .head-row h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3.5vw,2.6rem)}
+  .head-row .idx{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+
+  /* ── Gallery ── */
+  .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(.8rem,2vw,1.4rem)}
+  .shot{aspect-ratio:4/5;overflow:hidden;border:1px solid var(--border);position:relative}
+  .shot.wide{aspect-ratio:16/10;grid-column:span 2}
+  .shot i{position:absolute;inset:0;transition:transform 1.1s var(--ease),filter .6s var(--ease);
+    filter:grayscale(.3) brightness(.8)}
+  .shot:hover i{transform:scale(1.05);filter:grayscale(0) brightness(.92)}
+  .g1{background:linear-gradient(150deg,#1a1613,#281f16,#0e0c0b)}
+  .g2{background:linear-gradient(150deg,#16181a,#1f2528,#0c0e0e)}
+  .g3{background:linear-gradient(150deg,#1b1417,#291b22,#0e0c0d)}
+  .g4{background:linear-gradient(150deg,#191a13,#25281a,#0d0e0c)}
+
+  /* ── Frames destacados (diferencial) ── */
+  .frames-sec{background:var(--surface);border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border)}
+  .frames-wrap{max-width:1200px;margin:0 auto;padding:clamp(3.5rem,8vw,6rem) clamp(1.5rem,5vw,4rem)}
+  .frames-sec .note{font-size:.72rem;letter-spacing:.14em;color:var(--soft);max-width:52ch;
+    margin-top:-.4rem;margin-bottom:2.4rem}
+  .frames{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,1.8vw,1.2rem)}
+  .frame{position:relative;aspect-ratio:16/9;overflow:hidden;border:1px solid var(--border)}
+  .frame i{position:absolute;inset:0;filter:brightness(.82)}
+  .frame .tc{position:absolute;top:.6rem;left:.6rem;z-index:2;font-family:var(--sans);
+    font-size:.6rem;letter-spacing:.08em;color:var(--light);background:rgba(10,10,10,.6);
+    padding:.2rem .45rem;border:1px solid var(--border);backdrop-filter:blur(4px)}
+  .frame .tag{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:.7rem .8rem;
+    font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);
+    background:linear-gradient(0deg,rgba(10,10,10,.8),transparent);opacity:0;transform:translateY(6px);
+    transition:opacity .4s var(--ease),transform .4s var(--ease)}
+  .frame:hover .tag{opacity:1;transform:translateY(0)}
+  .f1{background:linear-gradient(135deg,#201a12,#2e2417)}
+  .f2{background:linear-gradient(135deg,#1a1c20,#252d30)}
+  .f3{background:linear-gradient(135deg,#211318,#2e1c24)}
+  .f4{background:linear-gradient(135deg,#1c1e14,#282c1a)}
+  .f5{background:linear-gradient(135deg,#1e1a22,#2a2432)}
+  .f6{background:linear-gradient(135deg,#22190f,#30231a)}
+
+  /* ── Next project ── */
+  .next{position:relative;height:44vh;min-height:320px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;overflow:hidden;
+    border-top:1px solid var(--border);cursor:pointer}
+  .next-media{position:absolute;inset:0;background:linear-gradient(135deg,#141a1c,#1c2a2a,#0c0e0e);
+    filter:brightness(.5) grayscale(.4);transition:transform 1.2s var(--ease),filter .6s var(--ease)}
+  .next:hover .next-media{transform:scale(1.05);filter:brightness(.62) grayscale(0)}
+  .next-inner{position:relative;z-index:2}
+  .next .lbl{font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--accent);
+    margin-bottom:1rem}
+  .next h3{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,4vw,3rem)}
+  .next .cl{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-top:.6rem}
+
+  footer{padding:clamp(3rem,6vw,4rem) clamp(1.5rem,5vw,4rem) 2.5rem;border-top:1px solid var(--border);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:1.5rem;
+    font-size:.64rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .socials{display:flex;gap:1.4rem}
+  .socials a{color:var(--soft);transition:color .3s}
+  .socials a:hover{color:var(--accent)}
+
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+
+  @media(max-width:760px){
+    .intro{grid-template-columns:1fr;gap:1.2rem}
+    .gallery{grid-template-columns:1fr}
+    .shot.wide{grid-column:span 1}
+    .frames{grid-template-columns:1fr 1fr}
+    .frame .tag{opacity:1;transform:none}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="home.html" class="wordmark">Práxedes de Vilallonga</a>
+  <a href="home.html" class="back"><span class="arrow"></span>Volver</a>
+</nav>
+
+<!-- PROJECT HERO -->
+<header class="p-hero">
+  <div class="p-hero-media"></div>
+  <div class="p-hero-grad"></div>
+  <div class="p-hero-inner">
+    <div class="client">Nike</div>
+    <h1>Air Max Campaign</h1>
+    <div class="meta"><span>Publicidad</span><span>2025</span><span>Barcelona</span></div>
+  </div>
+</header>
+
+<!-- INTRO -->
+<section class="section intro">
+  <div class="lbl">El proyecto</div>
+  <div>
+    <p>Dirección de vestuario para la campaña internacional de Air Max, un ejercicio de contraste entre lo urbano y lo escultórico donde cada look se construye alrededor del movimiento.</p>
+    <p>La paleta juega con texturas técnicas y tejidos naturales, buscando que el producto respire dentro de un universo visual coherente y contemporáneo.</p>
+  </div>
+</section>
+
+<!-- VIDEO -->
+<section class="section video-block">
+  <div class="video"><div class="play"></div></div>
+</section>
+
+<!-- GALLERY -->
+<section class="section">
+  <div class="head-row">
+    <h2>Galería</h2>
+    <span class="idx">Looks · Making of · Detalle</span>
+  </div>
+  <div class="gallery">
+    <div class="shot wide"><i class="g1"></i></div>
+    <div class="shot"><i class="g2"></i></div>
+    <div class="shot"><i class="g3"></i></div>
+    <div class="shot"><i class="g4"></i></div>
+    <div class="shot"><i class="g1"></i></div>
+  </div>
+</section>
+
+<!-- FRAMES DESTACADOS -->
+<section class="frames-sec">
+  <div class="frames-wrap">
+    <div class="head-row">
+      <h2>Frames destacados</h2>
+      <span class="idx">Extraídos del vídeo</span>
+    </div>
+    <p class="note">Capturas seleccionadas del propio spot para mostrar el vestuario en contexto — la herramienta diferencial del panel de administración.</p>
+    <div class="frames">
+      <div class="frame"><i class="f1"></i><span class="tc">00:04:12</span><span class="tag">Look principal</span></div>
+      <div class="frame"><i class="f2"></i><span class="tc">00:11:08</span><span class="tag">Detalle accesorio</span></div>
+      <div class="frame"><i class="f3"></i><span class="tc">00:19:24</span><span class="tag">Vestuario secundario</span></div>
+      <div class="frame"><i class="f4"></i><span class="tc">00:27:16</span><span class="tag">Look principal</span></div>
+      <div class="frame"><i class="f5"></i><span class="tc">00:33:02</span><span class="tag">Textura tejido</span></div>
+      <div class="frame"><i class="f6"></i><span class="tc">00:41:19</span><span class="tag">Detalle calzado</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT PROJECT -->
+<a class="next" href="proyecto.html">
+  <div class="next-media"></div>
+  <div class="next-inner">
+    <div class="lbl">Siguiente proyecto</div>
+    <h3>Pacifiction</h3>
+    <div class="cl">Albert Serra · Cine · 2020</div>
+  </div>
+</a>
+
+<footer>
+  <span>© 2026 Práxedes de Vilallonga · Barcelona</span>
+  <div class="socials"><a href="#">Vimeo</a><a href="#">Instagram</a></div>
+</footer>
+
+</body>
+</html>
