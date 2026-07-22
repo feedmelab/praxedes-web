@@ -6,6 +6,7 @@ import { getSettings } from '@/lib/public-data'
 import Nav from '@/components/public/Nav'
 import Footer from '@/components/public/Footer'
 import Analytics from '@/components/public/Analytics'
+import HtmlLang from '@/components/public/HtmlLang'
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -26,6 +27,7 @@ export default async function PublicLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
+      <HtmlLang locale={locale} />
       <Nav />
       <main>{children}</main>
       <Footer instagramUrl={settings?.instagramUrl} vimeoUrl={settings?.vimeoUrl} />

@@ -62,5 +62,10 @@
     "viewProject": "Ver proyecto",
     "loading": "Cargando…",
     "noResults": "Sin resultados"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "text": "La página que buscas no existe o se ha movido.",
+    "home": "Volver al inicio"
   }
 }

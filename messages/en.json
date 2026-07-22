@@ -62,5 +62,10 @@
     "viewProject": "View project",
     "loading": "Loading…",
     "noResults": "No results"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "The page you’re looking for doesn’t exist or has moved.",
+    "home": "Back to home"
   }
 }

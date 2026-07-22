@@ -1,8 +1,31 @@
 # SPEC — Módulo C: Web pública
 
-> Estado: alcance validado + dirección visual aprobada (mockup, 22 jul 2026).
-> Alineado con el brief del cliente (`Brief_Web_PraxedesDeVilallonga`, jun
-> 2026). Requiere módulos A y B.
+> Estado: **implementado** (Fases 1–5). Falta solo lo manual: volcar contenido
+> real por el panel, revisar Lighthouse en el deploy de Vercel y merge a
+> `main`. Alineado con el brief del cliente (`Brief_Web_PraxedesDeVilallonga`,
+> jun 2026). Requiere módulos A y B.
+
+## Estado de implementación (22 jul 2026)
+
+- **Fase 1** ✅ Armazón: layout público `(public)/[locale]`, Nav (con switch
+  de idioma), Footer, home con hero + destacados. Navegación localizada.
+- **Fase 2** ✅ Listados por categoría (Publicidad/Cine/Galería) + ficha de
+  proyecto con galería y "frames destacados".
+- **Fase 3** ✅ Sobre mí, Contacto (Resend por API REST + honeypot) y Alquiler
+  con filtro por categoría.
+- **Fase 4** ✅ SEO: `sitemap.ts` (con hreflang), `robots.ts`, Open Graph por
+  proyecto, y Google Analytics 4 (gated por `NEXT_PUBLIC_GA_ID`).
+- **Fase 5** ✅ Pulido: 404 público, `lang` correcto por idioma, paridad de
+  traducciones ES/EN, seed de demo con fotos (`npm run db:seed:demo`).
+  Pendiente manual: Lighthouse en Vercel + merge `develop` → `main`.
+
+Pasos manuales para lanzar (no código):
+
+- Volcar proyectos/fotos/vídeos reales por el panel (o adaptar el seed).
+- Env en `.env` y Vercel: `RESEND_API_KEY` + dominio verificado en Resend,
+  `NEXT_PUBLIC_GA_ID`, y el `reelVimeoId`/redes/email en Ajustes.
+- Quitar el host `picsum.photos` de `next.config.ts` (remotePatterns + CSP)
+  cuando ya no se use el seed de demo.
 
 ## 0. Dirección visual — APROBADA (mockup)
 
