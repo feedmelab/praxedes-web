@@ -23,6 +23,12 @@ function slugify(str: string) {
     .replace(/(^-|-$)/g, '')
 }
 
+// Foto de demo (Picsum, en gris para encajar con la estética editorial).
+// DEMO: sustituir por imágenes reales subidas desde el panel.
+function img(seed: string, w = 1600, h = 1000) {
+  return `https://picsum.photos/seed/${seed}/${w}/${h}?grayscale`
+}
+
 type ProjectSeed = {
   client: string
   category: ProjectCategory
@@ -152,11 +158,46 @@ async function main() {
   await prisma.project.deleteMany()
   await prisma.rentalItem.deleteMany()
 
-  console.log('→ Insertando proyectos de demo…')
+  const FRAME_LABELS: Array<{ es: string; en: string }> = [
+    { es: 'Look principal', en: 'Main look' },
+    { es: 'Detalle accesorio', en: 'Accessory detail' },
+    { es: 'Vestuario secundario', en: 'Secondary costume' },
+    { es: 'Textura tejido', en: 'Fabric texture' },
+    { es: 'Detalle calzado', en: 'Footwear detail' },
+    { es: 'Figuración', en: 'Extras' },
+  ]
+
+  console.log('→ Insertando proyectos de demo (con fotos y frames)…')
   for (const [i, p] of PROJECTS.entries()) {
+    const slug = slugify(`${p.client}-${p.titleEs}-${p.year}`)
+
+    // Galería: 4 imágenes por proyecto.
+    const images = Array.from({ length: 4 }, (_, n) => ({
+      fileId: `demo-${slug}-img-${n}`,
+      url: img(`${slug}-${n}`, n === 0 ? 1600 : 1200, n === 0 ? 1000 : 1500),
+      width: n === 0 ? 1600 : 1200,
+      height: n === 0 ? 1000 : 1500,
+      altEs: `${p.client} — imagen ${n + 1}`,
+      altEn: `${p.client} — image ${n + 1}`,
+      order: n,
+    }))
+
+    // Frames destacados: 3 por proyecto (con timecode y etiqueta).
+    const frames = [12.4, 68.2, 141.8].map((tc, n) => ({
+      fileId: `demo-${slug}-frame-${n}`,
+      url: img(`${slug}-frame-${n}`, 1600, 900),
+      width: 1600,
+      height: 900,
+      timecode: tc,
+      labelEs: FRAME_LABELS[n % FRAME_LABELS.length].es,
+      labelEn: FRAME_LABELS[n % FRAME_LABELS.length].en,
+      published: true,
+      order: n,
+    }))
+
     await prisma.project.create({
       data: {
-        slug: slugify(`${p.client}-${p.titleEs}-${p.year}`),
+        slug,
         category: p.category,
         client: p.client,
         year: p.year,
@@ -164,16 +205,35 @@ async function main() {
         titleEn: p.titleEn,
         descEs: p.descEs,
         descEn: p.descEn,
+        vimeoId: p.category === 'EDITORIAL' ? null : '76979871',
+        coverImage: img(`${slug}-cover`, 1600, 1000),
         published: true,
         featured: p.featured ?? false,
         order: i,
+        images: { create: images },
+        frames: { create: p.category === 'EDITORIAL' ? [] : frames },
       },
     })
   }
   console.log(`✓ ${PROJECTS.length} proyectos`)
 
-  console.log('→ Insertando piezas de alquiler de demo…')
+  console.log('→ Insertando piezas de alquiler de demo (con fotos)…')
   for (const [i, r] of RENTAL.entries()) {
+    const seed = slugify(`${r.nameEn}-${i}`)
+    const images = [
+      {
+        fileId: `demo-rental-${seed}-0`,
+        url: img(`rental-${seed}-0`, 900, 1200),
+        width: 900,
+        height: 1200,
+      },
+      {
+        fileId: `demo-rental-${seed}-1`,
+        url: img(`rental-${seed}-1`, 900, 1200),
+        width: 900,
+        height: 1200,
+      },
+    ]
     await prisma.rentalItem.create({
       data: {
         nameEs: r.nameEs,
@@ -183,7 +243,7 @@ async function main() {
         category: r.category,
         available: true,
         order: i,
-        images: [],
+        images,
       },
     })
   }
