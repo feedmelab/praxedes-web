@@ -7,21 +7,25 @@ Stack: Next.js 15 · TypeScript · Tailwind · PostgreSQL (Neon) · Prisma · Ne
 ## Setup local
 
 ### 1. Requisitos
+
 - Node.js 20+
 - npm 10+
 
 ### 2. Instalar dependencias
+
 ```bash
 npm install
 ```
 
 ### 3. Variables de entorno
+
 ```bash
 cp .env.example .env
 # Editar .env con tus credenciales reales
 ```
 
 ### 4. Base de datos (Neon)
+
 1. Crear cuenta en [neon.tech](https://neon.tech)
 2. Crear proyecto → rama `main` (producción) y `dev` (desarrollo)
 3. Copiar ambas connection strings en `.env` (`DATABASE_URL` y `DIRECT_URL`)
@@ -38,12 +42,14 @@ npm run db:seed
 ```
 
 ### 5. ImageKit
+
 1. Crear cuenta en [imagekit.io](https://imagekit.io)
 2. Ir a Settings → API Keys
 3. Copiar Public Key, Private Key y URL Endpoint en `.env`
 4. En ImageKit → Settings → Restrictions → habilitar signed URLs
 
 ### 6. Arrancar
+
 ```bash
 npm run dev
 # http://localhost:3000       → web pública (aún vacía en módulo A)
@@ -55,22 +61,26 @@ npm run dev
 ## Deploy en Vercel
 
 ### 1. Conectar repo
+
 1. Ir a [vercel.com](https://vercel.com) → New Project
 2. Importar el repo de GitHub
 3. Framework: Next.js (autodetectado)
 
 ### 2. Variables de entorno en Vercel
+
 En el dashboard de Vercel → Settings → Environment Variables, añadir todas las variables de `.env.example` con valores de producción.
 
 > **Importante:** Usar la branch `dev` de Neon para `Preview` y la branch `main` para `Production`.
 
 ### 3. Dominio
+
 1. Vercel → Settings → Domains
 2. Añadir `praxedesdevilallonga.com`
 3. Añadir `admin.praxedesdevilallonga.com` → apuntar a `/admin`
 4. Actualizar DNS en el registrador de dominio
 
 ### 4. Deploy
+
 ```bash
 git push origin main  # → deploy automático en Vercel
 ```
@@ -132,9 +142,10 @@ prisma/
 
 ## Módulos
 
-| Módulo | Estado |
-|--------|--------|
-| A · Infraestructura | ✅ Completo |
-| B · Panel admin     | 🔜 Pendiente |
-| C · Web pública     | 🔜 Pendiente |
-| D · Formación       | 🔜 Pendiente |
+| Módulo                | Estado                                            |
+| --------------------- | ------------------------------------------------- |
+| A · Infraestructura   | ✅ Completo                                       |
+| B · Panel admin       | ✅ Completo (falta spike Vimeo con cuenta Pro)    |
+| C · Web pública       | ✅ Completo (pendiente volcado de contenido real) |
+| D · Formación         | 🔜 Pendiente                                      |
+| E · Reservas alquiler | ✅ Implementado (requiere `npm run db:migrate`)   |

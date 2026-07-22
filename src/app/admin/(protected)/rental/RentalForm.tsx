@@ -13,6 +13,7 @@ type Defaults = {
   descEs?: string | null
   descEn?: string | null
   category?: string
+  stock?: number
 }
 
 export default function RentalForm({
@@ -38,15 +39,26 @@ export default function RentalForm({
         </Field>
       </div>
 
-      <Field label="Categoría">
-        <SelectInput name="category" defaultValue={d.category ?? 'PERIOD'} required>
-          {Object.entries(RENTAL_CATEGORIES).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </SelectInput>
-      </Field>
+      <div className="grid gap-6 sm:grid-cols-2">
+        <Field label="Categoría">
+          <SelectInput name="category" defaultValue={d.category ?? 'PERIOD'} required>
+            {Object.entries(RENTAL_CATEGORIES).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </SelectInput>
+        </Field>
+        <Field label="Stock (unidades)">
+          <TextInput
+            name="stock"
+            type="number"
+            min={1}
+            defaultValue={String(d.stock ?? 1)}
+            required
+          />
+        </Field>
+      </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <Field label="Descripción (ES)">

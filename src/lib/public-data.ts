@@ -94,6 +94,28 @@ export async function getRentalItems() {
   }
 }
 
+/** Una pieza de alquiler disponible por id. */
+export async function getRentalItem(id: string) {
+  try {
+    return await prisma.rentalItem.findFirst({ where: { id, available: true } })
+  } catch {
+    return null
+  }
+}
+
+/** IDs de piezas disponibles (para generateStaticParams). */
+export async function getRentalItemIds() {
+  try {
+    const rows = await prisma.rentalItem.findMany({
+      where: { available: true },
+      select: { id: true },
+    })
+    return rows.map((r) => r.id)
+  } catch {
+    return []
+  }
+}
+
 export const RENTAL_LABELS: Record<'es' | 'en', Record<RentalCategory, string>> = {
   es: {
     PERIOD: 'Época',

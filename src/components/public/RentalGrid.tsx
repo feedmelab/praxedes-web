@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import type { RentalCategory } from '@prisma/client'
 
 type Item = {
@@ -65,7 +66,11 @@ export default function RentalGrid({
           const name = locale === 'en' ? item.nameEn : item.nameEs
           const cover = item.images[0]?.url
           return (
-            <div key={item.id} className="group">
+            <Link
+              key={item.id}
+              href={{ pathname: '/rental/[id]', params: { id: item.id } }}
+              className="group block"
+            >
               <div className="relative aspect-[3/4] overflow-hidden border border-border bg-surface">
                 {cover ? (
                   <Image
@@ -83,12 +88,14 @@ export default function RentalGrid({
                 )}
               </div>
               <div className="mt-3 flex items-baseline justify-between gap-2">
-                <span className="font-display text-lg">{name}</span>
+                <span className="font-display text-lg transition-colors group-hover:text-accent">
+                  {name}
+                </span>
                 <span className="text-[0.6rem] uppercase tracking-[0.14em] text-muted">
                   {labels[item.category]}
                 </span>
               </div>
-            </div>
+            </Link>
           )
         })}
       </div>

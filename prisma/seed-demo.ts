@@ -234,7 +234,7 @@ async function main() {
         height: 1200,
       },
     ]
-    await prisma.rentalItem.create({
+    const item = await prisma.rentalItem.create({
       data: {
         nameEs: r.nameEs,
         nameEn: r.nameEn,
@@ -242,10 +242,46 @@ async function main() {
         descEn: r.descEn ?? null,
         category: r.category,
         available: true,
+        stock: (i % 4) + 2, // 2–5 unidades
         order: i,
         images,
       },
     })
+
+    // Un par de reservas de demo en las dos primeras piezas.
+    if (i < 2) {
+      const base = new Date()
+      const d = (offset: number) => {
+        const x = new Date(base)
+        x.setUTCDate(x.getUTCDate() + offset)
+        return new Date(Date.UTC(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate()))
+      }
+      await prisma.reservation.create({
+        data: {
+          itemId: item.id,
+          startDate: d(5),
+          endDate: d(9),
+          quantity: 1,
+          status: 'CONFIRMED',
+          kind: 'CUSTOMER',
+          customerName: 'Productora Ejemplo',
+          customerEmail: 'cliente@ejemplo.com',
+          customerPhone: '+34 600 000 000',
+          notes: 'Rodaje spot',
+        },
+      })
+      await prisma.reservation.create({
+        data: {
+          itemId: item.id,
+          startDate: d(14),
+          endDate: d(16),
+          quantity: 1,
+          status: 'CONFIRMED',
+          kind: 'BLOCK',
+          notes: 'Mantenimiento / limpieza',
+        },
+      })
+    }
   }
   console.log(`✓ ${RENTAL.length} piezas de alquiler`)
 

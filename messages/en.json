@@ -30,7 +30,30 @@
     "subtitle": "Costume stock for film and advertising",
     "cta": "Check availability",
     "all": "All",
-    "empty": "Coming soon."
+    "empty": "Coming soon.",
+    "viewItem": "View & book"
+  },
+  "booking": {
+    "title": "Availability & booking",
+    "start": "Start date",
+    "end": "Return date",
+    "quantity": "Units",
+    "check": "Check availability",
+    "checking": "Checking…",
+    "available": "Available: {free} unit(s) for those dates",
+    "unavailable": "Not available for those dates",
+    "selectDates": "Pick dates to see availability",
+    "rangeError": "Check the dates: the start can’t be in the past and must be before the return",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone (optional)",
+    "notes": "Notes (optional)",
+    "reserve": "Request booking",
+    "reserving": "Sending…",
+    "success": "Booking confirmed. We’ve emailed you the details.",
+    "error": "Could not complete the booking. Please try again.",
+    "invalid": "Please check the form fields.",
+    "stock": "{stock} units in catalogue"
   },
   "project": {
     "overview": "The project",

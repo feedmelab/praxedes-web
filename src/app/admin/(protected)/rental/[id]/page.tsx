@@ -50,6 +50,7 @@ export default async function EditRentalPage({ params }: { params: Promise<{ id:
             descEs: item.descEs,
             descEn: item.descEn,
             category: item.category,
+            stock: item.stock,
           }}
         />
       </Card>

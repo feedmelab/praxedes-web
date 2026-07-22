@@ -110,10 +110,47 @@ model RentalItem {
   descEn    String?        @db.Text
   category  RentalCategory
   images    Json           @default("[]") // array de { fileId, url, width, height }
-  available Boolean        @default(true)
+  available Boolean        @default(true) // visible/alquilable en la web
+  stock     Int            @default(1)    // unidades disponibles de la pieza
   order     Int            @default(0)
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
+
+  reservations Reservation[]
+}
+
+// ── Reservas de alquiler (módulo E) ───────────────────────────
+
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum ReservationKind {
+  CUSTOMER // reserva de un cliente
+  BLOCK    // bloqueo interno (mantenimiento / uso propio)
+}
+
+model Reservation {
+  id        String            @id @default(cuid())
+  itemId    String
+  item      RentalItem        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  startDate DateTime          @db.Date // inclusivo
+  endDate   DateTime          @db.Date // exclusivo (día de devolución)
+  quantity  Int               @default(1)
+  status    ReservationStatus @default(CONFIRMED)
+  kind      ReservationKind   @default(CUSTOMER)
+
+  customerName  String?
+  customerEmail String?
+  customerPhone String?
+  notes         String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([itemId, startDate, endDate])
+  @@index([status])
 }
 
 // ── Site settings (singleton) ─────────────────────────────────

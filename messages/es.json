@@ -30,7 +30,30 @@
     "subtitle": "Fondo de vestuario para cine y publicidad",
     "cta": "Consultar disponibilidad",
     "all": "Todo",
-    "empty": "Próximamente."
+    "empty": "Próximamente.",
+    "viewItem": "Ver y reservar"
+  },
+  "booking": {
+    "title": "Disponibilidad y reserva",
+    "start": "Fecha de inicio",
+    "end": "Fecha de devolución",
+    "quantity": "Unidades",
+    "check": "Comprobar disponibilidad",
+    "checking": "Comprobando…",
+    "available": "Disponible: {free} unidad(es) en esas fechas",
+    "unavailable": "Sin disponibilidad en esas fechas",
+    "selectDates": "Elige fechas para ver la disponibilidad",
+    "rangeError": "Revisa las fechas: el inicio no puede ser pasado y debe ser anterior a la devolución",
+    "name": "Nombre",
+    "email": "Email",
+    "phone": "Teléfono (opcional)",
+    "notes": "Notas (opcional)",
+    "reserve": "Solicitar reserva",
+    "reserving": "Enviando…",
+    "success": "Reserva confirmada. Te hemos enviado un email con los detalles.",
+    "error": "No se pudo completar la reserva. Inténtalo de nuevo.",
+    "invalid": "Revisa los campos del formulario.",
+    "stock": "{stock} unidades en catálogo"
   },
   "project": {
     "overview": "El proyecto",

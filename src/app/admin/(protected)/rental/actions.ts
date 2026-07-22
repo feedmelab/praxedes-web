@@ -21,6 +21,7 @@ const rentalSchema = z.object({
   descEs: z.string().optional(),
   descEn: z.string().optional(),
   category: z.enum(['PERIOD', 'CONTEMPORARY', 'ACCESSORIES', 'PROPS', 'OTHER']),
+  stock: z.coerce.number().int().min(1, 'Stock mínimo 1').max(999).default(1),
 })
 
 export async function createRentalItem(formData: FormData) {
@@ -35,6 +36,7 @@ export async function createRentalItem(formData: FormData) {
       category: parsed.data.category as RentalCategory,
       descEs: parsed.data.descEs || null,
       descEn: parsed.data.descEn || null,
+      stock: parsed.data.stock,
       order: count,
     },
   })
@@ -55,6 +57,7 @@ export async function updateRentalItem(id: string, formData: FormData) {
       category: parsed.data.category as RentalCategory,
       descEs: parsed.data.descEs || null,
       descEn: parsed.data.descEn || null,
+      stock: parsed.data.stock,
     },
   })
 
@@ -145,4 +148,57 @@ export async function deleteRentalImage(id: string, fileId: string) {
     data: { images: remaining as unknown as object[] },
   })
   revalidatePath(`/admin/rental/${id}`)
+}
+
+// ── Reservas (módulo E) ───────────────────────────────────────
+
+const blockSchema = z.object({
+  itemId: z.string().min(1, 'Pieza requerida'),
+  start: z.string().min(1, 'Fecha inicio requerida'),
+  end: z.string().min(1, 'Fecha fin requerida'),
+  quantity: z.coerce.number().int().min(1).max(999).default(1),
+  notes: z.string().optional(),
+})
+
+// Crea un bloqueo interno (mantenimiento / uso propio) que resta stock.
+export async function createBlock(
+  _prev: { error?: string; ok?: boolean } | null,
+  formData: FormData
+) {
+  await requireAuth()
+  const parsed = blockSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? 'Datos inválidos' }
+
+  const start = new Date(parsed.data.start)
+  const end = new Date(parsed.data.end)
+  if (!(start.getTime() < end.getTime()))
+    return { error: 'La fecha de fin debe ser posterior al inicio' }
+
+  await prisma.reservation.create({
+    data: {
+      itemId: parsed.data.itemId,
+      startDate: start,
+      endDate: end,
+      quantity: parsed.data.quantity,
+      status: 'CONFIRMED',
+      kind: 'BLOCK',
+      notes: parsed.data.notes || null,
+    },
+  })
+  revalidatePath('/admin/rental/reservations')
+  return { ok: true }
+}
+
+// Cancela una reserva (libera stock).
+export async function cancelReservation(id: string) {
+  await requireAuth()
+  await prisma.reservation.update({ where: { id }, data: { status: 'CANCELLED' } })
+  revalidatePath('/admin/rental/reservations')
+}
+
+// Borra una reserva definitivamente.
+export async function deleteReservation(id: string) {
+  await requireAuth()
+  await prisma.reservation.delete({ where: { id } })
+  revalidatePath('/admin/rental/reservations')
 }
