@@ -1,37 +1,66 @@
 {
   "nav": {
     "commercials": "Commercials",
-    "film":        "Film & TV",
-    "gallery":     "Gallery",
-    "rental":      "Rental",
-    "about":       "About",
-    "contact":     "Contact"
+    "film": "Film & TV",
+    "gallery": "Gallery",
+    "rental": "Rental",
+    "about": "About",
+    "contact": "Contact"
   },
   "home": {
-    "claim": "Stylist · Costume designer · Costume rental"
+    "eyebrow": "Styling · Costume design",
+    "claim": "Stylist · Costume designer · Costume rental",
+    "scroll": "Scroll",
+    "selectedWork": "Selected work",
+    "selectedWorkIdx": "Commercials & Film",
+    "clientsLabel": "Selected clients",
+    "aboutTitle": "Between the poetic and the radical",
+    "aboutCta": "About",
+    "viewProject": "View project"
   },
-  "commercials": { "title": "Commercials",   "subtitle": "Spots & campaigns" },
-  "film":        { "title": "Film & TV",      "subtitle": "Feature films & series" },
-  "gallery":     { "title": "Gallery",        "subtitle": "Production stills" },
+  "footer": {
+    "available": "Available for projects",
+    "rights": "All rights reserved"
+  },
+  "commercials": { "title": "Commercials", "subtitle": "Spots & campaigns" },
+  "film": { "title": "Film & TV", "subtitle": "Feature films & series" },
+  "gallery": { "title": "Gallery", "subtitle": "Production stills" },
   "rental": {
-    "title":    "Costume rental",
+    "title": "Costume rental",
     "subtitle": "Costume stock for film and advertising",
-    "cta":      "Check availability"
+    "cta": "Check availability",
+    "all": "All",
+    "empty": "Coming soon."
   },
-  "about":   { "title": "About" },
+  "project": {
+    "overview": "The project",
+    "gallery": "Gallery",
+    "gallerySub": "Looks · Making of · Detail",
+    "frames": "Selected frames",
+    "framesSub": "Selected stills from the video showing the costume in context.",
+    "notFound": "Project not found"
+  },
+  "about": {
+    "title": "About",
+    "clients": "Selected clients"
+  },
   "contact": {
-    "title":   "Contact",
-    "name":    "Name",
-    "email":   "Email",
+    "title": "Contact",
+    "intro": "For quotes, availability or collaborations, get in touch.",
+    "name": "Name",
+    "email": "Email",
     "message": "Message",
-    "submit":  "Send",
+    "submit": "Send",
+    "sending": "Sending…",
     "success": "Message sent. I'll get back to you shortly.",
-    "error":   "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "invalid": "Please check the fields: name, valid email and message.",
+    "orEmail": "Or email me directly at"
   },
   "common": {
-    "back":        "Back",
+    "back": "Back",
     "viewProject": "View project",
-    "loading":     "Loading…",
-    "noResults":   "No results"
+    "loading": "Loading…",
+    "noResults": "No results"
   }
 }

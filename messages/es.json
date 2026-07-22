@@ -1,37 +1,66 @@
 {
   "nav": {
     "commercials": "Publicidad",
-    "film":        "Cine y TV",
-    "gallery":     "Galería",
-    "rental":      "Alquiler",
-    "about":       "Sobre mí",
-    "contact":     "Contacto"
+    "film": "Cine y TV",
+    "gallery": "Galería",
+    "rental": "Alquiler",
+    "about": "Sobre mí",
+    "contact": "Contacto"
   },
   "home": {
-    "claim": "Estilista · Diseñadora de vestuario · Costume rental"
+    "eyebrow": "Estilismo · Diseño de vestuario",
+    "claim": "Estilista · Diseñadora de vestuario · Costume rental",
+    "scroll": "Desliza",
+    "selectedWork": "Trabajo destacado",
+    "selectedWorkIdx": "Publicidad & Cine",
+    "clientsLabel": "Clientes seleccionados",
+    "aboutTitle": "Entre lo poético y lo radical",
+    "aboutCta": "Sobre mí",
+    "viewProject": "Ver proyecto"
   },
-  "commercials": { "title": "Publicidad",       "subtitle": "Spots y campañas" },
-  "film":        { "title": "Cine y TV",         "subtitle": "Largometrajes y series" },
-  "gallery":     { "title": "Galería",           "subtitle": "Imágenes de producción" },
+  "footer": {
+    "available": "Disponible para proyectos",
+    "rights": "Todos los derechos reservados"
+  },
+  "commercials": { "title": "Publicidad", "subtitle": "Spots y campañas" },
+  "film": { "title": "Cine y TV", "subtitle": "Largometrajes y series" },
+  "gallery": { "title": "Galería", "subtitle": "Imágenes de producción" },
   "rental": {
-    "title":    "Alquiler de vestuario",
+    "title": "Alquiler de vestuario",
     "subtitle": "Fondo de vestuario para cine y publicidad",
-    "cta":      "Consultar disponibilidad"
+    "cta": "Consultar disponibilidad",
+    "all": "Todo",
+    "empty": "Próximamente."
   },
-  "about":   { "title": "Sobre mí" },
+  "project": {
+    "overview": "El proyecto",
+    "gallery": "Galería",
+    "gallerySub": "Looks · Making of · Detalle",
+    "frames": "Frames destacados",
+    "framesSub": "Capturas seleccionadas del vídeo que muestran el vestuario en contexto.",
+    "notFound": "Proyecto no encontrado"
+  },
+  "about": {
+    "title": "Sobre mí",
+    "clients": "Clientes seleccionados"
+  },
   "contact": {
-    "title":   "Contacto",
-    "name":    "Nombre",
-    "email":   "Email",
+    "title": "Contacto",
+    "intro": "Para presupuestos, disponibilidad o colaboraciones, escríbeme.",
+    "name": "Nombre",
+    "email": "Email",
     "message": "Mensaje",
-    "submit":  "Enviar",
+    "submit": "Enviar",
+    "sending": "Enviando…",
     "success": "Mensaje enviado. Responderé en breve.",
-    "error":   "Ha ocurrido un error. Inténtalo de nuevo."
+    "error": "Ha ocurrido un error. Inténtalo de nuevo.",
+    "invalid": "Revisa los campos: nombre, email válido y mensaje.",
+    "orEmail": "O escríbeme directamente a"
   },
   "common": {
-    "back":        "Volver",
+    "back": "Volver",
     "viewProject": "Ver proyecto",
-    "loading":     "Cargando…",
-    "noResults":   "Sin resultados"
+    "loading": "Cargando…",
+    "noResults": "Sin resultados"
   }
 }
