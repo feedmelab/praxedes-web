@@ -1,0 +1,10 @@
+-- CreateEnum
+CREATE TYPE "MediaKind" AS ENUM ('IMAGE', 'VIDEO');
+
+-- AlterTable
+ALTER TABLE "ProjectImage" ADD COLUMN     "kind" "MediaKind" NOT NULL DEFAULT 'IMAGE',
+ADD COLUMN     "vimeoId" TEXT,
+ALTER COLUMN "fileId" DROP NOT NULL,
+ALTER COLUMN "url" DROP NOT NULL,
+ALTER COLUMN "width" DROP NOT NULL,
+ALTER COLUMN "height" DROP NOT NULL;
