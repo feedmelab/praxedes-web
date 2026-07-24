@@ -15,15 +15,14 @@ async function requireAuth() {
   if (!session) throw new Error('No autorizado')
 }
 
-// Refresca las páginas públicas afectadas por un cambio de proyecto/frames/
-// imágenes (necesario en producción, donde se cachean). Revalida por patrón de
-// ruta, así cubre todos los slugs e idiomas.
+// Refresca las páginas públicas afectadas por un cambio (necesario en
+// producción, donde se cachean). Invalidamos todo el árbol con
+// revalidatePath('/', 'layout') porque con las rutas localizadas de next-intl
+// la invalidación por ruta concreta no siempre casa. Es una web de edición
+// poco frecuente, así que el coste es irrelevante y garantiza que la web
+// pública muestre los cambios al recargar.
 function revalidatePublic() {
-  revalidatePath('/[locale]/projects/[slug]', 'page')
-  revalidatePath('/[locale]', 'page')
-  revalidatePath('/[locale]/commercials', 'page')
-  revalidatePath('/[locale]/film', 'page')
-  revalidatePath('/[locale]/gallery', 'page')
+  revalidatePath('/', 'layout')
 }
 
 const projectSchema = z.object({

@@ -15,10 +15,11 @@ async function requireAuth() {
   if (!session) throw new Error('No autorizado')
 }
 
-// Refresca las páginas públicas de alquiler (necesario en producción).
+// Refresca las páginas públicas (necesario en producción). Invalidamos todo el
+// árbol porque con las rutas localizadas de next-intl la invalidación por ruta
+// concreta no siempre casa.
 function revalidatePublicRental() {
-  revalidatePath('/[locale]/rental', 'page')
-  revalidatePath('/[locale]/rental/[id]', 'page')
+  revalidatePath('/', 'layout')
 }
 
 const rentalSchema = z.object({

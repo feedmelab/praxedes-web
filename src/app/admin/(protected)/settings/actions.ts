@@ -45,7 +45,7 @@ export async function updateSettings(
 
   revalidatePath('/admin/settings')
   // Los ajustes (reel, bio, redes, email) aparecen en home, footer, sobre mí y
-  // contacto → revalidar todo el árbol público por idioma.
-  revalidatePath('/[locale]', 'layout')
+  // contacto → invalidar todo el árbol para que se reflejen.
+  revalidatePath('/', 'layout')
   return { ok: true }
 }
