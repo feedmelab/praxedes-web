@@ -10,6 +10,7 @@ import {
   addProjectVideo,
   deleteProjectImage,
   setCoverImage,
+  toggleImageWide,
   updateImageAlt,
   reorderProjectImages,
 } from '../actions'
@@ -21,6 +22,7 @@ export type ImageVM = {
   thumb: string
   vimeoId: string
   isCover: boolean
+  wide: boolean
   altEs: string
   altEn: string
 }
@@ -175,6 +177,18 @@ export default function ImageManager({
                               Portada
                             </button>
                           )}
+                          <button
+                            disabled={pending}
+                            onClick={() =>
+                              startTransition(() => toggleImageWide(img.id, !img.wide))
+                            }
+                            className={`hover:underline disabled:opacity-40 ${
+                              img.wide ? 'text-accent' : 'text-muted'
+                            }`}
+                            title="Ancho en la galería"
+                          >
+                            {img.wide ? '2 columnas' : '1 columna'}
+                          </button>
                           <button
                             disabled={pending}
                             onClick={() => startTransition(() => deleteProjectImage(img.id))}

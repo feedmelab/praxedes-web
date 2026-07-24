@@ -81,6 +81,7 @@ export async function getProjectBySlug(slug: string) {
         kind: m.kind as 'IMAGE' | 'VIDEO',
         url: m.url ? signedDisplayUrl(m.url) : null,
         vimeoId: m.vimeoId,
+        wide: m.wide,
         altEs: m.altEs,
         altEn: m.altEn,
       })),

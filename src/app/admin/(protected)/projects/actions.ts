@@ -253,6 +253,17 @@ export async function setCoverImage(projectId: string, url: string) {
   revalidatePublic()
 }
 
+// Alterna si un item de la galería ocupa 2 columnas (ancho completo) o 1.
+export async function toggleImageWide(imageId: string, value: boolean) {
+  await requireAuth()
+  const image = await prisma.projectImage.update({
+    where: { id: imageId },
+    data: { wide: value },
+  })
+  revalidatePath(`/admin/projects/${image.projectId}`)
+  revalidatePublic()
+}
+
 /* ── Frames de vídeo ─────────────────────────────────────────── */
 
 export async function addFrame(projectId: string, formData: FormData) {

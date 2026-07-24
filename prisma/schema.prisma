@@ -77,6 +77,7 @@ model ProjectImage {
   // guarda "id" o "id?h=hash" (se parsea con parseVimeo).
   vimeoId String?
 
+  wide      Boolean  @default(false) // true = ocupa 2 columnas en la galería
   altEs     String?
   altEn     String?
   order     Int      @default(0)

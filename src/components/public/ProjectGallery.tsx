@@ -11,6 +11,7 @@ type MediaItem = {
   kind: 'IMAGE' | 'VIDEO'
   url: string | null
   vimeoId: string | null
+  wide: boolean
   altEs: string | null
   altEn: string | null
 }
@@ -41,7 +42,7 @@ export default function ProjectGallery({
     <>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:gap-6">
         {images.map((m, i) => {
-          const wide = i === 0
+          const wide = m.wide
           const spanClass = wide ? 'sm:col-span-2' : ''
 
           if (m.kind === 'VIDEO' && m.vimeoId) {

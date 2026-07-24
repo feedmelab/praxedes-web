@@ -170,11 +170,12 @@ async function main() {
           url: string
           width: number
           height: number
+          wide: boolean
           altEs: string
           altEn: string
           order: number
         }
-      | { kind: 'VIDEO'; vimeoId: string; order: number }
+      | { kind: 'VIDEO'; vimeoId: string; wide: boolean; order: number }
 
     const media: MediaSeed[] = Array.from({ length: 4 }, (_, n) => ({
       kind: 'IMAGE' as const,
@@ -182,6 +183,7 @@ async function main() {
       url: img(`${slug}-${n}`, n === 0 ? 1600 : 1200, n === 0 ? 1000 : 1500),
       width: n === 0 ? 1600 : 1200,
       height: n === 0 ? 1000 : 1500,
+      wide: n === 0, // la primera en ancho completo
       altEs: `${p.client} — imagen ${n + 1}`,
       altEn: `${p.client} — image ${n + 1}`,
       order: n,
@@ -189,7 +191,12 @@ async function main() {
     // Solo el primer proyecto lleva un vídeo de ejemplo en la galería (para
     // no dar la falsa impresión de que "el vídeo está en todos los proyectos").
     if (i === 0) {
-      media.push({ kind: 'VIDEO' as const, vimeoId: '76979871?h=8272103f6e', order: media.length })
+      media.push({
+        kind: 'VIDEO' as const,
+        vimeoId: '76979871?h=8272103f6e',
+        wide: false,
+        order: media.length,
+      })
     }
 
     await prisma.project.create({

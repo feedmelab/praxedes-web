@@ -32,6 +32,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     thumb: m.url ? getThumbUrl(m.url, 400) : '',
     vimeoId: m.vimeoId ?? '',
     isCover: !!m.url && project.coverImage === m.url,
+    wide: m.wide,
     altEs: m.altEs ?? '',
     altEn: m.altEn ?? '',
   }))
