@@ -54,16 +54,29 @@ model Project {
   @@index([featured, published])
 }
 
-// ── Project images ────────────────────────────────────────────
+// ── Project media (galería: imagen o vídeo) ───────────────────
+
+enum MediaKind {
+  IMAGE
+  VIDEO
+}
 
 model ProjectImage {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  fileId    String   // ImageKit fileId para borrado
-  url       String   // ImageKit URL base (sin transformaciones)
-  width     Int
-  height    Int
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  kind      MediaKind @default(IMAGE)
+
+  // Solo para kind = IMAGE (foto subida o fotograma extraído de un vídeo):
+  fileId String? // ImageKit fileId para borrado
+  url    String? // ImageKit URL base (sin transformaciones)
+  width  Int?
+  height Int?
+
+  // Solo para kind = VIDEO (un vídeo Vimeo como item de la galería):
+  // guarda "id" o "id?h=hash" (se parsea con parseVimeo).
+  vimeoId String?
+
   altEs     String?
   altEn     String?
   order     Int      @default(0)

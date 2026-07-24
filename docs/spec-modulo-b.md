@@ -35,6 +35,29 @@ Construido con **Server Actions + Zod**, componentes en `src/app/admin/(protecte
 - **Ajustes**: singleton (reel, claims, bio, contacto, redes).
 - **Cuenta**: cambio de contraseña.
 
+## 3c. Galería unificada del proyecto (actualización jul 2026)
+
+Cambio de enfoque validado con la clienta: **los fotogramas no se muestran
+como una sección "frames" en la web**; son la fuente de las imágenes del
+proyecto. La galería del proyecto es ahora una lista unificada donde cada item
+es imagen o vídeo:
+
+- `ProjectImage` gana `kind` (IMAGE | VIDEO) y `vimeoId`; los campos de fichero
+  son nullable (los vídeos no tienen fichero). Se elimina el uso público de
+  `VideoFrame` (el modelo permanece pero no se muestra).
+- **Fotos subidas**: como antes (`addProjectImage`).
+- **Fotograma extraído de un vídeo**: el extractor Vimeo guarda la captura como
+  un `ProjectImage` (IMAGE), que el admin coloca/ordena/portada como una foto
+  más. Ya no crea `VideoFrame`.
+- **Vídeo Vimeo como item**: `addProjectVideo` crea un `ProjectImage` (VIDEO)
+  con `vimeoId`. En la web se embebe el player; se puede intercalar con fotos.
+- Admin: `ImageManager` gestiona fotos y vídeos (subir, añadir vídeo, ordenar,
+  portada [solo fotos], alt, borrar). Se retira la sección "Frames".
+- Público: `ProjectGallery` renderiza imagen (con visor) o embed de vídeo.
+
+Migración pendiente en local: `npm run db:migrate` (añade `kind`/`vimeoId` a
+ProjectImage) + `npm run db:seed:demo` para recargar el demo.
+
 ## 3b. Extractor Vimeo único, dos vías (actualización jul 2026)
 
 Un solo extractor (`VimeoCapture`) sobre el `vimeoId` del proyecto. Captura por

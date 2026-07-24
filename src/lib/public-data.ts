@@ -66,21 +66,24 @@ export async function getPublishedSlugs() {
   }
 }
 
-/** Ficha de proyecto: proyecto + imágenes + frames publicados (URLs firmadas). */
+/** Ficha de proyecto: proyecto + galería (imágenes/vídeos), URLs firmadas. */
 export async function getProjectBySlug(slug: string) {
   try {
     const project = await prisma.project.findFirst({
       where: { slug, published: true },
-      include: {
-        images: { orderBy: { order: 'asc' } },
-        frames: { where: { published: true }, orderBy: { order: 'asc' } },
-      },
+      include: { images: { orderBy: { order: 'asc' } } },
     })
     if (!project) return null
     return {
       ...signCover(project),
-      images: project.images.map((img) => ({ ...img, url: signedDisplayUrl(img.url) })),
-      frames: project.frames.map((f) => ({ ...f, url: signedDisplayUrl(f.url) })),
+      images: project.images.map((m) => ({
+        id: m.id,
+        kind: m.kind as 'IMAGE' | 'VIDEO',
+        url: m.url ? signedDisplayUrl(m.url) : null,
+        vimeoId: m.vimeoId,
+        altEs: m.altEs,
+        altEn: m.altEn,
+      })),
     }
   } catch {
     return null

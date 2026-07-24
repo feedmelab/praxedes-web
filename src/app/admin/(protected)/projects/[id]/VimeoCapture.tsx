@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Script from 'next/script'
 import { formatTimecode, parseTimecode, parseVimeo } from '@/lib/utils'
-import { addFrame, addFrameFromVimeoThumb } from '../actions'
+import { addProjectImage, addProjectImageFromUrl } from '../actions'
 
 const FPS = 25 // estimación para el salto por fotograma
 
@@ -267,14 +267,14 @@ export default function VimeoCapture({
         const fd = new FormData()
         fd.set(
           'file',
-          new File([captured.blob], `vimeo-${vimeoId}-${captured.t.toFixed(2)}.jpg`, {
+          new File([captured.blob], `vimeo-${vId}-${captured.t.toFixed(2)}.jpg`, {
             type: 'image/jpeg',
           })
         )
-        fd.set('timecode', String(captured.t))
-        r = await addFrame(projectId, fd)
+        // El fotograma extraído se guarda como una imagen más de la galería.
+        r = await addProjectImage(projectId, fd)
       } else {
-        r = await addFrameFromVimeoThumb(projectId, captured.t, captured.url)
+        r = await addProjectImageFromUrl(projectId, captured.url)
       }
 
       if (r && 'error' in r && r.error) {

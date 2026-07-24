@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { uploadFile, deleteFile } from '@/lib/imagekit'
 import { isVimeoImageHost } from '@/lib/vimeo'
-import { slugify } from '@/lib/utils'
+import { slugify, parseVimeo } from '@/lib/utils'
 import type { ProjectCategory } from '@prisma/client'
 
 async function requireAuth() {
@@ -121,7 +121,10 @@ export async function deleteProject(id: string) {
   if (!project) return
 
   // Borrar ficheros de ImageKit (best-effort)
-  const fileIds = [...project.images.map((i) => i.fileId), ...project.frames.map((f) => f.fileId)]
+  const fileIds = [
+    ...project.images.map((i) => i.fileId),
+    ...project.frames.map((f) => f.fileId),
+  ].filter((fid): fid is string => !!fid)
   await Promise.allSettled(fileIds.map((fid) => deleteFile(fid)))
 
   await prisma.project.delete({ where: { id } })
@@ -143,6 +146,7 @@ export async function addProjectImage(projectId: string, formData: FormData) {
   const image = await prisma.projectImage.create({
     data: {
       projectId,
+      kind: 'IMAGE',
       fileId: uploaded.fileId,
       url: uploaded.url,
       width: uploaded.width,
@@ -158,6 +162,62 @@ export async function addProjectImage(projectId: string, formData: FormData) {
   }
 
   revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePublic()
+  return { ok: true }
+}
+
+/**
+ * Guarda como imagen del proyecto una imagen alojada en una URL permitida
+ * (p.ej. un fotograma generado por la Pictures API de Vimeo — allowlist
+ * anti-SSRF). La descarga, la sube a ImageKit y crea un ProjectImage.
+ */
+export async function addProjectImageFromUrl(projectId: string, url: string) {
+  await requireAuth()
+  if (!isVimeoImageHost(url)) return { error: 'URL de imagen no permitida' }
+
+  const res = await fetch(url, { cache: 'no-store' })
+  if (!res.ok) return { error: `No se pudo descargar la imagen (${res.status})` }
+  const buffer = Buffer.from(await res.arrayBuffer())
+  const uploaded = await uploadFile(buffer, `frame-${Date.now()}.jpg`, `projects/${projectId}`, [
+    projectId,
+  ])
+
+  const count = await prisma.projectImage.count({ where: { projectId } })
+  const image = await prisma.projectImage.create({
+    data: {
+      projectId,
+      kind: 'IMAGE',
+      fileId: uploaded.fileId,
+      url: uploaded.url,
+      width: uploaded.width,
+      height: uploaded.height,
+      order: count,
+    },
+  })
+  const project = await prisma.project.findUnique({ where: { id: projectId } })
+  if (project && !project.coverImage) {
+    await prisma.project.update({ where: { id: projectId }, data: { coverImage: image.url } })
+  }
+
+  revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePublic()
+  return { ok: true }
+}
+
+/** Añade un vídeo de Vimeo como item de la galería del proyecto. */
+export async function addProjectVideo(projectId: string, vimeoInput: string) {
+  await requireAuth()
+  const { id, hash } = parseVimeo(vimeoInput)
+  if (!id || !/^\d{6,}$/.test(id)) return { error: 'Introduce un ID o URL de Vimeo válido' }
+  const vimeoId = hash ? `${id}?h=${hash}` : id
+
+  const count = await prisma.projectImage.count({ where: { projectId } })
+  await prisma.projectImage.create({
+    data: { projectId, kind: 'VIDEO', vimeoId, order: count },
+  })
+
+  revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePublic()
   return { ok: true }
 }
 
@@ -166,14 +226,14 @@ export async function deleteProjectImage(imageId: string) {
   const image = await prisma.projectImage.findUnique({ where: { id: imageId } })
   if (!image) return
 
-  await Promise.allSettled([deleteFile(image.fileId)])
+  if (image.fileId) await Promise.allSettled([deleteFile(image.fileId)])
   await prisma.projectImage.delete({ where: { id: imageId } })
 
-  // Si era la portada, reasignar a otra imagen si existe
+  // Si era la portada, reasignar a otra imagen (solo IMAGE con url)
   const project = await prisma.project.findUnique({ where: { id: image.projectId } })
-  if (project?.coverImage === image.url) {
+  if (image.url && project?.coverImage === image.url) {
     const next = await prisma.projectImage.findFirst({
-      where: { projectId: image.projectId },
+      where: { projectId: image.projectId, kind: 'IMAGE' },
       orderBy: { order: 'asc' },
     })
     await prisma.project.update({
@@ -183,12 +243,14 @@ export async function deleteProjectImage(imageId: string) {
   }
 
   revalidatePath(`/admin/projects/${image.projectId}`)
+  revalidatePublic()
 }
 
 export async function setCoverImage(projectId: string, url: string) {
   await requireAuth()
   await prisma.project.update({ where: { id: projectId }, data: { coverImage: url } })
   revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePublic()
 }
 
 /* ── Frames de vídeo ─────────────────────────────────────────── */

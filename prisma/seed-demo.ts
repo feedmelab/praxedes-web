@@ -158,21 +158,26 @@ async function main() {
   await prisma.project.deleteMany()
   await prisma.rentalItem.deleteMany()
 
-  const FRAME_LABELS: Array<{ es: string; en: string }> = [
-    { es: 'Look principal', en: 'Main look' },
-    { es: 'Detalle accesorio', en: 'Accessory detail' },
-    { es: 'Vestuario secundario', en: 'Secondary costume' },
-    { es: 'Textura tejido', en: 'Fabric texture' },
-    { es: 'Detalle calzado', en: 'Footwear detail' },
-    { es: 'Figuración', en: 'Extras' },
-  ]
-
-  console.log('→ Insertando proyectos de demo (con fotos y frames)…')
+  console.log('→ Insertando proyectos de demo (fotos + vídeo en galería)…')
   for (const [i, p] of PROJECTS.entries()) {
     const slug = slugify(`${p.client}-${p.titleEs}-${p.year}`)
 
-    // Galería: 4 imágenes por proyecto.
-    const images = Array.from({ length: 4 }, (_, n) => ({
+    // Galería unificada: 4 fotos y, en publicidad/cine, un vídeo Vimeo.
+    type MediaSeed =
+      | {
+          kind: 'IMAGE'
+          fileId: string
+          url: string
+          width: number
+          height: number
+          altEs: string
+          altEn: string
+          order: number
+        }
+      | { kind: 'VIDEO'; vimeoId: string; order: number }
+
+    const media: MediaSeed[] = Array.from({ length: 4 }, (_, n) => ({
+      kind: 'IMAGE' as const,
       fileId: `demo-${slug}-img-${n}`,
       url: img(`${slug}-${n}`, n === 0 ? 1600 : 1200, n === 0 ? 1000 : 1500),
       width: n === 0 ? 1600 : 1200,
@@ -181,19 +186,9 @@ async function main() {
       altEn: `${p.client} — image ${n + 1}`,
       order: n,
     }))
-
-    // Frames destacados: 3 por proyecto (con timecode y etiqueta).
-    const frames = [12.4, 68.2, 141.8].map((tc, n) => ({
-      fileId: `demo-${slug}-frame-${n}`,
-      url: img(`${slug}-frame-${n}`, 1600, 900),
-      width: 1600,
-      height: 900,
-      timecode: tc,
-      labelEs: FRAME_LABELS[n % FRAME_LABELS.length].es,
-      labelEn: FRAME_LABELS[n % FRAME_LABELS.length].en,
-      published: true,
-      order: n,
-    }))
+    if (p.category !== 'EDITORIAL') {
+      media.push({ kind: 'VIDEO' as const, vimeoId: '76979871?h=8272103f6e', order: media.length })
+    }
 
     await prisma.project.create({
       data: {
@@ -205,13 +200,12 @@ async function main() {
         titleEn: p.titleEn,
         descEs: p.descEs,
         descEn: p.descEn,
-        vimeoId: p.category === 'EDITORIAL' ? null : '76979871',
+        vimeoId: p.category === 'EDITORIAL' ? null : '76979871?h=8272103f6e',
         coverImage: img(`${slug}-cover`, 1600, 1000),
         published: true,
         featured: p.featured ?? false,
         order: i,
-        images: { create: images },
-        frames: { create: p.category === 'EDITORIAL' ? [] : frames },
+        images: { create: media },
       },
     })
   }

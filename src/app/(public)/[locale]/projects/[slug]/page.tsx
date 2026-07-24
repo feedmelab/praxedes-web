@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import ProjectGallery from '@/components/public/ProjectGallery'
-import FramesGrid from '@/components/public/FramesGrid'
 import {
   getProjectBySlug,
   getPublishedSlugs,
@@ -114,23 +113,6 @@ export default async function ProjectPage({
             </span>
           </div>
           <ProjectGallery images={project.images} locale={locale} />
-        </section>
-      )}
-
-      {/* Frames destacados */}
-      {project.frames.length > 0 && (
-        <section className="border-y border-border bg-surface">
-          <div className="mx-auto max-w-[1200px] px-6 py-16 sm:px-10 lg:px-16 lg:py-24">
-            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-4">
-              <h2 className="font-display text-[clamp(1.6rem,3.5vw,2.6rem)] font-normal">
-                {t('frames')}
-              </h2>
-            </div>
-            <p className="mb-10 max-w-[52ch] text-[0.72rem] tracking-[0.14em] text-soft">
-              {t('framesSub')}
-            </p>
-            <FramesGrid frames={project.frames} locale={locale} />
-          </div>
         </section>
       )}
 
