@@ -132,20 +132,33 @@ async function sendReservationEmails(r: {
   quantity: number
 }) {
   const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) return
+  if (!apiKey) {
+    console.error('Resend reserva: falta RESEND_API_KEY en el entorno')
+    return
+  }
 
   const settings = await getSettings()
   const owner = settings?.contactEmail || process.env.CONTACT_TO
   const from = process.env.CONTACT_FROM || 'Reservas Práxedes <onboarding@resend.dev>'
+  if (!owner) console.error('Resend reserva: sin email de destino (contactEmail/CONTACT_TO)')
 
   const period = `${r.start} → ${r.end}`
-  const send = (to: string, subject: string, text: string) =>
-    fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: [to], subject, text }),
-      cache: 'no-store',
-    }).catch(() => {})
+  const send = async (to: string, subject: string, text: string) => {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from, to: [to], subject, text }),
+        cache: 'no-store',
+      })
+      if (!res.ok) {
+        // Visible en los logs de la función (Vercel → Logs).
+        console.error('Resend reserva error', res.status, await res.text())
+      }
+    } catch (e) {
+      console.error('Resend reserva fetch failed', e)
+    }
+  }
 
   // Aviso a Práxedes
   if (owner) {

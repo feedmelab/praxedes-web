@@ -15,6 +15,17 @@ async function requireAuth() {
   if (!session) throw new Error('No autorizado')
 }
 
+// Refresca las páginas públicas afectadas por un cambio de proyecto/frames/
+// imágenes (necesario en producción, donde se cachean). Revalida por patrón de
+// ruta, así cubre todos los slugs e idiomas.
+function revalidatePublic() {
+  revalidatePath('/[locale]/projects/[slug]', 'page')
+  revalidatePath('/[locale]', 'page')
+  revalidatePath('/[locale]/commercials', 'page')
+  revalidatePath('/[locale]/film', 'page')
+  revalidatePath('/[locale]/gallery', 'page')
+}
+
 const projectSchema = z.object({
   category: z.enum(['COMMERCIALS', 'FILM_TV', 'EDITORIAL']),
   client: z.string().min(1, 'Cliente requerido'),
@@ -261,6 +272,7 @@ export async function toggleFramePublished(frameId: string, value: boolean) {
     data: { published: value },
   })
   revalidatePath(`/admin/projects/${frame.projectId}`)
+  revalidatePublic()
 }
 
 /* ── Textos alternativos / metadatos ─────────────────────────── */

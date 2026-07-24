@@ -11,10 +11,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (!session) return new NextResponse('Unauthorized', { status: 401 })
 
   const { id } = await params
+  const hash = new URL(req.url).searchParams.get('h') ?? undefined
 
   let fileUrl: string
   try {
-    ;({ fileUrl } = await resolveVimeoFile(id))
+    ;({ fileUrl } = await resolveVimeoFile(id, hash))
   } catch (e) {
     const err = e instanceof VimeoError ? e : new Error('Error desconocido')
     const status = err instanceof VimeoError && err.code === 'NO_TOKEN' ? 501 : 502

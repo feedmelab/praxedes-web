@@ -92,8 +92,12 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         </h2>
         {project.vimeoId ? (
           <div className="mb-8">
-            <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-soft">
+            <p className="mb-1 text-[11px] uppercase tracking-[0.2em] text-soft">
               Extraer de Vimeo
+            </p>
+            <p className="mb-3 text-[11px] text-muted">
+              Vídeos públicos: funciona sin token. Vídeos privados de la cuenta de Práxedes:
+              requiere el token de Vimeo en el entorno.
             </p>
             <VimeoCapture projectId={project.id} vimeoId={project.vimeoId} />
           </div>

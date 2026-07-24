@@ -35,6 +35,23 @@ Construido con **Server Actions + Zod**, componentes en `src/app/admin/(protecte
 - **Ajustes**: singleton (reel, claims, bio, contacto, redes).
 - **Cuenta**: cambio de contraseña.
 
+## 3b. Extractor Vimeo único, dos vías (actualización jul 2026)
+
+Un solo extractor (`VimeoCapture`) sobre el `vimeoId` del proyecto. Captura por
+canvas y guarda el frame en ImageKit vía `addFrame`. Resuelve la fuente solo:
+
+1. **Vídeo público/libre — sin token ni cuenta.** Usa el `config` del
+   reproductor público de Vimeo (`player.vimeo.com/video/{id}/config`), que
+   expone el MP4 progresivo, y captura por el proxy same-origin. Funciona con
+   cualquier vídeo público/embebible.
+2. **Vídeo privado de la cuenta de Práxedes — con `VIMEO_ACCESS_TOKEN`.** API de
+   la cuenta propietaria (Pro). Necesario solo para privados con restricción de
+   dominio.
+
+Prioridad en `getVimeoMeta`: si hay token y da ficheros → API (privados); si no
+→ config público (públicos); si nada funciona → error claro. No hay extractor
+de archivo local.
+
 ## 4. Herramienta de extracción de fotogramas Vimeo (núcleo pendiente)
 
 ### 4.1 Qué debe hacer

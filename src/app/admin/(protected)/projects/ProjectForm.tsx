@@ -74,8 +74,15 @@ export default function ProjectForm({
         </Field>
       </div>
 
-      <Field label="Vimeo ID" hint="Solo el identificador numérico del vídeo">
-        <TextInput name="vimeoId" defaultValue={d.vimeoId ?? ''} placeholder="123456789" />
+      <Field
+        label="Vimeo"
+        hint="Pega la URL del vídeo o el ID. Si el vídeo es privado/unlisted incluye el hash: 123456789?h=abc123 o https://vimeo.com/123456789/abc123"
+      >
+        <TextInput
+          name="vimeoId"
+          defaultValue={d.vimeoId ?? ''}
+          placeholder="123456789?h=abc123  ·  https://vimeo.com/123456789/abc123"
+        />
       </Field>
 
       {state?.error && <p className="text-xs text-red-400">{state.error}</p>}

@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Script from 'next/script'
-import { formatTimecode, parseTimecode } from '@/lib/utils'
+import { formatTimecode, parseTimecode, parseVimeo } from '@/lib/utils'
 import { addFrame, addFrameFromVimeoThumb } from '../actions'
 
 const FPS = 25 // estimación para el salto por fotograma
@@ -20,7 +20,7 @@ type VimeoPlayer = {
 declare global {
   interface Window {
     Vimeo?: {
-      Player: new (el: HTMLElement, opts: Record<string, unknown>) => VimeoPlayer
+      Player: new (el: HTMLElement, opts?: Record<string, unknown>) => VimeoPlayer
     }
   }
 }
@@ -38,7 +38,10 @@ export default function VimeoCapture({
   projectId: string
   vimeoId: string
 }) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const { id: vId, hash } = useMemo(() => parseVimeo(vimeoId), [vimeoId])
+  const qs = hash ? `?h=${hash}` : ''
+
+  const iframeRef = useRef<HTMLIFrameElement>(null)
   const playerRef = useRef<VimeoPlayer | null>(null)
   const scrubbingRef = useRef(false)
 
@@ -52,38 +55,51 @@ export default function VimeoCapture({
   const [status, setStatus] = useState<Status>({ msg: '', kind: 'idle' })
   const [saving, startSave] = useTransition()
   const [timecodeInput, setTimecodeInput] = useState('')
+  const [access, setAccess] = useState<'public' | 'private' | 'unknown'>('unknown')
+  const [blocked, setBlocked] = useState(false) // vídeo privado sin acceso
 
-  // Modo de captura disponible + aviso temprano si falta token
+  // Detecta si el vídeo es público o privado, y el modo de captura.
   useEffect(() => {
-    fetch(`/api/admin/vimeo/${vimeoId}`)
+    fetch(`/api/admin/vimeo/${vId}${qs}`)
       .then((r) => r.json())
       .then((d) => {
         if (d.ok) {
           setMode(d.mode)
+          setAccess(d.access ?? 'unknown')
           if (d.mode === 'thumbnail') {
             setStatus({
               msg: 'Sin MP4 progresivo: se usará la API de miniaturas (calidad algo menor).',
               kind: 'idle',
             })
           }
+        } else if (d.code === 'PRIVATE' || d.code === 'NO_TOKEN') {
+          setBlocked(true)
+          setStatus({ msg: d.error, kind: 'error' })
         } else {
-          const hint =
-            d.code === 'NO_TOKEN' ? 'Falta VIMEO_ACCESS_TOKEN en el entorno.' : `Vimeo: ${d.error}`
-          setStatus({ msg: hint, kind: 'error' })
+          setStatus({ msg: `Vimeo: ${d.error}`, kind: 'error' })
         }
       })
       .catch(() => {})
-  }, [vimeoId])
+  }, [vId, qs])
+
+  // URL de embed directa del player (incluye el hash). Al usar un <iframe> con
+  // esta src y adjuntar el SDK a él, evitamos la búsqueda oEmbed del SDK (que
+  // devolvía "not found") — el iframe carga el player directamente.
+  const embedSrc = useMemo(() => {
+    const p = new URLSearchParams({
+      controls: '1',
+      autopause: '0',
+      muted: '1', // silencio: evita el bloqueo de autoplay al pulsar Play
+      playsinline: '1',
+      dnt: '1',
+    })
+    if (hash) p.set('h', hash)
+    return `https://player.vimeo.com/video/${vId}?${p.toString()}`
+  }, [vId, hash])
 
   useEffect(() => {
-    if (!sdkReady || !window.Vimeo || !containerRef.current) return
-    const player = new window.Vimeo.Player(containerRef.current, {
-      id: Number(vimeoId),
-      controls: false,
-      autopause: false,
-      playsinline: true,
-      dnt: true,
-    })
+    if (!sdkReady || !window.Vimeo || !iframeRef.current) return
+    const player = new window.Vimeo.Player(iframeRef.current)
     playerRef.current = player
 
     player.on('loaded', async () => setDuration(await player.getDuration()))
@@ -103,7 +119,7 @@ export default function VimeoCapture({
       player.destroy().catch(() => {})
       playerRef.current = null
     }
-  }, [sdkReady, vimeoId])
+  }, [sdkReady, vId, hash])
 
   const seekTo = useCallback(async (t: number) => {
     const player = playerRef.current
@@ -140,7 +156,7 @@ export default function VimeoCapture({
     video.crossOrigin = 'anonymous'
     video.muted = true
     video.preload = 'auto'
-    video.src = `/api/admin/vimeo/${vimeoId}/file`
+    video.src = `/api/admin/vimeo/${vId}/file${qs}`
     try {
       await new Promise<void>((resolve, reject) => {
         video.onloadedmetadata = () => resolve()
@@ -168,7 +184,9 @@ export default function VimeoCapture({
 
   // Fallback: fotograma por timecode vía Pictures API (planes sin progresivo).
   async function captureThumbnail(t: number): Promise<Captured> {
-    const r = await fetch(`/api/admin/vimeo/${vimeoId}/thumb?t=${encodeURIComponent(t)}`)
+    const r = await fetch(
+      `/api/admin/vimeo/${vId}/thumb?t=${encodeURIComponent(t)}${hash ? `&h=${hash}` : ''}`
+    )
     const d = await r.json()
     if (!d.ok) throw new Error(d.error || 'No se pudo generar la miniatura')
     return { kind: 'url', url: d.url, t, w: d.width, h: d.height }
@@ -280,9 +298,43 @@ export default function VimeoCapture({
         strategy="afterInteractive"
       />
 
-      <div className="relative aspect-video w-full overflow-hidden rounded border border-border bg-black">
-        <div ref={containerRef} className="h-full w-full [&_iframe]:h-full [&_iframe]:w-full" />
-      </div>
+      {/* Indicador de acceso del vídeo */}
+      {access === 'public' && (
+        <p className="inline-flex items-center gap-2 rounded-sm border border-green-500/40 px-2.5 py-1 text-[11px] uppercase tracking-[0.15em] text-green-400">
+          ● Vídeo público — sin token
+        </p>
+      )}
+      {access === 'private' && (
+        <p className="inline-flex items-center gap-2 rounded-sm border border-accent/50 px-2.5 py-1 text-[11px] uppercase tracking-[0.15em] text-accent">
+          ● Vídeo privado — con token de la cuenta
+        </p>
+      )}
+
+      {/* Vídeo privado sin acceso: aviso claro en vez de un player que no carga */}
+      {blocked ? (
+        <div className="rounded border border-red-500/40 bg-red-500/5 p-4">
+          <p className="mb-1 text-xs font-medium uppercase tracking-[0.15em] text-red-400">
+            Vídeo privado — no accesible
+          </p>
+          <p className="text-[11px] leading-relaxed text-soft">
+            {status.msg}
+            <br />
+            Para vídeos privados de la cuenta de Práxedes, configura{' '}
+            <code className="text-light">VIMEO_ACCESS_TOKEN</code> en el entorno. Si el vídeo
+            debería ser público, cambia su privacidad en Vimeo a “Cualquiera” o permite el embed.
+          </p>
+        </div>
+      ) : (
+        <div className="relative aspect-video w-full overflow-hidden rounded border border-border bg-black">
+          <iframe
+            ref={iframeRef}
+            src={embedSrc}
+            className="h-full w-full"
+            allow="autoplay; fullscreen; picture-in-picture"
+            title="Vimeo"
+          />
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
         <input

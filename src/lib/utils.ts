@@ -23,6 +23,21 @@ export function formatTimecode(seconds: number) {
 }
 
 /**
+ * Extrae el ID y el hash de privacidad de lo que el usuario ponga en el campo
+ * de Vimeo: "76979871", "76979871?h=abc123", "76979871/abc123",
+ * "https://vimeo.com/76979871/abc123", "https://vimeo.com/76979871?h=abc123",
+ * "https://player.vimeo.com/video/76979871?h=abc123".
+ * Casi todos los vídeos de Vimeo (desde 2021) necesitan el hash para embeberse.
+ */
+export function parseVimeo(input: string): { id: string; hash?: string } {
+  const s = (input || '').trim()
+  const id = s.match(/(?:vimeo\.com\/(?:video\/)?)?(\d{6,})/)?.[1] ?? s
+  const hashQuery = s.match(/[?&]h=([0-9a-zA-Z]+)/)?.[1]
+  const hashPath = s.match(/\d{6,}\/([0-9a-zA-Z]+)/)?.[1]
+  return { id, hash: hashQuery || hashPath || undefined }
+}
+
+/**
  * Parsea un timecode escrito a mano a segundos. Admite "ss", "ss.mmm",
  * "mm:ss", "mm:ss.mmm" y "hh:mm:ss.mmm". Devuelve null si el formato no es
  * válido.
