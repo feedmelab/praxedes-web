@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Reveal from './Reveal'
 import Lightbox from './Lightbox'
-import { parseVimeo } from '@/lib/utils'
+import VimeoEmbed from './VimeoEmbed'
 
 type MediaItem = {
   id: string
@@ -45,21 +45,13 @@ export default function ProjectGallery({
           const spanClass = wide ? 'sm:col-span-2' : ''
 
           if (m.kind === 'VIDEO' && m.vimeoId) {
-            const { id, hash } = parseVimeo(m.vimeoId)
-            const src = `https://player.vimeo.com/video/${id}?dnt=1&title=0&byline=0&portrait=0${hash ? `&h=${hash}` : ''}`
             return (
               <Reveal
                 key={m.id}
                 delay={(i % 2) * 60}
-                className={`relative aspect-video overflow-hidden border border-border ${spanClass}`}
+                className={`relative aspect-video overflow-hidden bg-black ${spanClass}`}
               >
-                <iframe
-                  src={src}
-                  className="h-full w-full border-0"
-                  style={{ border: 0 }}
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  title="Vimeo"
-                />
+                <VimeoEmbed vimeoId={m.vimeoId} />
               </Reveal>
             )
           }

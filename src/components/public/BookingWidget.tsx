@@ -51,9 +51,9 @@ export default function BookingWidget({ itemId, stock }: { itemId: string; stock
         {t('stock', { stock })}
       </p>
 
-      {/* Fechas + cantidad */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
+      {/* Fechas (2 columnas) + cantidad (estrecha, debajo) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="min-w-0">
           <label className={label}>{t('start')}</label>
           <input
             type="date"
@@ -66,7 +66,7 @@ export default function BookingWidget({ itemId, stock }: { itemId: string; stock
             className={field}
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <label className={label}>{t('end')}</label>
           <input
             type="date"
@@ -79,17 +79,17 @@ export default function BookingWidget({ itemId, stock }: { itemId: string; stock
             className={field}
           />
         </div>
-        <div>
-          <label className={label}>{t('quantity')}</label>
-          <input
-            type="number"
-            min={1}
-            max={stock}
-            value={qty}
-            onChange={(e) => setQty(Math.max(1, Math.min(stock, Number(e.target.value) || 1)))}
-            className={field}
-          />
-        </div>
+      </div>
+      <div className="mt-4 w-28">
+        <label className={label}>{t('quantity')}</label>
+        <input
+          type="number"
+          min={1}
+          max={stock}
+          value={qty}
+          onChange={(e) => setQty(Math.max(1, Math.min(stock, Number(e.target.value) || 1)))}
+          className={field}
+        />
       </div>
 
       <button

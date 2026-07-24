@@ -329,7 +329,7 @@ export default function VimeoCapture({
           <iframe
             ref={iframeRef}
             src={embedSrc}
-            className="h-full w-full border-0"
+            className="absolute inset-0 block h-full w-full border-0"
             style={{ border: 0 }}
             allow="autoplay; fullscreen; picture-in-picture"
             title="Vimeo"
