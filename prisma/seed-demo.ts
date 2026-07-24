@@ -186,7 +186,9 @@ async function main() {
       altEn: `${p.client} — image ${n + 1}`,
       order: n,
     }))
-    if (p.category !== 'EDITORIAL') {
+    // Solo el primer proyecto lleva un vídeo de ejemplo en la galería (para
+    // no dar la falsa impresión de que "el vídeo está en todos los proyectos").
+    if (i === 0) {
       media.push({ kind: 'VIDEO' as const, vimeoId: '76979871?h=8272103f6e', order: media.length })
     }
 

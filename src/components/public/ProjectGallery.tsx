@@ -55,7 +55,8 @@ export default function ProjectGallery({
               >
                 <iframe
                   src={src}
-                  className="h-full w-full"
+                  className="h-full w-full border-0"
+                  style={{ border: 0 }}
                   allow="autoplay; fullscreen; picture-in-picture"
                   title="Vimeo"
                 />
