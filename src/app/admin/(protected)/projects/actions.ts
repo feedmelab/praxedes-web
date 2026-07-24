@@ -66,6 +66,7 @@ export async function createProject(formData: FormData) {
   })
 
   revalidatePath('/admin/projects')
+  revalidatePublic()
   redirect(`/admin/projects/${project.id}`)
 }
 
@@ -91,6 +92,7 @@ export async function updateProject(id: string, formData: FormData) {
 
   revalidatePath('/admin/projects')
   revalidatePath(`/admin/projects/${id}`)
+  revalidatePublic()
   return { ok: true }
 }
 
@@ -101,6 +103,7 @@ export async function togglePublished(id: string, value: boolean) {
   await prisma.project.update({ where: { id }, data: { published: value } })
   revalidatePath('/admin/projects')
   revalidatePath(`/admin/projects/${id}`)
+  revalidatePublic()
 }
 
 export async function toggleFeatured(id: string, value: boolean) {
@@ -108,6 +111,7 @@ export async function toggleFeatured(id: string, value: boolean) {
   await prisma.project.update({ where: { id }, data: { featured: value } })
   revalidatePath('/admin/projects')
   revalidatePath(`/admin/projects/${id}`)
+  revalidatePublic()
 }
 
 /* ── Borrar (con limpieza de ImageKit) ───────────────────────── */
@@ -357,6 +361,7 @@ export async function updateImageAlt(imageId: string, altEs: string, altEn: stri
     data: { altEs: altEs || null, altEn: altEn || null },
   })
   revalidatePath(`/admin/projects/${image.projectId}`)
+  revalidatePublic()
 }
 
 export async function updateFrameMeta(
@@ -391,6 +396,7 @@ export async function reorderProjectImages(projectId: string, ids: string[]) {
     ids.map((id, index) => prisma.projectImage.update({ where: { id }, data: { order: index } }))
   )
   revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePublic()
 }
 
 export async function reorderFrames(projectId: string, ids: string[]) {

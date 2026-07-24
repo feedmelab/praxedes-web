@@ -15,6 +15,12 @@ async function requireAuth() {
   if (!session) throw new Error('No autorizado')
 }
 
+// Refresca las páginas públicas de alquiler (necesario en producción).
+function revalidatePublicRental() {
+  revalidatePath('/[locale]/rental', 'page')
+  revalidatePath('/[locale]/rental/[id]', 'page')
+}
+
 const rentalSchema = z.object({
   nameEs: z.string().min(1, 'Nombre (ES) requerido'),
   nameEn: z.string().min(1, 'Nombre (EN) requerido'),
@@ -42,6 +48,7 @@ export async function createRentalItem(formData: FormData) {
   })
 
   revalidatePath('/admin/rental')
+  revalidatePublicRental()
   redirect(`/admin/rental/${item.id}`)
 }
 
@@ -62,6 +69,7 @@ export async function updateRentalItem(id: string, formData: FormData) {
   })
 
   revalidatePath('/admin/rental')
+  revalidatePublicRental()
   revalidatePath(`/admin/rental/${id}`)
   return { ok: true }
 }
@@ -70,6 +78,7 @@ export async function toggleAvailable(id: string, value: boolean) {
   await requireAuth()
   await prisma.rentalItem.update({ where: { id }, data: { available: value } })
   revalidatePath('/admin/rental')
+  revalidatePublicRental()
   revalidatePath(`/admin/rental/${id}`)
 }
 
@@ -81,6 +90,7 @@ export async function deleteRentalItem(id: string) {
   await Promise.allSettled(images.map((img) => deleteFile(img.fileId)))
   await prisma.rentalItem.delete({ where: { id } })
   revalidatePath('/admin/rental')
+  revalidatePublicRental()
   redirect('/admin/rental')
 }
 
@@ -116,6 +126,7 @@ export async function reorderRentalItems(ids: string[]) {
     ids.map((id, index) => prisma.rentalItem.update({ where: { id }, data: { order: index } }))
   )
   revalidatePath('/admin/rental')
+  revalidatePublicRental()
 }
 
 export async function reorderRentalImages(id: string, fileIds: string[]) {
