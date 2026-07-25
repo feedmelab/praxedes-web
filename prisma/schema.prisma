@@ -176,6 +176,8 @@ model SiteSettings {
   claimEn      String?
   aboutTitleEs String?
   aboutTitleEn String?
+  homeIntroEs  String?  @db.Text
+  homeIntroEn  String?  @db.Text
   bioEs        String?  @db.Text
   bioEn        String?  @db.Text
   contactEmail String?

@@ -11,6 +11,8 @@ type Settings = {
   claimEn?: string | null
   aboutTitleEs?: string | null
   aboutTitleEn?: string | null
+  homeIntroEs?: string | null
+  homeIntroEn?: string | null
   bioEs?: string | null
   bioEn?: string | null
   contactEmail?: string | null
@@ -44,7 +46,9 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">Biografía</h2>
+        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">
+          Sección «Sobre mí» (home)
+        </h2>
         <div className="grid gap-6 sm:grid-cols-2">
           <Field label="Titular (ES)" hint="Título de la sección «Sobre mí» de la home">
             <TextInput
@@ -62,11 +66,33 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           </Field>
         </div>
         <div className="grid gap-6 sm:grid-cols-2">
-          <Field label="Bio (ES)">
-            <TextArea name="bioEs" defaultValue={s.bioEs ?? ''} className="min-h-[10rem]" />
+          <Field label="Texto breve (ES)" hint="Párrafo corto del teaser de la home">
+            <TextArea
+              name="homeIntroEs"
+              defaultValue={s.homeIntroEs ?? ''}
+              className="min-h-[7rem]"
+            />
           </Field>
-          <Field label="Bio (EN)">
-            <TextArea name="bioEn" defaultValue={s.bioEn ?? ''} className="min-h-[10rem]" />
+          <Field label="Texto breve (EN)" hint="Short home teaser paragraph">
+            <TextArea
+              name="homeIntroEn"
+              defaultValue={s.homeIntroEn ?? ''}
+              className="min-h-[7rem]"
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">
+          Biografía (página «Sobre mí»)
+        </h2>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <Field label="Bio (ES)" hint="Texto completo de la página Sobre mí">
+            <TextArea name="bioEs" defaultValue={s.bioEs ?? ''} className="min-h-[12rem]" />
+          </Field>
+          <Field label="Bio (EN)" hint="Full text of the About page">
+            <TextArea name="bioEn" defaultValue={s.bioEn ?? ''} className="min-h-[12rem]" />
           </Field>
         </div>
       </section>

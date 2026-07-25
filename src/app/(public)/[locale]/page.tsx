@@ -31,7 +31,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const t = await getTranslations('home')
   const [settings, projects] = await Promise.all([getSettings(), getFeaturedProjects()])
 
-  const bio = locale === 'en' ? settings?.bioEn : settings?.bioEs
+  // Texto breve propio del teaser de la home (independiente de la bio completa
+  // de la página «Sobre mí»).
+  const homeIntro = locale === 'en' ? settings?.homeIntroEn : settings?.homeIntroEs
   const aboutTitle =
     (locale === 'en' ? settings?.aboutTitleEn : settings?.aboutTitleEs) || t('aboutTitle')
 
@@ -99,8 +101,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <h2 className="mb-6 font-display text-[clamp(1.8rem,4vw,3rem)] font-normal leading-[1.05]">
             {aboutTitle}
           </h2>
-          <p className="max-w-[46ch] text-soft">
-            {bio ??
+          <p className="max-w-[46ch] whitespace-pre-line text-soft">
+            {homeIntro ??
               (locale === 'en'
                 ? 'Práxedes de Vilallonga moves fluidly between cinema, fashion, and advertising, crafting a visual universe that oscillates between the poetic and the radical.'
                 : 'Práxedes de Vilallonga se mueve con fluidez entre el cine, la moda y la publicidad, construyendo un universo visual que oscila entre lo poético y lo radical.')}
