@@ -387,6 +387,7 @@ export async function reorderProjects(ids: string[]) {
     ids.map((id, index) => prisma.project.update({ where: { id }, data: { order: index } }))
   )
   revalidatePath('/admin/projects')
+  revalidatePublic()
 }
 
 export async function reorderProjectImages(projectId: string, ids: string[]) {

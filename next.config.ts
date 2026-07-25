@@ -20,7 +20,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-eval' 'unsafe-inline' player.vimeo.com www.googletagmanager.com",
       "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
       "font-src 'self' fonts.gstatic.com",
-      "img-src 'self' data: blob: *.imagekit.io i.vimeocdn.com www.googletagmanager.com www.google-analytics.com picsum.photos fastly.picsum.photos",
+      "img-src 'self' data: blob: *.imagekit.io i.vimeocdn.com www.googletagmanager.com www.google-analytics.com picsum.photos fastly.picsum.photos images.unsplash.com",
       'frame-src player.vimeo.com',
       "connect-src 'self' *.neon.tech api.imagekit.io vimeo.com player.vimeo.com www.google-analytics.com www.googletagmanager.com",
       "media-src 'self' *.vimeocdn.com",
@@ -40,6 +40,7 @@ const nextConfig: NextConfig = {
       // DEMO — fotos de ejemplo del seed. Quitar antes de producción.
       { protocol: 'https', hostname: 'picsum.photos' },
       { protocol: 'https', hostname: 'fastly.picsum.photos' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
   },
   async headers() {

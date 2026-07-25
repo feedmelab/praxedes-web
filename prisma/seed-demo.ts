@@ -23,10 +23,52 @@ function slugify(str: string) {
     .replace(/(^-|-$)/g, '')
 }
 
-// Foto de demo (Picsum, en gris para encajar con la estética editorial).
-// DEMO: sustituir por imágenes reales subidas desde el panel.
-function img(seed: string, w = 1600, h = 1000) {
-  return `https://picsum.photos/seed/${seed}/${w}/${h}?grayscale`
+// Fotos de demo EN COLOR, orientadas a vestuario de cine/TV, moda y retrato
+// (Unsplash). Son placeholders: cuando Práxedes suba sus fotos reales por el
+// panel, sustituyen a estas. DEMO — quitar antes de producción.
+//
+// Pool de retrato / moda / vestuario / cine (color).
+const POOL = [
+  'photo-1517841905240-472988babdf9', // retrato mujer
+  'photo-1506794778202-cad84cf45f1d', // retrato hombre
+  'photo-1534528741775-53994a69daeb', // moda mujer
+  'photo-1488426862026-3ee34a7d66df', // retrato mujer
+  'photo-1500648767791-00dcc994a43e', // retrato hombre
+  'photo-1502823403499-6ccfcf4fb453', // retrato hombre
+  'photo-1524504388940-b1c1722653e1', // mujer exterior
+  'photo-1509631179647-0177331693ae', // hombre barba
+  'photo-1529626455594-4ff0802cfb7e', // retrato hombre
+  'photo-1524250502761-1ac6f2e30d43', // retrato hombre
+  'photo-1490481651871-ab68de25d43d', // moda mujer
+  'photo-1519345182560-3f2917c472ef', // hombre
+  'photo-1508214751196-bcfd4ca60f91', // pareja
+  'photo-1521572163474-6864f9cf17ab', // retrato hombre
+  'photo-1539109136881-3be0616acf4b', // moda mujer
+  'photo-1496747611176-843222e1e57c', // mujer
+  'photo-1483985988355-763728e1935b', // perchero de ropa
+  'photo-1441984904996-e0b6ba687e04', // boutique
+  'photo-1445205170230-053b83016050', // ropa colgada
+  'photo-1515372039744-b8f02a3ae446', // moda color
+  'photo-1485846234645-a62644f84728', // sala de cine
+  'photo-1490114538077-0a7f8cb49891', // moda editorial
+]
+
+let _cursor = 0
+function nextId() {
+  const id = POOL[_cursor % POOL.length]
+  _cursor++
+  return id
+}
+
+// Devuelve una URL de Unsplash con recorte al tamaño pedido (color).
+function unsplash(id: string, w: number, h: number) {
+  return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`
+}
+
+// img(): una imagen del pool con el tamaño pedido, avanzando el cursor para
+// no repetir dentro de un mismo proyecto.
+function img(_seed: string, w = 1600, h = 1000) {
+  return unsplash(nextId(), w, h)
 }
 
 type ProjectSeed = {
