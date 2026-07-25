@@ -17,11 +17,45 @@ type Reservation = {
   customerEmail: string | null
   customerPhone: string | null
   notes: string | null
+  createdAt: string
 }
 
 type ItemOption = { id: string; name: string; stock: number }
 
 const fmt = (iso: string) => new Date(iso).toISOString().slice(0, 10)
+
+// '5 ago 2026' — fecha legible (en UTC para no desplazar el día).
+const fmtLong = (iso: string) =>
+  new Intl.DateTimeFormat('es-ES', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(iso))
+
+// '5 ago 2026, 14:30' — fecha y hora (para "reservado el").
+const fmtDateTime = (iso: string) =>
+  new Intl.DateTimeFormat('es-ES', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(iso))
+
+const nights = (a: string, b: string) =>
+  Math.max(0, Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86_400_000))
+
+// Fila etiqueta / valor del bloque de detalle.
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <>
+      <dt className="text-[10px] uppercase tracking-[0.14em] text-muted">{label}</dt>
+      <dd className="text-[13px] text-light">{children}</dd>
+    </>
+  )
+}
 
 export default function ReservationsManager({
   reservations,
@@ -124,53 +158,103 @@ export default function ReservationsManager({
       {filtered.length === 0 ? (
         <p className="text-sm text-muted">No hay reservas en esta vista.</p>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((r) => (
-            <div
-              key={r.id}
-              className="flex flex-wrap items-center justify-between gap-4 rounded border border-border bg-surface p-4"
-            >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-display text-lg text-light">{r.itemName}</span>
-                  <Badge tone={r.kind === 'BLOCK' ? 'muted' : 'accent'}>
-                    {r.kind === 'BLOCK' ? 'Bloqueo' : 'Cliente'}
-                  </Badge>
-                  {r.status === 'CANCELLED' && <Badge tone="red">Cancelada</Badge>}
-                </div>
-                <div className="mt-1 font-mono text-[11px] text-soft">
-                  {fmt(r.startDate)} → {fmt(r.endDate)} · x{r.quantity}
-                </div>
-                {r.kind === 'CUSTOMER' && (
-                  <div className="mt-1 text-[11px] text-muted">
-                    {r.customerName} · {r.customerEmail}
-                    {r.customerPhone ? ` · ${r.customerPhone}` : ''}
-                    {r.notes ? ` · ${r.notes}` : ''}
+        <div className="space-y-4">
+          {filtered.map((r) => {
+            const n = nights(r.startDate, r.endDate)
+            return (
+              <div
+                key={r.id}
+                className={`rounded border bg-surface p-5 ${
+                  r.status === 'CANCELLED' ? 'border-border opacity-60' : 'border-border'
+                }`}
+              >
+                {/* Cabecera: pieza + estado + acciones */}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-display text-xl text-light">{r.itemName}</span>
+                    <Badge tone={r.kind === 'BLOCK' ? 'muted' : 'accent'}>
+                      {r.kind === 'BLOCK' ? 'Bloqueo interno' : 'Reserva de cliente'}
+                    </Badge>
+                    {r.status === 'CANCELLED' && <Badge tone="red">Cancelada</Badge>}
                   </div>
-                )}
+                  <div className="flex shrink-0 gap-2">
+                    {r.status === 'CONFIRMED' && (
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => onCancel(r.id)}
+                        className="rounded-sm border border-border px-3 py-1.5 text-[11px] uppercase tracking-[0.15em] text-soft transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+                      >
+                        Cancelar
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => onDelete(r.id)}
+                      className="rounded-sm border border-red-500/40 px-3 py-1.5 text-[11px] uppercase tracking-[0.15em] text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-40"
+                    >
+                      Borrar
+                    </button>
+                  </div>
+                </div>
+
+                {/* Detalle */}
+                <dl className="mt-4 grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-2 border-t border-border pt-4 sm:grid-cols-[auto_1fr_auto_1fr]">
+                  <Row label="Recogida">{fmtLong(r.startDate)}</Row>
+                  <Row label="Devolución">{fmtLong(r.endDate)}</Row>
+                  <Row label="Duración">
+                    {n} {n === 1 ? 'noche' : 'noches'}
+                  </Row>
+                  <Row label="Unidades">{r.quantity}</Row>
+
+                  {r.kind === 'CUSTOMER' && (
+                    <>
+                      <Row label="Cliente">{r.customerName || '—'}</Row>
+                      <Row label="Email">
+                        {r.customerEmail ? (
+                          <a
+                            href={`mailto:${r.customerEmail}`}
+                            className="text-accent underline-offset-2 hover:underline"
+                          >
+                            {r.customerEmail}
+                          </a>
+                        ) : (
+                          '—'
+                        )}
+                      </Row>
+                      <Row label="Teléfono">
+                        {r.customerPhone ? (
+                          <a
+                            href={`tel:${r.customerPhone}`}
+                            className="text-accent underline-offset-2 hover:underline"
+                          >
+                            {r.customerPhone}
+                          </a>
+                        ) : (
+                          '—'
+                        )}
+                      </Row>
+                      <Row label="Reservado">{fmtDateTime(r.createdAt)}</Row>
+                    </>
+                  )}
+
+                  {r.kind === 'BLOCK' && <Row label="Creado">{fmtDateTime(r.createdAt)}</Row>}
+
+                  {r.notes && (
+                    <div className="col-span-full mt-1">
+                      <dt className="mb-1 text-[10px] uppercase tracking-[0.14em] text-muted">
+                        Notas
+                      </dt>
+                      <dd className="whitespace-pre-wrap rounded-sm border border-border bg-bg/40 p-3 text-[13px] text-soft">
+                        {r.notes}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
               </div>
-              <div className="flex shrink-0 gap-2">
-                {r.status === 'CONFIRMED' && (
-                  <button
-                    type="button"
-                    disabled={pending}
-                    onClick={() => onCancel(r.id)}
-                    className="rounded-sm border border-border px-3 py-1.5 text-[11px] uppercase tracking-[0.15em] text-soft transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
-                  >
-                    Cancelar
-                  </button>
-                )}
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => onDelete(r.id)}
-                  className="rounded-sm border border-red-500/40 px-3 py-1.5 text-[11px] uppercase tracking-[0.15em] text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-40"
-                >
-                  Borrar
-                </button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

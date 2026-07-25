@@ -29,6 +29,7 @@ export default async function ReservationsPage() {
     customerEmail: r.customerEmail,
     customerPhone: r.customerPhone,
     notes: r.notes,
+    createdAt: r.createdAt.toISOString(),
   }))
 
   const itemOptions = items.map((i) => ({ id: i.id, name: i.nameEs, stock: i.stock }))
