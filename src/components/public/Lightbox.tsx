@@ -95,21 +95,21 @@ export default function Lightbox({
         </>
       )}
 
-      {/* Imagen */}
+      {/* Imagen — llena el máximo del viewport manteniendo su orientación real. */}
       <div
-        className="relative flex max-h-[88vh] max-w-[92vw] items-center justify-center"
+        className="relative flex h-[90vh] w-[94vw] items-center justify-center"
         onClick={(e) => e.stopPropagation()}
       >
         <Image
           src={current.url}
           alt={current.alt ?? ''}
-          width={1600}
-          height={1000}
-          sizes="92vw"
-          className="h-auto max-h-[88vh] w-auto object-contain"
+          fill
+          sizes="94vw"
+          priority
+          className="object-contain"
         />
         {current.caption && (
-          <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[0.7rem] uppercase tracking-[0.16em] text-muted">
+          <span className="absolute bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[0.7rem] uppercase tracking-[0.16em] text-muted">
             {current.caption}
           </span>
         )}
