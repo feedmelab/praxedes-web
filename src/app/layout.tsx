@@ -1,57 +1,58 @@
 import type { Metadata } from 'next'
 import { Inter, Cormorant_Garamond, JetBrains_Mono } from 'next/font/google'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const inter = Inter({
-  subsets:  ['latin'],
+  subsets: ['latin'],
   variable: '--font-inter',
-  display:  'swap',
+  display: 'swap',
 })
 
 const cormorant = Cormorant_Garamond({
-  subsets:  ['latin'],
-  weight:   ['300', '400', '500', '600'],
-  style:    ['normal', 'italic'],
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  style: ['normal', 'italic'],
   variable: '--font-cormorant',
-  display:  'swap',
+  display: 'swap',
 })
 
 const jetbrains = JetBrains_Mono({
-  subsets:  ['latin'],
-  weight:   ['400', '500'],
+  subsets: ['latin'],
+  weight: ['400', '500'],
   variable: '--font-jetbrains',
-  display:  'swap',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://praxedesdevilallonga.com'),
   title: {
-    default:  'Práxedes de Vilallonga — Estilista & Costume Designer',
+    default: 'Práxedes de Vilallonga — Estilista & Costume Designer',
     template: '%s | Práxedes de Vilallonga',
   },
   description:
     'Estilista y diseñadora de vestuario con base en Barcelona. ' +
     'Publicidad, cine y televisión.',
   openGraph: {
-    siteName:        'Práxedes de Vilallonga',
-    locale:          'es_ES',
+    siteName: 'Práxedes de Vilallonga',
+    locale: 'es_ES',
     alternateLocale: 'en_US',
-    type:            'website',
+    type: 'website',
   },
   robots: {
-    index:  true,
+    index: true,
     follow: true,
   },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="es"
-      className={`${inter.variable} ${cormorant.variable} ${jetbrains.variable}`}
-    >
+    <html lang="es" className={`${inter.variable} ${cormorant.variable} ${jetbrains.variable}`}>
       <body className="bg-bg text-light antialiased">
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
