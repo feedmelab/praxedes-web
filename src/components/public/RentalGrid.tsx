@@ -14,6 +14,7 @@ type Item = {
   descEn: string | null
   category: RentalCategory
   images: { url: string }[]
+  soldOutNow?: boolean
 }
 
 const ORDER: RentalCategory[] = ['PERIOD', 'CONTEMPORARY', 'ACCESSORIES', 'PROPS', 'OTHER']
@@ -78,13 +79,22 @@ export default function RentalGrid({
                     alt={name}
                     fill
                     sizes="(max-width: 640px) 50vw, 25vw"
-                    className="object-cover brightness-[0.85] transition-all duration-700 ease-out-expo group-hover:scale-[1.04] group-hover:brightness-100"
+                    className={`object-cover transition-all duration-700 ease-out-expo group-hover:scale-[1.04] ${
+                      item.soldOutNow
+                        ? 'brightness-[0.45] grayscale'
+                        : 'brightness-[0.85] group-hover:brightness-100'
+                    }`}
                   />
                 ) : (
                   <div
                     className="absolute inset-0"
                     style={{ background: 'linear-gradient(150deg,#1a1613,#241d14,#0e0c0b)' }}
                   />
+                )}
+                {item.soldOutNow && (
+                  <span className="absolute left-2 top-2 z-[2] border border-light/30 bg-bg/80 px-2 py-1 text-[0.56rem] uppercase tracking-[0.14em] text-light backdrop-blur-sm">
+                    {t('soldOut')}
+                  </span>
                 )}
               </div>
               <div className="mt-3 flex items-baseline justify-between gap-2">

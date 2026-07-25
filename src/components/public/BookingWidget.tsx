@@ -1,40 +1,61 @@
 'use client'
 
-import { useState, useTransition, useActionState } from 'react'
+import { useState, useActionState } from 'react'
 import { useTranslations } from 'next-intl'
-import { checkAvailability, createReservation, type BookingState } from '@/lib/rental-booking'
+import { createReservation, type BookingState } from '@/lib/rental-booking'
+import RangeCalendar, { type Res } from './RangeCalendar'
 
 const initial: BookingState = { status: 'idle' }
 
-// Widget de disponibilidad + solicitud de reserva de una pieza.
-export default function BookingWidget({ itemId, stock }: { itemId: string; stock: number }) {
+function nightsBetween(start: string, end: string) {
+  if (!start || !end) return 0
+  const a = new Date(`${start}T00:00:00Z`).getTime()
+  const b = new Date(`${end}T00:00:00Z`).getTime()
+  return Math.max(0, Math.round((b - a) / 86_400_000))
+}
+
+// Widget de reserva con calendario: los días ocupados o pasados aparecen
+// deshabilitados y no se pueden elegir. El servidor revalida al reservar.
+export default function BookingWidget({
+  itemId,
+  stock,
+  reservations,
+  locale,
+}: {
+  itemId: string
+  stock: number
+  reservations: Res[]
+  locale: 'es' | 'en'
+}) {
   const t = useTranslations('booking')
 
-  const today = new Date().toISOString().slice(0, 10)
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
   const [qty, setQty] = useState(1)
 
-  const [avail, setAvail] = useState<
-    { state: 'idle' | 'range' | 'error' } | { state: 'ok'; free: number }
-  >({ state: 'idle' })
-  const [checking, startCheck] = useTransition()
-
   const [booking, action, pending] = useActionState(createReservation, initial)
 
-  function onCheck() {
-    if (!start || !end) return
-    startCheck(async () => {
-      const r = await checkAvailability(itemId, start, end)
-      if (r.ok) setAvail({ state: 'ok', free: r.free })
-      else setAvail({ state: r.reason === 'range' ? 'range' : 'error' })
-    })
+  // Al cambiar la cantidad, la disponibilidad por día cambia → reiniciamos.
+  function changeQty(v: number) {
+    setQty(Math.max(1, Math.min(stock, v || 1)))
+    setStart('')
+    setEnd('')
   }
 
-  const canBook = avail.state === 'ok' && avail.free >= qty && booking.status !== 'success'
+  const nights = nightsBetween(start, end)
+  const canBook = !!start && !!end && booking.status !== 'success'
+
   const field =
     'w-full border border-border bg-transparent px-4 py-3 text-sm text-light placeholder:text-muted focus:border-accent focus:outline-none transition-colors'
   const label = 'mb-1.5 block text-[0.66rem] uppercase tracking-[0.16em] text-muted'
+
+  const fmt = (d: string) =>
+    new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${d}T00:00:00Z`))
 
   if (booking.status === 'success') {
     return (
@@ -51,70 +72,58 @@ export default function BookingWidget({ itemId, stock }: { itemId: string; stock
         {t('stock', { stock })}
       </p>
 
-      {/* Fechas (2 columnas) + cantidad (estrecha, debajo) */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="min-w-0">
-          <label className={label}>{t('start')}</label>
-          <input
-            type="date"
-            min={today}
-            value={start}
-            onChange={(e) => {
-              setStart(e.target.value)
-              setAvail({ state: 'idle' })
-            }}
-            className={field}
-          />
-        </div>
-        <div className="min-w-0">
-          <label className={label}>{t('end')}</label>
-          <input
-            type="date"
-            min={start || today}
-            value={end}
-            onChange={(e) => {
-              setEnd(e.target.value)
-              setAvail({ state: 'idle' })
-            }}
-            className={field}
-          />
-        </div>
-      </div>
-      <div className="mt-4 w-28">
+      {/* Cantidad */}
+      <div className="mb-5 w-28">
         <label className={label}>{t('quantity')}</label>
         <input
           type="number"
           min={1}
           max={stock}
           value={qty}
-          onChange={(e) => setQty(Math.max(1, Math.min(stock, Number(e.target.value) || 1)))}
+          onChange={(e) => changeQty(Number(e.target.value))}
           className={field}
         />
       </div>
 
-      <button
-        type="button"
-        onClick={onCheck}
-        disabled={!start || !end || checking}
-        className="mt-4 border border-border px-5 py-2.5 text-[0.7rem] uppercase tracking-[0.16em] text-soft transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
-      >
-        {checking ? t('checking') : t('check')}
-      </button>
+      {/* Calendario de disponibilidad */}
+      <RangeCalendar
+        stock={stock}
+        qty={qty}
+        reservations={reservations}
+        start={start}
+        end={end}
+        locale={locale}
+        onSelect={(s, e) => {
+          setStart(s)
+          setEnd(e)
+        }}
+        labels={{ occupied: t('occupied'), past: t('past'), hint: t('calendarHint') }}
+      />
 
-      {/* Resultado disponibilidad */}
-      <p className="mt-3 text-xs">
-        {avail.state === 'idle' && <span className="text-muted">{t('selectDates')}</span>}
-        {avail.state === 'range' && <span className="text-red-400">{t('rangeError')}</span>}
-        {avail.state === 'error' && <span className="text-red-400">{t('error')}</span>}
-        {avail.state === 'ok' && avail.free >= qty && (
-          <span className="text-green-400">{t('available', { free: avail.free })}</span>
+      {/* Resumen de selección */}
+      <div className="mt-4 min-h-[1.25rem] text-xs">
+        {!start && <span className="text-muted">{t('pickDates')}</span>}
+        {start && !end && <span className="text-soft">{t('pickEnd')}</span>}
+        {start && end && (
+          <span className="text-green-400">
+            {fmt(start)} → {fmt(end)} · {t('nights', { count: nights })}
+          </span>
         )}
-        {avail.state === 'ok' && avail.free < qty && (
-          <span className="text-red-400">{t('unavailable')}</span>
+        {(start || end) && (
+          <button
+            type="button"
+            onClick={() => {
+              setStart('')
+              setEnd('')
+            }}
+            className="ml-3 text-muted underline transition-colors hover:text-accent"
+          >
+            {t('clearDates')}
+          </button>
         )}
-      </p>
+      </div>
 
-      {/* Formulario de reserva (solo si hay disponibilidad) */}
+      {/* Formulario de reserva (solo con fechas válidas) */}
       {canBook && (
         <form action={action} className="mt-6 space-y-4 border-t border-border pt-6">
           <input type="hidden" name="itemId" value={itemId} />

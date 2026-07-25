@@ -50,6 +50,13 @@ export default async function RentalItemPage({
     url: signedDisplayUrl(img.url),
   }))
 
+  // Reservas confirmadas → rangos 'YYYY-MM-DD' (fin exclusivo) para el calendario.
+  const reservations = item.reservations.map((r) => ({
+    start: r.startDate.toISOString().slice(0, 10),
+    end: r.endDate.toISOString().slice(0, 10),
+    quantity: r.quantity,
+  }))
+
   return (
     <div className="px-6 pb-24 pt-32 sm:px-10 lg:px-16 lg:pt-44">
       <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
@@ -67,7 +74,12 @@ export default async function RentalItemPage({
           {desc && <p className="mt-4 max-w-[46ch] text-soft">{desc}</p>}
 
           <div className="mt-8">
-            <BookingWidget itemId={item.id} stock={item.stock} />
+            <BookingWidget
+              itemId={item.id}
+              stock={item.stock}
+              reservations={reservations}
+              locale={locale}
+            />
           </div>
         </div>
       </div>

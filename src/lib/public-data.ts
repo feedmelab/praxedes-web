@@ -100,22 +100,33 @@ export function localizedDesc(p: { descEs: string | null; descEn: string | null 
   return locale === 'en' ? p.descEn : p.descEs
 }
 
-/** Piezas de alquiler disponibles, ordenadas. */
+// Incluye solo las reservas confirmadas (cliente + bloqueos) de cada pieza,
+// que son las que restan disponibilidad.
+const confirmedReservations = {
+  where: { status: 'CONFIRMED' as const },
+  select: { startDate: true, endDate: true, quantity: true },
+}
+
+/** Piezas de alquiler disponibles, ordenadas, con sus reservas confirmadas. */
 export async function getRentalItems() {
   try {
     return await prisma.rentalItem.findMany({
       where: { available: true },
       orderBy: { order: 'asc' },
+      include: { reservations: confirmedReservations },
     })
   } catch {
     return []
   }
 }
 
-/** Una pieza de alquiler disponible por id. */
+/** Una pieza de alquiler disponible por id, con sus reservas confirmadas. */
 export async function getRentalItem(id: string) {
   try {
-    return await prisma.rentalItem.findFirst({ where: { id, available: true } })
+    return await prisma.rentalItem.findFirst({
+      where: { id, available: true },
+      include: { reservations: confirmedReservations },
+    })
   } catch {
     return null
   }

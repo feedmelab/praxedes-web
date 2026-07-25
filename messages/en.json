@@ -22,16 +22,26 @@
     "available": "Available for projects",
     "rights": "All rights reserved"
   },
-  "commercials": { "title": "Commercials", "subtitle": "Spots & campaigns" },
-  "film": { "title": "Film & TV", "subtitle": "Feature films & series" },
-  "gallery": { "title": "Gallery", "subtitle": "Production stills" },
+  "commercials": {
+    "title": "Commercials",
+    "subtitle": "Spots & campaigns"
+  },
+  "film": {
+    "title": "Film & TV",
+    "subtitle": "Feature films & series"
+  },
+  "gallery": {
+    "title": "Gallery",
+    "subtitle": "Production stills"
+  },
   "rental": {
     "title": "Costume rental",
     "subtitle": "Costume stock for film and advertising",
     "cta": "Check availability",
     "all": "All",
     "empty": "Coming soon.",
-    "viewItem": "View & book"
+    "viewItem": "View & book",
+    "soldOut": "Not available now"
   },
   "booking": {
     "title": "Availability & booking",
@@ -53,7 +63,14 @@
     "success": "Booking confirmed. We’ve emailed you the details.",
     "error": "Could not complete the booking. Please try again.",
     "invalid": "Please check the form fields.",
-    "stock": "{stock} units in catalogue"
+    "stock": "{stock} units in catalogue",
+    "pickDates": "Pick the collection date on the calendar.",
+    "pickEnd": "Now choose the return date.",
+    "nights": "{count, plural, one {# night} other {# nights}}",
+    "clearDates": "Clear dates",
+    "occupied": "Booked",
+    "past": "Past date",
+    "calendarHint": "Struck-through days have no availability for the selected quantity."
   },
   "project": {
     "overview": "The project",

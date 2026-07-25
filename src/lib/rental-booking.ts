@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { getSettings } from '@/lib/public-data'
-import { toDay, isValidRange, freeUnits } from '@/lib/rental-availability'
+import { toDay, isValidRange, freeUnits, BUFFER_DAYS } from '@/lib/rental-availability'
 
 // ── Comprobar disponibilidad (público) ───────────────────────
 
@@ -28,7 +28,7 @@ export async function checkAvailability(
       where: { itemId, status: 'CONFIRMED' },
       select: { startDate: true, endDate: true, quantity: true },
     })
-    const free = freeUnits(item.stock, { start, end }, reservations)
+    const free = freeUnits(item.stock, { start, end }, reservations, BUFFER_DAYS)
     return { ok: true, free: Math.max(0, free) }
   } catch {
     return { ok: false, reason: 'error' }
@@ -79,7 +79,7 @@ export async function createReservation(
         where: { itemId, status: 'CONFIRMED' },
         select: { startDate: true, endDate: true, quantity: true },
       })
-      const free = freeUnits(item.stock, { start, end }, reservations)
+      const free = freeUnits(item.stock, { start, end }, reservations, BUFFER_DAYS)
       if (free < quantity) return { ok: false as const, free: Math.max(0, free) }
 
       await tx.reservation.create({

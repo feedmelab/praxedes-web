@@ -22,16 +22,26 @@
     "available": "Disponible para proyectos",
     "rights": "Todos los derechos reservados"
   },
-  "commercials": { "title": "Publicidad", "subtitle": "Spots y campañas" },
-  "film": { "title": "Cine y TV", "subtitle": "Largometrajes y series" },
-  "gallery": { "title": "Galería", "subtitle": "Imágenes de producción" },
+  "commercials": {
+    "title": "Publicidad",
+    "subtitle": "Spots y campañas"
+  },
+  "film": {
+    "title": "Cine y TV",
+    "subtitle": "Largometrajes y series"
+  },
+  "gallery": {
+    "title": "Galería",
+    "subtitle": "Imágenes de producción"
+  },
   "rental": {
     "title": "Alquiler de vestuario",
     "subtitle": "Fondo de vestuario para cine y publicidad",
     "cta": "Consultar disponibilidad",
     "all": "Todo",
     "empty": "Próximamente.",
-    "viewItem": "Ver y reservar"
+    "viewItem": "Ver y reservar",
+    "soldOut": "No disponible ahora"
   },
   "booking": {
     "title": "Disponibilidad y reserva",
@@ -53,7 +63,14 @@
     "success": "Reserva confirmada. Te hemos enviado un email con los detalles.",
     "error": "No se pudo completar la reserva. Inténtalo de nuevo.",
     "invalid": "Revisa los campos del formulario.",
-    "stock": "{stock} unidades en catálogo"
+    "stock": "{stock} unidades en catálogo",
+    "pickDates": "Selecciona la fecha de recogida en el calendario.",
+    "pickEnd": "Ahora elige la fecha de devolución.",
+    "nights": "{count, plural, one {# noche} other {# noches}}",
+    "clearDates": "Borrar fechas",
+    "occupied": "Ocupado",
+    "past": "Fecha pasada",
+    "calendarHint": "Los días tachados no tienen disponibilidad para la cantidad seleccionada."
   },
   "project": {
     "overview": "El proyecto",
