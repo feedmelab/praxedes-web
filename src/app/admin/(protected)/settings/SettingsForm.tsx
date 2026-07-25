@@ -9,6 +9,8 @@ type Settings = {
   reelVimeoId?: string | null
   claimEs?: string | null
   claimEn?: string | null
+  aboutTitleEs?: string | null
+  aboutTitleEn?: string | null
   bioEs?: string | null
   bioEn?: string | null
   contactEmail?: string | null
@@ -43,6 +45,22 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
 
       <section className="space-y-6">
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">Biografía</h2>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <Field label="Titular (ES)" hint="Título de la sección «Sobre mí» de la home">
+            <TextInput
+              name="aboutTitleEs"
+              defaultValue={s.aboutTitleEs ?? ''}
+              placeholder="Entre lo poético y lo radical"
+            />
+          </Field>
+          <Field label="Titular (EN)" hint="Home «About» section heading">
+            <TextInput
+              name="aboutTitleEn"
+              defaultValue={s.aboutTitleEn ?? ''}
+              placeholder="Between the poetic and the radical"
+            />
+          </Field>
+        </div>
         <div className="grid gap-6 sm:grid-cols-2">
           <Field label="Bio (ES)">
             <TextArea name="bioEs" defaultValue={s.bioEs ?? ''} className="min-h-[10rem]" />

@@ -32,6 +32,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const [settings, projects] = await Promise.all([getSettings(), getFeaturedProjects()])
 
   const bio = locale === 'en' ? settings?.bioEn : settings?.bioEs
+  const aboutTitle =
+    (locale === 'en' ? settings?.aboutTitleEn : settings?.aboutTitleEs) || t('aboutTitle')
 
   return (
     <>
@@ -95,7 +97,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </Reveal>
         <Reveal delay={100}>
           <h2 className="mb-6 font-display text-[clamp(1.8rem,4vw,3rem)] font-normal leading-[1.05]">
-            {t('aboutTitle')}
+            {aboutTitle}
           </h2>
           <p className="max-w-[46ch] text-soft">
             {bio ??
