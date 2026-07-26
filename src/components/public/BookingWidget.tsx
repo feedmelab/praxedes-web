@@ -97,7 +97,13 @@ export default function BookingWidget({
           setStart(s)
           setEnd(e)
         }}
-        labels={{ occupied: t('occupied'), past: t('past'), hint: t('calendarHint') }}
+        labels={{
+          occupied: t('occupied'),
+          past: t('past'),
+          hint: t('calendarHint'),
+          free: t('legendFree'),
+          selected: t('legendSelected'),
+        }}
       />
 
       {/* Resumen de selección */}

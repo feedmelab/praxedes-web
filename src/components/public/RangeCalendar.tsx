@@ -39,7 +39,7 @@ export default function RangeCalendar({
   end: string
   onSelect: (start: string, end: string) => void
   locale: 'es' | 'en'
-  labels: { occupied: string; past: string; hint: string }
+  labels: { occupied: string; past: string; hint: string; free: string; selected: string }
 }) {
   const today = todayISO()
   const [view, setView] = useState(() => {
@@ -150,9 +150,11 @@ export default function RangeCalendar({
             ? 'bg-accent text-bg font-medium'
             : inRange
               ? 'bg-accent/20 text-light'
-              : disabled
-                ? 'cursor-not-allowed text-muted/40 line-through'
-                : 'cursor-pointer text-soft hover:bg-accent/10 hover:text-accent'
+              : full
+                ? 'cursor-not-allowed bg-red-500/15 text-red-300/80 line-through'
+                : isPast
+                  ? 'cursor-not-allowed text-muted/25'
+                  : 'cursor-pointer text-soft hover:bg-accent/10 hover:text-accent'
           return (
             <button
               key={c}
@@ -166,6 +168,22 @@ export default function RangeCalendar({
             </button>
           )
         })}
+      </div>
+
+      {/* Leyenda */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.62rem] uppercase tracking-[0.12em] text-muted">
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-sm border border-border" />
+          {labels.free}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-sm bg-red-500/30" />
+          {labels.occupied}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-sm bg-accent" />
+          {labels.selected}
+        </span>
       </div>
 
       <p className="mt-3 text-[0.66rem] leading-relaxed text-muted">{labels.hint}</p>

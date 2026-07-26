@@ -70,7 +70,9 @@
     "clearDates": "Clear dates",
     "occupied": "Booked",
     "past": "Past date",
-    "calendarHint": "Struck-through days have no availability for the selected quantity."
+    "calendarHint": "Struck-through days have no availability for the selected quantity.",
+    "legendFree": "Available",
+    "legendSelected": "Selected"
   },
   "project": {
     "overview": "The project",

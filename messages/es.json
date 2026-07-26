@@ -70,7 +70,9 @@
     "clearDates": "Borrar fechas",
     "occupied": "Ocupado",
     "past": "Fecha pasada",
-    "calendarHint": "Los días tachados no tienen disponibilidad para la cantidad seleccionada."
+    "calendarHint": "Los días tachados no tienen disponibilidad para la cantidad seleccionada.",
+    "legendFree": "Disponible",
+    "legendSelected": "Seleccionado"
   },
   "project": {
     "overview": "El proyecto",
