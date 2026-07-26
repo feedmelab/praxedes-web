@@ -43,6 +43,7 @@ model Project {
   coverImage String?         // ImageKit URL
   published  Boolean         @default(false)
   featured   Boolean         @default(false)
+  coverFocal ImageFocal      @default(TOP) // encuadre de la portada en las tarjetas
   order      Int             @default(0)
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
@@ -61,6 +62,13 @@ enum MediaKind {
   VIDEO
 }
 
+// Punto de anclaje del recorte (object-position) al mostrar una imagen recortada.
+enum ImageFocal {
+  TOP
+  CENTER
+  BOTTOM
+}
+
 model ProjectImage {
   id        String    @id @default(cuid())
   projectId String
@@ -77,7 +85,8 @@ model ProjectImage {
   // guarda "id" o "id?h=hash" (se parsea con parseVimeo).
   vimeoId String?
 
-  wide      Boolean  @default(false) // true = ocupa 2 columnas en la galería
+  wide      Boolean    @default(false) // true = ocupa 2 columnas en la galería
+  focal     ImageFocal @default(TOP) // encuadre del recorte en la galería
   altEs     String?
   altEn     String?
   order     Int      @default(0)

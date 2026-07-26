@@ -23,6 +23,7 @@ export default async function EditRentalPage({ params }: { params: Promise<{ id:
   const images = rawImages.map((img) => ({
     fileId: img.fileId,
     thumb: getThumbUrl(img.url, 400),
+    focal: img.focal ?? 'TOP',
   }))
 
   return (

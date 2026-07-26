@@ -10,10 +10,13 @@ import {
   addProjectVideo,
   deleteProjectImage,
   setCoverImage,
+  setCoverFocal,
+  setImageFocal,
   toggleImageWide,
   updateImageAlt,
   reorderProjectImages,
 } from '../actions'
+import { FOCALS, FOCAL_LABEL, type Focal } from '@/lib/focal'
 
 export type ImageVM = {
   id: string
@@ -23,16 +26,49 @@ export type ImageVM = {
   vimeoId: string
   isCover: boolean
   wide: boolean
+  focal: Focal
   altEs: string
   altEn: string
+}
+
+// Selector de encuadre (arriba / centro / abajo).
+function FocalPicker({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: Focal
+  onChange: (f: Focal) => void
+  disabled?: boolean
+}) {
+  return (
+    <div className="flex overflow-hidden rounded-sm border border-border">
+      {FOCALS.map((f) => (
+        <button
+          key={f}
+          type="button"
+          disabled={disabled}
+          onClick={() => onChange(f)}
+          title={`Encuadre: ${FOCAL_LABEL[f]}`}
+          className={`px-2 py-1 text-[10px] uppercase tracking-wider transition-colors disabled:opacity-40 ${
+            value === f ? 'bg-accent text-bg' : 'text-muted hover:text-light'
+          }`}
+        >
+          {FOCAL_LABEL[f]}
+        </button>
+      ))}
+    </div>
+  )
 }
 
 export default function ImageManager({
   projectId,
   images,
+  coverFocal,
 }: {
   projectId: string
   images: ImageVM[]
+  coverFocal: Focal
 }) {
   const [pending, startTransition] = useTransition()
   const [videoInput, setVideoInput] = useState('')
@@ -95,6 +131,18 @@ export default function ImageManager({
         </div>
       </div>
       {videoErr && <p className="text-xs text-red-400">{videoErr}</p>}
+
+      {/* Encuadre de la portada (cómo se recorta en las tarjetas de la web) */}
+      <div className="flex flex-wrap items-center gap-3 rounded border border-border bg-bg/40 px-3 py-2">
+        <span className="text-[11px] uppercase tracking-[0.14em] text-muted">
+          Encuadre de la portada
+        </span>
+        <FocalPicker
+          value={coverFocal}
+          disabled={pending}
+          onChange={(f) => startTransition(() => setCoverFocal(projectId, f))}
+        />
+      </div>
 
       {images.length === 0 ? (
         <p className="text-sm text-muted">Sin contenido. Sube una foto o añade un vídeo.</p>
@@ -165,7 +213,14 @@ export default function ImageManager({
                             />
                           </>
                         )}
-                        <div className="mt-auto flex items-center gap-3 text-[10px] uppercase tracking-wider">
+                        {img.kind === 'IMAGE' && (
+                          <FocalPicker
+                            value={img.focal}
+                            disabled={pending}
+                            onChange={(f) => startTransition(() => setImageFocal(img.id, f))}
+                          />
+                        )}
+                        <div className="mt-auto flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-wider">
                           {img.kind === 'IMAGE' && !img.isCover && (
                             <button
                               disabled={pending}

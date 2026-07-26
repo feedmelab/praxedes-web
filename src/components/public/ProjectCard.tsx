@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
+import { focalClass, type Focal } from '@/lib/focal'
 
 type Props = {
   slug: string
@@ -7,6 +8,7 @@ type Props = {
   title: string
   meta: string
   coverImage?: string | null
+  coverFocal?: Focal | null
   /** Índice para variar el placeholder cuando no hay portada. */
   index?: number
 }
@@ -18,7 +20,15 @@ const PLACEHOLDERS = [
   'linear-gradient(135deg,#181a14,#242a1a 60%,#0d0e0c)',
 ]
 
-export default function ProjectCard({ slug, client, title, meta, coverImage, index = 0 }: Props) {
+export default function ProjectCard({
+  slug,
+  client,
+  title,
+  meta,
+  coverImage,
+  coverFocal,
+  index = 0,
+}: Props) {
   return (
     <Link
       href={{ pathname: '/projects/[slug]', params: { slug } }}
@@ -30,7 +40,7 @@ export default function ProjectCard({ slug, client, title, meta, coverImage, ind
           alt={`${client} — ${title}`}
           fill
           sizes="(max-width: 760px) 100vw, 50vw"
-          className="object-cover object-top brightness-[0.72] grayscale-[0.35] transition-all duration-[1100ms] ease-out-expo group-hover:scale-105 group-hover:brightness-[0.85] group-hover:grayscale-0"
+          className={`object-cover ${focalClass(coverFocal)} brightness-[0.72] grayscale-[0.35] transition-all duration-[1100ms] ease-out-expo group-hover:scale-105 group-hover:brightness-[0.85] group-hover:grayscale-0`}
         />
       ) : (
         <div

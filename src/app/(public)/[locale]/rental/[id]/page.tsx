@@ -48,6 +48,7 @@ export default async function RentalItemPage({
   const images = ((item.images as unknown as RentalImage[]) ?? []).map((img) => ({
     ...img,
     url: signedDisplayUrl(img.url),
+    focal: img.focal,
   }))
 
   // Reservas confirmadas → rangos 'YYYY-MM-DD' (fin exclusivo) para el calendario.

@@ -8,7 +8,15 @@ import { auth } from '@/lib/auth'
 import { uploadFile, deleteFile } from '@/lib/imagekit'
 import type { RentalCategory } from '@prisma/client'
 
-export type RentalImage = { fileId: string; url: string; width: number; height: number }
+import type { Focal } from '@/lib/focal'
+
+export type RentalImage = {
+  fileId: string
+  url: string
+  width: number
+  height: number
+  focal?: Focal
+}
 
 async function requireAuth() {
   const session = await auth()
@@ -111,6 +119,7 @@ export async function addRentalImage(id: string, formData: FormData) {
     url: uploaded.url,
     width: uploaded.width,
     height: uploaded.height,
+    focal: 'TOP',
   })
 
   await prisma.rentalItem.update({
@@ -145,6 +154,21 @@ export async function reorderRentalImages(id: string, fileIds: string[]) {
     data: { images: reordered as unknown as object[] },
   })
   revalidatePath(`/admin/rental/${id}`)
+}
+
+// Encuadre del recorte de una imagen de alquiler (arriba / centro / abajo).
+export async function setRentalImageFocal(id: string, fileId: string, focal: Focal) {
+  await requireAuth()
+  const item = await prisma.rentalItem.findUnique({ where: { id } })
+  if (!item) return
+  const images = (item.images as unknown as RentalImage[]) ?? []
+  const updated = images.map((img) => (img.fileId === fileId ? { ...img, focal } : img))
+  await prisma.rentalItem.update({
+    where: { id },
+    data: { images: updated as unknown as object[] },
+  })
+  revalidatePath(`/admin/rental/${id}`)
+  revalidatePublicRental()
 }
 
 export async function deleteRentalImage(id: string, fileId: string) {

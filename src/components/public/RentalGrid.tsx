@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import type { RentalCategory } from '@prisma/client'
+import { focalClass, type Focal } from '@/lib/focal'
 
 type Item = {
   id: string
@@ -13,7 +14,7 @@ type Item = {
   descEs: string | null
   descEn: string | null
   category: RentalCategory
-  images: { url: string }[]
+  images: { url: string; focal?: Focal }[]
   soldOutNow?: boolean
 }
 
@@ -66,6 +67,7 @@ export default function RentalGrid({
         {shown.map((item) => {
           const name = locale === 'en' ? item.nameEn : item.nameEs
           const cover = item.images[0]?.url
+          const coverFocal = item.images[0]?.focal
           return (
             <Link
               key={item.id}
@@ -79,7 +81,7 @@ export default function RentalGrid({
                     alt={name}
                     fill
                     sizes="(max-width: 640px) 50vw, 25vw"
-                    className={`object-cover object-top transition-all duration-700 ease-out-expo group-hover:scale-[1.04] ${
+                    className={`object-cover ${focalClass(coverFocal)} transition-all duration-700 ease-out-expo group-hover:scale-[1.04] ${
                       item.soldOutNow
                         ? 'brightness-[0.45] grayscale'
                         : 'brightness-[0.85] group-hover:brightness-100'

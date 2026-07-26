@@ -33,6 +33,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     vimeoId: m.vimeoId ?? '',
     isCover: !!m.url && project.coverImage === m.url,
     wide: m.wide,
+    focal: m.focal,
     altEs: m.altEs ?? '',
     altEn: m.altEn ?? '',
   }))
@@ -79,7 +80,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           Sube fotos, añade vídeos de Vimeo, y ordena todo. Las imágenes extraídas del vídeo (abajo)
           también aparecen aquí como una foto más.
         </p>
-        <ImageManager projectId={project.id} images={media} />
+        <ImageManager projectId={project.id} images={media} coverFocal={project.coverFocal} />
       </Card>
 
       <Card>

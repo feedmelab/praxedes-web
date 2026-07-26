@@ -4,13 +4,14 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Reveal from './Reveal'
 import Lightbox from './Lightbox'
+import { focalClass, type Focal } from '@/lib/focal'
 
 // Galería de una pieza de alquiler con visor a pantalla completa al pulsar.
 export default function RentalGallery({
   images,
   name,
 }: {
-  images: { url: string }[]
+  images: { url: string; focal?: Focal }[]
   name: string
 }) {
   const [open, setOpen] = useState<number | null>(null)
@@ -50,7 +51,7 @@ export default function RentalGallery({
               alt={name}
               fill
               sizes="(max-width: 1024px) 100vw, 55vw"
-              className="object-cover object-top brightness-[0.9] transition-all duration-700 ease-out-expo group-hover:scale-[1.03] group-hover:brightness-100"
+              className={`object-cover ${focalClass(img.focal)} brightness-[0.9] transition-all duration-700 ease-out-expo group-hover:scale-[1.03] group-hover:brightness-100`}
             />
           </Reveal>
         ))}

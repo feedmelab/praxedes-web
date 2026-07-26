@@ -34,6 +34,7 @@ export default async function RentalPage({ params }: { params: Promise<{ locale:
     category: r.category,
     images: ((r.images as unknown as RentalImage[]) ?? []).map((img) => ({
       url: signedDisplayUrl(img.url),
+      focal: img.focal,
     })),
     // Agotada ahora mismo (sin unidades libres hoy).
     soldOutNow: freeToday(r.stock, r.reservations) < 1,

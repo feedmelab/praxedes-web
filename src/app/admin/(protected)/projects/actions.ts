@@ -267,6 +267,25 @@ export async function toggleImageWide(imageId: string, value: boolean) {
   revalidatePublic()
 }
 
+// Encuadre del recorte de una imagen de la galería (arriba / centro / abajo).
+export async function setImageFocal(imageId: string, focal: 'TOP' | 'CENTER' | 'BOTTOM') {
+  await requireAuth()
+  const image = await prisma.projectImage.update({
+    where: { id: imageId },
+    data: { focal },
+  })
+  revalidatePath(`/admin/projects/${image.projectId}`)
+  revalidatePublic()
+}
+
+// Encuadre del recorte de la portada en las tarjetas.
+export async function setCoverFocal(projectId: string, focal: 'TOP' | 'CENTER' | 'BOTTOM') {
+  await requireAuth()
+  await prisma.project.update({ where: { id: projectId }, data: { coverFocal: focal } })
+  revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePublic()
+}
+
 /* ── Frames de vídeo ─────────────────────────────────────────── */
 
 export async function addFrame(projectId: string, formData: FormData) {

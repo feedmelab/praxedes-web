@@ -2,7 +2,15 @@ import { prisma } from '@/lib/prisma'
 import { signedDisplayUrl } from '@/lib/imagekit'
 import type { ProjectCategory, RentalCategory } from '@prisma/client'
 
-export type RentalImage = { fileId: string; url: string; width: number; height: number }
+import type { Focal } from '@/lib/focal'
+
+export type RentalImage = {
+  fileId: string
+  url: string
+  width: number
+  height: number
+  focal?: Focal
+}
 
 // Firma la portada de un proyecto (URLs de ImageKit); deja intactas las demo.
 function signCover<T extends { coverImage: string | null }>(p: T): T {
@@ -82,6 +90,7 @@ export async function getProjectBySlug(slug: string) {
         url: m.url ? signedDisplayUrl(m.url) : null,
         vimeoId: m.vimeoId,
         wide: m.wide,
+        focal: m.focal,
         altEs: m.altEs,
         altEn: m.altEn,
       })),

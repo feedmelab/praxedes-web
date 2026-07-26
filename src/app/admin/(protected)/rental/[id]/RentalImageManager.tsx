@@ -5,9 +5,15 @@ import Image from 'next/image'
 import SubmitButton from '../../_components/SubmitButton'
 import { Field, TextInput } from '../../_components/ui'
 import { useSortableList, SortableArea, SortableItem, DragHandle } from '../../_components/sortable'
-import { addRentalImage, deleteRentalImage, reorderRentalImages } from '../actions'
+import {
+  addRentalImage,
+  deleteRentalImage,
+  reorderRentalImages,
+  setRentalImageFocal,
+} from '../actions'
+import { FOCALS, FOCAL_LABEL, type Focal } from '@/lib/focal'
 
-export type RentalImageVM = { fileId: string; thumb: string }
+export type RentalImageVM = { fileId: string; thumb: string; focal: Focal }
 
 export default function RentalImageManager({
   id,
@@ -60,12 +66,38 @@ export default function RentalImageManager({
                         alt=""
                         width={300}
                         height={300}
-                        className="aspect-square w-full object-cover"
+                        className={`aspect-square w-full object-cover ${
+                          img.focal === 'CENTER'
+                            ? 'object-center'
+                            : img.focal === 'BOTTOM'
+                              ? 'object-bottom'
+                              : 'object-top'
+                        }`}
                       />
                       <div className="absolute left-2 top-2 rounded bg-bg/80 p-1">
                         <DragHandle handle={handle} />
                       </div>
-                      <div className="absolute inset-x-0 bottom-0 flex justify-end bg-bg/85 p-2 opacity-0 transition-opacity group-hover:opacity-100">
+                      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-bg/85 p-2 opacity-0 transition-opacity group-hover:opacity-100">
+                        <div className="flex overflow-hidden rounded-sm border border-border">
+                          {FOCALS.map((f) => (
+                            <button
+                              key={f}
+                              type="button"
+                              disabled={pending}
+                              onClick={() =>
+                                startTransition(() => setRentalImageFocal(id, img.fileId, f))
+                              }
+                              title={`Encuadre: ${FOCAL_LABEL[f]}`}
+                              className={`flex-1 px-1 py-1 text-[9px] uppercase tracking-wider transition-colors disabled:opacity-40 ${
+                                img.focal === f
+                                  ? 'bg-accent text-bg'
+                                  : 'text-muted hover:text-light'
+                              }`}
+                            >
+                              {FOCAL_LABEL[f]}
+                            </button>
+                          ))}
+                        </div>
                         <button
                           disabled={pending}
                           onClick={() => startTransition(() => deleteRentalImage(id, img.fileId))}

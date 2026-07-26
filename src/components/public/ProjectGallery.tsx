@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Reveal from './Reveal'
 import Lightbox from './Lightbox'
 import VimeoEmbed from './VimeoEmbed'
+import { focalClass, type Focal } from '@/lib/focal'
 
 type MediaItem = {
   id: string
@@ -12,6 +13,7 @@ type MediaItem = {
   url: string | null
   vimeoId: string | null
   wide: boolean
+  focal: Focal
   altEs: string | null
   altEn: string | null
 }
@@ -79,7 +81,7 @@ export default function ProjectGallery({
                   alt={alt}
                   fill
                   sizes={wide ? '100vw' : '(max-width: 640px) 100vw, 50vw'}
-                  className="object-cover object-top brightness-[0.85] transition-all duration-700 ease-out-expo group-hover:scale-[1.03] group-hover:brightness-100"
+                  className={`object-cover ${focalClass(m.focal)} brightness-[0.85] transition-all duration-700 ease-out-expo group-hover:scale-[1.03] group-hover:brightness-100`}
                 />
               )}
             </Reveal>
