@@ -61,8 +61,10 @@ function nextId() {
 }
 
 // Devuelve una URL de Unsplash con recorte al tamaño pedido (color).
+// crop=faces,center → Unsplash usa detección de caras al recortar, así no
+// corta las cabezas en los retratos/bustos (si no detecta cara, centra).
 function unsplash(id: string, w: number, h: number) {
-  return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`
+  return `https://images.unsplash.com/${id}?auto=format&fit=crop&crop=faces,center&w=${w}&h=${h}&q=80`
 }
 
 // img(): una imagen del pool con el tamaño pedido, avanzando el cursor para
