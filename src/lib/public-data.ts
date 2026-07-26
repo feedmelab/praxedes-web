@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { signedDisplayUrl } from '@/lib/imagekit'
-import type { ProjectCategory, RentalCategory } from '@prisma/client'
+import type { ProjectCategory, RentalCategory, ReservationStatus } from '@prisma/client'
 
 import type { Focal } from '@/lib/focal'
 
@@ -109,10 +109,11 @@ export function localizedDesc(p: { descEs: string | null; descEn: string | null 
   return locale === 'en' ? p.descEn : p.descEs
 }
 
-// Incluye solo las reservas confirmadas (cliente + bloqueos) de cada pieza,
-// que son las que restan disponibilidad.
-const confirmedReservations = {
-  where: { status: 'CONFIRMED' as const },
+// Reservas que restan disponibilidad: confirmadas y también las pendientes de
+// confirmar (retienen stock mientras el admin decide, para no sobrevender).
+const ACTIVE_STATUSES: ReservationStatus[] = ['PENDING', 'CONFIRMED']
+const activeReservations = {
+  where: { status: { in: ACTIVE_STATUSES } },
   select: { startDate: true, endDate: true, quantity: true },
 }
 
@@ -122,7 +123,7 @@ export async function getRentalItems() {
     return await prisma.rentalItem.findMany({
       where: { available: true },
       orderBy: { order: 'asc' },
-      include: { reservations: confirmedReservations },
+      include: { reservations: activeReservations },
     })
   } catch {
     return []
@@ -134,7 +135,7 @@ export async function getRentalItem(id: string) {
   try {
     return await prisma.rentalItem.findFirst({
       where: { id, available: true },
-      include: { reservations: confirmedReservations },
+      include: { reservations: activeReservations },
     })
   } catch {
     return null

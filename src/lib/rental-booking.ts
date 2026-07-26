@@ -3,8 +3,8 @@
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { getSettings } from '@/lib/public-data'
 import { toDay, isValidRange, freeUnits, BUFFER_DAYS } from '@/lib/rental-availability'
+import { sendRequestEmails } from '@/lib/rental-emails'
 
 // ── Comprobar disponibilidad (público) ───────────────────────
 
@@ -25,7 +25,7 @@ export async function checkAvailability(
     if (!item || !item.available) return { ok: false, reason: 'notfound' }
 
     const reservations = await prisma.reservation.findMany({
-      where: { itemId, status: 'CONFIRMED' },
+      where: { itemId, status: { in: ['PENDING', 'CONFIRMED'] } },
       select: { startDate: true, endDate: true, quantity: true },
     })
     const free = freeUnits(item.stock, { start, end }, reservations, BUFFER_DAYS)
@@ -35,7 +35,9 @@ export async function checkAvailability(
   }
 }
 
-// ── Crear reserva (público, auto-confirma si hay stock) ───────
+// ── Crear SOLICITUD de reserva (público) ─────────────────────
+// El cliente solicita; queda PENDIENTE hasta que el admin la confirma. Se
+// retiene el stock desde la solicitud para no sobrevender.
 
 const bookingSchema = z.object({
   itemId: z.string().min(1),
@@ -76,7 +78,7 @@ export async function createReservation(
       if (!item || !item.available) return { ok: false as const }
 
       const reservations = await tx.reservation.findMany({
-        where: { itemId, status: 'CONFIRMED' },
+        where: { itemId, status: { in: ['PENDING', 'CONFIRMED'] } },
         select: { startDate: true, endDate: true, quantity: true },
       })
       const free = freeUnits(item.stock, { start, end }, reservations, BUFFER_DAYS)
@@ -88,7 +90,7 @@ export async function createReservation(
           startDate: start,
           endDate: end,
           quantity,
-          status: 'CONFIRMED',
+          status: 'PENDING',
           kind: 'CUSTOMER',
           customerName: name,
           customerEmail: email,
@@ -101,7 +103,7 @@ export async function createReservation(
 
     if (!result.ok) return { status: 'unavailable', free: result.free }
 
-    await sendReservationEmails({
+    await sendRequestEmails({
       itemName: result.item.nameEs,
       name,
       email,
@@ -120,61 +122,4 @@ export async function createReservation(
   } catch {
     return { status: 'error' }
   }
-}
-
-// ── Emails (Resend REST, server-to-server) ───────────────────
-
-async function sendReservationEmails(r: {
-  itemName: string
-  name: string
-  email: string
-  phone: string
-  notes: string
-  start: string
-  end: string
-  quantity: number
-}) {
-  const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) {
-    console.error('Resend reserva: falta RESEND_API_KEY en el entorno')
-    return
-  }
-
-  const settings = await getSettings()
-  const owner = settings?.contactEmail || process.env.CONTACT_TO
-  const from = process.env.CONTACT_FROM || 'Reservas Práxedes <onboarding@resend.dev>'
-  if (!owner) console.error('Resend reserva: sin email de destino (contactEmail/CONTACT_TO)')
-
-  const period = `${r.start} → ${r.end}`
-  const send = async (to: string, subject: string, text: string) => {
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from, to: [to], subject, text }),
-        cache: 'no-store',
-      })
-      if (!res.ok) {
-        // Visible en los logs de la función (Vercel → Logs).
-        console.error('Resend reserva error', res.status, await res.text())
-      }
-    } catch (e) {
-      console.error('Resend reserva fetch failed', e)
-    }
-  }
-
-  // Aviso a Práxedes
-  if (owner) {
-    await send(
-      owner,
-      `Nueva reserva — ${r.itemName}`,
-      `Pieza: ${r.itemName} (x${r.quantity})\nFechas: ${period}\n\nCliente: ${r.name}\nEmail: ${r.email}\nTeléfono: ${r.phone || '—'}\nNotas: ${r.notes || '—'}`
-    )
-  }
-  // Confirmación al cliente
-  await send(
-    r.email,
-    `Reserva confirmada — ${r.itemName}`,
-    `Hola ${r.name},\n\nTu reserva de "${r.itemName}" (x${r.quantity}) para ${period} está confirmada.\n\nGracias,\nPráxedes de Vilallonga`
-  )
 }

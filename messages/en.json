@@ -61,7 +61,7 @@
     "notes": "Notes (optional)",
     "reserve": "Request booking",
     "reserving": "Sending…",
-    "success": "Booking confirmed. We’ve emailed you the details.",
+    "success": "Request sent. We’ve emailed you to confirm we received it, and we’ll notify you by email once the booking is confirmed.",
     "error": "Could not complete the booking. Please try again.",
     "invalid": "Please check the form fields.",
     "stock": "{stock} units in catalogue",

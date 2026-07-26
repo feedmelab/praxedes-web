@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { uploadFile, deleteFile } from '@/lib/imagekit'
+import { sendConfirmedEmail } from '@/lib/rental-emails'
 import type { RentalCategory } from '@prisma/client'
 
 import type { Focal } from '@/lib/focal'
@@ -226,7 +227,29 @@ export async function createBlock(
   return { ok: true }
 }
 
-// Cancela una reserva (libera stock).
+// Confirma una solicitud pendiente y avisa al cliente por email.
+export async function confirmReservation(id: string) {
+  await requireAuth()
+  const r = await prisma.reservation.update({
+    where: { id },
+    data: { status: 'CONFIRMED' },
+    include: { item: { select: { nameEs: true } } },
+  })
+  if (r.customerEmail) {
+    await sendConfirmedEmail({
+      itemName: r.item.nameEs,
+      name: r.customerName || '',
+      email: r.customerEmail,
+      start: r.startDate.toISOString().slice(0, 10),
+      end: r.endDate.toISOString().slice(0, 10),
+      quantity: r.quantity,
+    })
+  }
+  revalidatePath('/admin/rental/reservations')
+  revalidatePublicRental()
+}
+
+// Cancela/rechaza una reserva (libera stock).
 export async function cancelReservation(id: string) {
   await requireAuth()
   await prisma.reservation.update({ where: { id }, data: { status: 'CANCELLED' } })

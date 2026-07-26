@@ -145,6 +145,7 @@ model RentalItem {
 // ── Reservas de alquiler (módulo E) ───────────────────────────
 
 enum ReservationStatus {
+  PENDING // solicitud del cliente pendiente de confirmar por el admin
   CONFIRMED
   CANCELLED
 }

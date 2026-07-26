@@ -61,7 +61,7 @@
     "notes": "Notas (opcional)",
     "reserve": "Solicitar reserva",
     "reserving": "Enviando…",
-    "success": "Reserva confirmada. Te hemos enviado un email con los detalles.",
+    "success": "Solicitud enviada. Te hemos mandado un email de confirmación de recepción; te avisaremos por correo en cuanto la reserva quede confirmada.",
     "error": "No se pudo completar la reserva. Inténtalo de nuevo.",
     "invalid": "Revisa los campos del formulario.",
     "stock": "{stock} unidades en catálogo",

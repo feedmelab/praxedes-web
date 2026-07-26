@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { Card, Badge } from '../../_components/ui'
-import { cancelReservation, deleteReservation, createBlock } from '../actions'
+import { cancelReservation, confirmReservation, deleteReservation, createBlock } from '../actions'
 
 type Reservation = {
   id: string
@@ -11,7 +11,7 @@ type Reservation = {
   startDate: string
   endDate: string
   quantity: number
-  status: 'CONFIRMED' | 'CANCELLED'
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED'
   kind: 'CUSTOMER' | 'BLOCK'
   customerName: string | null
   customerEmail: string | null
@@ -64,14 +64,20 @@ export default function ReservationsManager({
   reservations: Reservation[]
   items: ItemOption[]
 }) {
-  const [tab, setTab] = useState<'upcoming' | 'past' | 'cancelled'>('upcoming')
+  const [tab, setTab] = useState<'requests' | 'upcoming' | 'past' | 'cancelled'>('requests')
   const [pending, startTransition] = useTransition()
   const [blockState, setBlockState] = useState<{ error?: string; ok?: boolean } | null>(null)
 
   const today = new Date().toISOString().slice(0, 10)
 
+  const pendingCount = useMemo(
+    () => reservations.filter((r) => r.status === 'PENDING').length,
+    [reservations]
+  )
+
   const filtered = useMemo(() => {
     return reservations.filter((r) => {
+      if (r.status === 'PENDING') return tab === 'requests'
       if (r.status === 'CANCELLED') return tab === 'cancelled'
       const isPast = fmt(r.endDate) < today
       if (tab === 'upcoming') return !isPast
@@ -80,6 +86,9 @@ export default function ReservationsManager({
     })
   }, [reservations, tab, today])
 
+  function onConfirm(id: string) {
+    startTransition(() => confirmReservation(id))
+  }
   function onCancel(id: string) {
     startTransition(() => cancelReservation(id))
   }
@@ -134,7 +143,14 @@ export default function ReservationsManager({
       </Card>
 
       {/* Filtros */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className={tabBtn(tab === 'requests')}
+          onClick={() => setTab('requests')}
+        >
+          Solicitudes{pendingCount > 0 ? ` (${pendingCount})` : ''}
+        </button>
         <button
           type="button"
           className={tabBtn(tab === 'upcoming')}
@@ -175,17 +191,28 @@ export default function ReservationsManager({
                     <Badge tone={r.kind === 'BLOCK' ? 'muted' : 'accent'}>
                       {r.kind === 'BLOCK' ? 'Bloqueo interno' : 'Reserva de cliente'}
                     </Badge>
+                    {r.status === 'PENDING' && <Badge tone="accent">Pendiente</Badge>}
                     {r.status === 'CANCELLED' && <Badge tone="red">Cancelada</Badge>}
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    {r.status === 'CONFIRMED' && (
+                    {r.status === 'PENDING' && (
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => onConfirm(r.id)}
+                        className="rounded-sm bg-accent px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.15em] text-bg transition-all hover:bg-accent/90 disabled:opacity-40"
+                      >
+                        Confirmar
+                      </button>
+                    )}
+                    {(r.status === 'CONFIRMED' || r.status === 'PENDING') && (
                       <button
                         type="button"
                         disabled={pending}
                         onClick={() => onCancel(r.id)}
                         className="rounded-sm border border-border px-3 py-1.5 text-[11px] uppercase tracking-[0.15em] text-soft transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
                       >
-                        Cancelar
+                        {r.status === 'PENDING' ? 'Rechazar' : 'Cancelar'}
                       </button>
                     )}
                     <button
