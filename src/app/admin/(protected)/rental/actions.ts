@@ -236,14 +236,17 @@ export async function confirmReservation(id: string) {
     include: { item: { select: { nameEs: true } } },
   })
   if (r.customerEmail) {
-    await sendConfirmedEmail({
-      itemName: r.item.nameEs,
-      name: r.customerName || '',
-      email: r.customerEmail,
-      start: r.startDate.toISOString().slice(0, 10),
-      end: r.endDate.toISOString().slice(0, 10),
-      quantity: r.quantity,
-    })
+    await sendConfirmedEmail(
+      {
+        itemName: r.item.nameEs,
+        name: r.customerName || '',
+        email: r.customerEmail,
+        start: r.startDate.toISOString().slice(0, 10),
+        end: r.endDate.toISOString().slice(0, 10),
+        quantity: r.quantity,
+      },
+      r.locale
+    )
   }
   revalidatePath('/admin/rental/reservations')
   revalidatePublicRental()

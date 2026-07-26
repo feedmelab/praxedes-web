@@ -1,8 +1,10 @@
 // Emails de alquiler vía la API REST de Resend (server-to-server; el token vive
 // solo en el servidor). Dos momentos:
-//   1) Solicitud recibida  → aviso al admin + "hemos recibido tu solicitud".
-//   2) Reserva confirmada  → "tu reserva está confirmada" al cliente.
+//   1) Solicitud recibida  → aviso al admin (ES) + "hemos recibido tu solicitud" (idioma del cliente).
+//   2) Reserva confirmada  → "tu reserva está confirmada" (idioma del cliente).
 import { getSettings } from '@/lib/public-data'
+
+export type EmailLocale = 'es' | 'en'
 
 type ReservationInfo = {
   itemName: string
@@ -40,8 +42,52 @@ async function ownerEmail() {
   return settings?.contactEmail || process.env.CONTACT_TO || null
 }
 
-// 1) Solicitud recibida: avisa al admin y confirma al cliente que la ha recibido.
-export async function sendRequestEmails(r: ReservationInfo) {
+const norm = (l: string): EmailLocale => (l === 'en' ? 'en' : 'es')
+
+// Textos al cliente según idioma.
+function requestText(r: ReservationInfo, period: string, locale: EmailLocale) {
+  if (locale === 'en') {
+    return {
+      subject: `Request received — ${r.itemName}`,
+      body:
+        `Hi ${r.name},\n\n` +
+        `We’ve received your rental request for “${r.itemName}” (x${r.quantity}) for ${period}.\n\n` +
+        `It is NOT confirmed yet: we’ll review it and email you as soon as the booking is confirmed.\n\n` +
+        `Thank you,\nPráxedes de Vilallonga`,
+    }
+  }
+  return {
+    subject: `Solicitud recibida — ${r.itemName}`,
+    body:
+      `Hola ${r.name},\n\n` +
+      `Hemos recibido tu solicitud de alquiler de "${r.itemName}" (x${r.quantity}) para ${period}.\n\n` +
+      `Todavía NO está confirmada: la revisaremos y te enviaremos un email en cuanto quede confirmada.\n\n` +
+      `Gracias,\nPráxedes de Vilallonga`,
+  }
+}
+
+function confirmedText(r: ReservationInfo, period: string, locale: EmailLocale) {
+  if (locale === 'en') {
+    return {
+      subject: `Booking confirmed — ${r.itemName}`,
+      body:
+        `Hi ${r.name},\n\n` +
+        `Your rental of “${r.itemName}” (x${r.quantity}) for ${period} is now CONFIRMED.\n\n` +
+        `Thank you,\nPráxedes de Vilallonga`,
+    }
+  }
+  return {
+    subject: `Reserva confirmada — ${r.itemName}`,
+    body:
+      `Hola ${r.name},\n\n` +
+      `Tu reserva de "${r.itemName}" (x${r.quantity}) para ${period} ya está CONFIRMADA.\n\n` +
+      `Gracias,\nPráxedes de Vilallonga`,
+  }
+}
+
+// 1) Solicitud recibida: avisa al admin (en ES) y confirma recepción al cliente
+//    en su idioma.
+export async function sendRequestEmails(r: ReservationInfo, locale: string) {
   const period = `${r.start} → ${r.end}`
   const owner = await ownerEmail()
   if (owner) {
@@ -56,24 +102,13 @@ export async function sendRequestEmails(r: ReservationInfo) {
   } else {
     console.error('Resend alquiler: sin email de destino (contactEmail/CONTACT_TO)')
   }
-  await resend(
-    r.email,
-    `Solicitud recibida — ${r.itemName}`,
-    `Hola ${r.name},\n\n` +
-      `Hemos recibido tu solicitud de alquiler de "${r.itemName}" (x${r.quantity}) para ${period}.\n\n` +
-      `Todavía NO está confirmada: la revisaremos y te enviaremos un email en cuanto quede confirmada.\n\n` +
-      `Gracias,\nPráxedes de Vilallonga`
-  )
+  const t = requestText(r, period, norm(locale))
+  await resend(r.email, t.subject, t.body)
 }
 
-// 2) Reserva confirmada: avisa al cliente de que su reserva ya está confirmada.
-export async function sendConfirmedEmail(r: ReservationInfo) {
+// 2) Reserva confirmada: avisa al cliente en su idioma.
+export async function sendConfirmedEmail(r: ReservationInfo, locale: string) {
   const period = `${r.start} → ${r.end}`
-  await resend(
-    r.email,
-    `Reserva confirmada — ${r.itemName}`,
-    `Hola ${r.name},\n\n` +
-      `Tu reserva de "${r.itemName}" (x${r.quantity}) para ${period} ya está CONFIRMADA.\n\n` +
-      `Gracias,\nPráxedes de Vilallonga`
-  )
+  const t = confirmedText(r, period, norm(locale))
+  await resend(r.email, t.subject, t.body)
 }

@@ -169,6 +169,7 @@ model Reservation {
   customerEmail String?
   customerPhone String?
   notes         String?  @db.Text
+  locale        String   @default("es") // idioma del cliente para los emails
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

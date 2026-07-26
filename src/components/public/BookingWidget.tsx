@@ -136,6 +136,7 @@ export default function BookingWidget({
           <input type="hidden" name="start" value={start} />
           <input type="hidden" name="end" value={end} />
           <input type="hidden" name="quantity" value={qty} />
+          <input type="hidden" name="locale" value={locale} />
           {/* Honeypot */}
           <input
             type="text"

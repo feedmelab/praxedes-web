@@ -48,6 +48,7 @@ const bookingSchema = z.object({
   email: z.string().trim().email().max(200),
   phone: z.string().trim().max(40).optional().or(z.literal('')),
   notes: z.string().trim().max(2000).optional().or(z.literal('')),
+  locale: z.enum(['es', 'en']).optional(),
   // Honeypot anti-bots.
   company: z.string().max(0).optional().or(z.literal('')),
 })
@@ -66,6 +67,7 @@ export async function createReservation(
   if (parsed.data.company) return { status: 'success' } // bot
 
   const { itemId, quantity, name, email, phone, notes } = parsed.data
+  const locale = parsed.data.locale ?? 'es'
   const start = toDay(parsed.data.start)
   const end = toDay(parsed.data.end)
   if (!isValidRange(start, end)) return { status: 'invalid' }
@@ -96,6 +98,7 @@ export async function createReservation(
           customerEmail: email,
           customerPhone: phone || null,
           notes: notes || null,
+          locale,
         },
       })
       return { ok: true as const, item }
@@ -103,16 +106,19 @@ export async function createReservation(
 
     if (!result.ok) return { status: 'unavailable', free: result.free }
 
-    await sendRequestEmails({
-      itemName: result.item.nameEs,
-      name,
-      email,
-      phone: phone || '',
-      notes: notes || '',
-      start: parsed.data.start,
-      end: parsed.data.end,
-      quantity,
-    })
+    await sendRequestEmails(
+      {
+        itemName: result.item.nameEs,
+        name,
+        email,
+        phone: phone || '',
+        notes: notes || '',
+        start: parsed.data.start,
+        end: parsed.data.end,
+        quantity,
+      },
+      locale
+    )
 
     revalidatePath('/admin/rental/reservations')
     // Refresca también la web pública para que el calendario de disponibilidad
