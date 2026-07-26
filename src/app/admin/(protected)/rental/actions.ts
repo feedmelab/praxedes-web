@@ -222,6 +222,7 @@ export async function createBlock(
     },
   })
   revalidatePath('/admin/rental/reservations')
+  revalidatePublicRental()
   return { ok: true }
 }
 
@@ -230,6 +231,7 @@ export async function cancelReservation(id: string) {
   await requireAuth()
   await prisma.reservation.update({ where: { id }, data: { status: 'CANCELLED' } })
   revalidatePath('/admin/rental/reservations')
+  revalidatePublicRental()
 }
 
 // Borra una reserva definitivamente.
@@ -237,4 +239,5 @@ export async function deleteReservation(id: string) {
   await requireAuth()
   await prisma.reservation.delete({ where: { id } })
   revalidatePath('/admin/rental/reservations')
+  revalidatePublicRental()
 }

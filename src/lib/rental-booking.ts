@@ -113,6 +113,9 @@ export async function createReservation(
     })
 
     revalidatePath('/admin/rental/reservations')
+    // Refresca también la web pública para que el calendario de disponibilidad
+    // marque de inmediato los días que acaban de ocuparse.
+    revalidatePath('/', 'layout')
     return { status: 'success' }
   } catch {
     return { status: 'error' }
