@@ -79,7 +79,7 @@ export default function ProjectGallery({
                   alt={alt}
                   fill
                   sizes={wide ? '100vw' : '(max-width: 640px) 100vw, 50vw'}
-                  className="object-cover brightness-[0.85] transition-all duration-700 ease-out-expo group-hover:scale-[1.03] group-hover:brightness-100"
+                  className="object-cover object-top brightness-[0.85] transition-all duration-700 ease-out-expo group-hover:scale-[1.03] group-hover:brightness-100"
                 />
               )}
             </Reveal>

@@ -79,7 +79,7 @@ export default function RentalGrid({
                     alt={name}
                     fill
                     sizes="(max-width: 640px) 50vw, 25vw"
-                    className={`object-cover transition-all duration-700 ease-out-expo group-hover:scale-[1.04] ${
+                    className={`object-cover object-top transition-all duration-700 ease-out-expo group-hover:scale-[1.04] ${
                       item.soldOutNow
                         ? 'brightness-[0.45] grayscale'
                         : 'brightness-[0.85] group-hover:brightness-100'

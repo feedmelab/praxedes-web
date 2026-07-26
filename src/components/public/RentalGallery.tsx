@@ -50,7 +50,7 @@ export default function RentalGallery({
               alt={name}
               fill
               sizes="(max-width: 1024px) 100vw, 55vw"
-              className="object-cover brightness-[0.9] transition-all duration-700 ease-out-expo group-hover:scale-[1.03] group-hover:brightness-100"
+              className="object-cover object-top brightness-[0.9] transition-all duration-700 ease-out-expo group-hover:scale-[1.03] group-hover:brightness-100"
             />
           </Reveal>
         ))}

@@ -30,7 +30,7 @@ export default function ProjectCard({ slug, client, title, meta, coverImage, ind
           alt={`${client} — ${title}`}
           fill
           sizes="(max-width: 760px) 100vw, 50vw"
-          className="object-cover brightness-[0.72] grayscale-[0.35] transition-all duration-[1100ms] ease-out-expo group-hover:scale-105 group-hover:brightness-[0.85] group-hover:grayscale-0"
+          className="object-cover object-top brightness-[0.72] grayscale-[0.35] transition-all duration-[1100ms] ease-out-expo group-hover:scale-105 group-hover:brightness-[0.85] group-hover:grayscale-0"
         />
       ) : (
         <div
