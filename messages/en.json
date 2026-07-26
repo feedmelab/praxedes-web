@@ -41,7 +41,8 @@
     "all": "All",
     "empty": "Coming soon.",
     "viewItem": "View & book",
-    "soldOut": "Not available now"
+    "soldOut": "Not available now",
+    "availableFrom": "Available from"
   },
   "booking": {
     "title": "Availability & booking",

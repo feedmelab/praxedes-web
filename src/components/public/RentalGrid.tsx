@@ -16,6 +16,7 @@ type Item = {
   category: RentalCategory
   images: { url: string; focal?: Focal }[]
   soldOutNow?: boolean
+  availableFrom?: string | null
 }
 
 const ORDER: RentalCategory[] = ['PERIOD', 'CONTEMPORARY', 'ACCESSORIES', 'PROPS', 'OTHER']
@@ -31,6 +32,14 @@ export default function RentalGrid({
 }) {
   const t = useTranslations('rental')
   const [filter, setFilter] = useState<RentalCategory | 'ALL'>('ALL')
+
+  const fmtDate = (iso: string) =>
+    new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${iso}T00:00:00Z`))
 
   // Solo mostramos filtros de categorías que existen en el catálogo.
   const present = useMemo(() => ORDER.filter((c) => items.some((i) => i.category === c)), [items])
@@ -94,8 +103,13 @@ export default function RentalGrid({
                   />
                 )}
                 {item.soldOutNow && (
-                  <span className="absolute left-2 top-2 z-[2] border border-light/30 bg-bg/80 px-2 py-1 text-[0.56rem] uppercase tracking-[0.14em] text-light backdrop-blur-sm">
-                    {t('soldOut')}
+                  <span className="absolute inset-x-2 top-2 z-[2] flex flex-col gap-0.5 border border-light/30 bg-bg/80 px-2 py-1.5 text-[0.56rem] uppercase tracking-[0.12em] text-light backdrop-blur-sm">
+                    <span>{t('soldOut')}</span>
+                    {item.availableFrom && (
+                      <span className="text-accent">
+                        {t('availableFrom')} {fmtDate(item.availableFrom)}
+                      </span>
+                    )}
                   </span>
                 )}
               </div>

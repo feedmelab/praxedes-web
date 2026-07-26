@@ -41,7 +41,8 @@
     "all": "Todo",
     "empty": "Próximamente.",
     "viewItem": "Ver y reservar",
-    "soldOut": "No disponible ahora"
+    "soldOut": "No disponible ahora",
+    "availableFrom": "Disponible desde"
   },
   "booking": {
     "title": "Disponibilidad y reserva",

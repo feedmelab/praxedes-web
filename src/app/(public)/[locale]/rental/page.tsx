@@ -4,7 +4,7 @@ import { Link } from '@/i18n/navigation'
 import RentalGrid from '@/components/public/RentalGrid'
 import { getRentalItems, RENTAL_LABELS, type Locale, type RentalImage } from '@/lib/public-data'
 import { signedDisplayUrl } from '@/lib/imagekit'
-import { freeToday } from '@/lib/rental-availability'
+import { freeToday, nextAvailableDay } from '@/lib/rental-availability'
 
 export async function generateMetadata({
   params,
@@ -36,8 +36,11 @@ export default async function RentalPage({ params }: { params: Promise<{ locale:
       url: signedDisplayUrl(img.url),
       focal: img.focal,
     })),
-    // Agotada ahora mismo (sin unidades libres hoy).
+    // Agotada ahora mismo (sin unidades libres hoy) y, si lo está, desde qué
+    // día vuelve a haber al menos una unidad libre.
     soldOutNow: freeToday(r.stock, r.reservations) < 1,
+    availableFrom:
+      freeToday(r.stock, r.reservations) < 1 ? nextAvailableDay(r.stock, r.reservations) : null,
   }))
 
   return (

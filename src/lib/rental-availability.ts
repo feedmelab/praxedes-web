@@ -72,3 +72,27 @@ export function freeToday(
   const end = new Date(start.getTime() + 86_400_000)
   return freeUnits(stock, { start, end }, reservations)
 }
+
+const isoDay = (d: Date) =>
+  `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(
+    d.getUTCDate()
+  ).padStart(2, '0')}`
+
+/**
+ * Primer día (desde hoy) con al menos una unidad libre. Devuelve 'YYYY-MM-DD',
+ * o null si no hay hueco en el horizonte. Útil para "Disponible a partir del…"
+ * en piezas agotadas ahora mismo.
+ */
+export function nextAvailableDay(
+  stock: number,
+  reservations: Array<{ startDate: Date; endDate: Date; quantity: number }>,
+  horizonDays = 400
+): string | null {
+  const start = toDay(new Date())
+  for (let i = 0; i < horizonDays; i++) {
+    const day = addDays(start, i)
+    const free = freeUnits(stock, { start: day, end: addDays(day, 1) }, reservations)
+    if (free >= 1) return isoDay(day)
+  }
+  return null
+}
