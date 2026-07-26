@@ -329,6 +329,31 @@ async function main() {
         },
       })
     }
+
+    // Tercera pieza: agotada HOY (todas las unidades reservadas desde hoy),
+    // para mostrar el aviso "No disponible ahora / Disponible desde".
+    if (i === 2) {
+      const base = new Date()
+      const d = (offset: number) => {
+        const x = new Date(base)
+        x.setUTCDate(x.getUTCDate() + offset)
+        return new Date(Date.UTC(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate()))
+      }
+      const stock = (i % 4) + 2
+      await prisma.reservation.create({
+        data: {
+          itemId: item.id,
+          startDate: d(0),
+          endDate: d(4),
+          quantity: stock,
+          status: 'CONFIRMED',
+          kind: 'CUSTOMER',
+          customerName: 'Rodaje en curso',
+          customerEmail: 'cliente@ejemplo.com',
+          notes: 'Toda la existencia reservada esta semana',
+        },
+      })
+    }
   }
   console.log(`✓ ${RENTAL.length} piezas de alquiler`)
 

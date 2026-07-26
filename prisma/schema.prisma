@@ -180,6 +180,18 @@ model Reservation {
 
 // ── Site settings (singleton) ─────────────────────────────────
 
+// Plantillas de email editables desde el panel. key ∈ {rental_request,
+// rental_confirmed}. El cuerpo admite variables {name} {item} {quantity}
+// {period} {start} {end}.
+model EmailTemplate {
+  key       String   @id
+  subjectEs String   @db.Text
+  bodyEs    String   @db.Text
+  subjectEn String   @db.Text
+  bodyEn    String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
 model SiteSettings {
   id           String   @id @default("singleton")
   reelVimeoId  String?
