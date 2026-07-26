@@ -1,8 +1,13 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { Card, Badge } from '../../_components/ui'
+import Pagination from '../../_components/Pagination'
 import { cancelReservation, confirmReservation, deleteReservation, createBlock } from '../actions'
+
+type Tab = 'requests' | 'upcoming' | 'past' | 'cancelled'
+const BASE = '/admin/rental/reservations'
 
 type Reservation = {
   id: string
@@ -21,8 +26,6 @@ type Reservation = {
 }
 
 type ItemOption = { id: string; name: string; stock: number }
-
-const fmt = (iso: string) => new Date(iso).toISOString().slice(0, 10)
 
 // '5 ago 2026' — fecha legible (en UTC para no desplazar el día).
 const fmtLong = (iso: string) =>
@@ -60,31 +63,23 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 export default function ReservationsManager({
   reservations,
   items,
+  tab,
+  page,
+  totalPages,
+  pendingCount,
 }: {
   reservations: Reservation[]
   items: ItemOption[]
+  tab: Tab
+  page: number
+  totalPages: number
+  pendingCount: number
 }) {
-  const [tab, setTab] = useState<'requests' | 'upcoming' | 'past' | 'cancelled'>('requests')
   const [pending, startTransition] = useTransition()
   const [blockState, setBlockState] = useState<{ error?: string; ok?: boolean } | null>(null)
 
   const today = new Date().toISOString().slice(0, 10)
-
-  const pendingCount = useMemo(
-    () => reservations.filter((r) => r.status === 'PENDING').length,
-    [reservations]
-  )
-
-  const filtered = useMemo(() => {
-    return reservations.filter((r) => {
-      if (r.status === 'PENDING') return tab === 'requests'
-      if (r.status === 'CANCELLED') return tab === 'cancelled'
-      const isPast = fmt(r.endDate) < today
-      if (tab === 'upcoming') return !isPast
-      if (tab === 'past') return isPast
-      return false
-    })
-  }, [reservations, tab, today])
+  const filtered = reservations
 
   function onConfirm(id: string) {
     startTransition(() => confirmReservation(id))
@@ -142,32 +137,20 @@ export default function ReservationsManager({
         {blockState?.ok && <p className="mt-2 text-xs text-green-400">Bloqueo creado.</p>}
       </Card>
 
-      {/* Filtros */}
+      {/* Filtros (navegan por URL; el filtrado y la paginación son de servidor) */}
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className={tabBtn(tab === 'requests')}
-          onClick={() => setTab('requests')}
-        >
+        <Link href={`${BASE}?tab=requests`} className={tabBtn(tab === 'requests')}>
           Solicitudes{pendingCount > 0 ? ` (${pendingCount})` : ''}
-        </button>
-        <button
-          type="button"
-          className={tabBtn(tab === 'upcoming')}
-          onClick={() => setTab('upcoming')}
-        >
+        </Link>
+        <Link href={`${BASE}?tab=upcoming`} className={tabBtn(tab === 'upcoming')}>
           Próximas
-        </button>
-        <button type="button" className={tabBtn(tab === 'past')} onClick={() => setTab('past')}>
+        </Link>
+        <Link href={`${BASE}?tab=past`} className={tabBtn(tab === 'past')}>
           Pasadas
-        </button>
-        <button
-          type="button"
-          className={tabBtn(tab === 'cancelled')}
-          onClick={() => setTab('cancelled')}
-        >
+        </Link>
+        <Link href={`${BASE}?tab=cancelled`} className={tabBtn(tab === 'cancelled')}>
           Canceladas
-        </button>
+        </Link>
       </div>
 
       {/* Lista */}
@@ -284,6 +267,8 @@ export default function ReservationsManager({
           })}
         </div>
       )}
+
+      <Pagination basePath={BASE} page={page} totalPages={totalPages} query={{ tab }} />
     </div>
   )
 }

@@ -1,22 +1,58 @@
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '../../_components/ui'
 import ReservationsManager from './ReservationsManager'
 
 export const metadata = { title: 'Reservas' }
 
-export default async function ReservationsPage() {
-  const [reservations, items] = await Promise.all([
+const PAGE_SIZE = 15
+const TABS = ['requests', 'upcoming', 'past', 'cancelled'] as const
+type Tab = (typeof TABS)[number]
+
+export default async function ReservationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; page?: string }>
+}) {
+  const sp = await searchParams
+  const tab: Tab = (TABS as readonly string[]).includes(sp.tab ?? '') ? (sp.tab as Tab) : 'requests'
+  const page = Math.max(1, Number(sp.page) || 1)
+
+  const now = new Date()
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+
+  // Filtro por pestaña.
+  const where: Prisma.ReservationWhereInput =
+    tab === 'requests'
+      ? { status: 'PENDING' }
+      : tab === 'cancelled'
+        ? { status: 'CANCELLED' }
+        : tab === 'upcoming'
+          ? { status: 'CONFIRMED', endDate: { gte: todayStart } }
+          : { status: 'CONFIRMED', endDate: { lt: todayStart } }
+
+  const orderBy: Prisma.ReservationOrderByWithRelationInput =
+    tab === 'requests' ? { createdAt: 'desc' } : { startDate: 'asc' }
+
+  const [total, rows, items, pendingCount] = await Promise.all([
+    prisma.reservation.count({ where }),
     prisma.reservation.findMany({
-      orderBy: { startDate: 'asc' },
+      where,
+      orderBy,
       include: { item: { select: { nameEs: true } } },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
     }),
     prisma.rentalItem.findMany({
       orderBy: { order: 'asc' },
       select: { id: true, nameEs: true, stock: true },
     }),
+    prisma.reservation.count({ where: { status: 'PENDING' } }),
   ])
 
-  const data = reservations.map((r) => ({
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  const data = rows.map((r) => ({
     id: r.id,
     itemId: r.itemId,
     itemName: r.item.nameEs,
@@ -40,7 +76,14 @@ export default async function ReservationsPage() {
         title="Reservas de alquiler"
         back={{ href: '/admin/rental', label: 'Alquiler' }}
       />
-      <ReservationsManager reservations={data} items={itemOptions} />
+      <ReservationsManager
+        reservations={data}
+        items={itemOptions}
+        tab={tab}
+        page={page}
+        totalPages={totalPages}
+        pendingCount={pendingCount}
+      />
     </div>
   )
 }
