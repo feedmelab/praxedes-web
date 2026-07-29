@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import Hero from '@/components/public/Hero'
-import Intro from '@/components/public/Intro'
 import ProjectCard from '@/components/public/ProjectCard'
 import Reveal from '@/components/public/Reveal'
 import {
@@ -40,7 +39,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <Intro />
       <Hero reelVimeoId={settings?.reelVimeoId} />
 
       {/* Trabajo destacado */}

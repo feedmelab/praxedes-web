@@ -1,24 +1,26 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import LiquidName from './LiquidName'
 
-// Hero de la home. Si hay reel de Vimeo lo embebe de fondo; si no, un
-// degradado sobrio (placeholder). Parallax sutil al hacer scroll — moderado,
-// como pide el brief.
+// Hero de la home. Reel de Vimeo de fondo (si existe) con parallax sutil.
+// El indicador de scroll parpadea finamente y se desvanece al bajar; al volver
+// arriba reaparece y vuelve a parpadear.
 export default function Hero({ reelVimeoId }: { reelVimeoId?: string | null }) {
   const t = useTranslations('home')
   const mediaRef = useRef<HTMLDivElement>(null)
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     const el = mediaRef.current
-    if (!el) return
     let raf = 0
     const onScroll = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
         const y = window.scrollY
-        if (y < window.innerHeight) el.style.transform = `translateY(${y * 0.18}px)`
+        setScrolled(y > 4)
+        if (el && y < window.innerHeight) el.style.transform = `translateY(${y * 0.18}px)`
       })
     }
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -43,7 +45,7 @@ export default function Hero({ reelVimeoId }: { reelVimeoId?: string | null }) {
             className="absolute inset-0"
             style={{
               background:
-                'radial-gradient(ellipse at 50% 40%, rgba(40,36,30,.5), transparent 70%), linear-gradient(180deg,#0d0c0b 0%,#131110 45%,#0a0a0a 100%)',
+                'radial-gradient(ellipse at 50% 42%, rgba(32,28,22,.28), transparent 62%), linear-gradient(180deg,#0c0b0a 0%,#0f0e0d 45%,#0a0a0a 100%)',
             }}
           />
         )}
@@ -62,20 +64,26 @@ export default function Hero({ reelVimeoId }: { reelVimeoId?: string | null }) {
         <p className="mb-6 animate-fade-up text-[0.7rem] uppercase tracking-[0.32em] text-accent">
           {t('eyebrow')}
         </p>
-        <h1 className="animate-fade-up font-display text-[clamp(2.8rem,8vw,6.5rem)] font-normal leading-[0.98] tracking-[0.01em]">
-          Práxedes
-          <br />
-          de Vilallonga
-        </h1>
+        <LiquidName />
         <p className="mt-6 animate-fade-up text-[clamp(0.8rem,1.6vw,1rem)] uppercase tracking-[0.16em] text-soft">
           {t('claim')}
         </p>
       </div>
 
-      <div className="absolute bottom-9 left-1/2 z-[2] flex -translate-x-1/2 flex-col items-center gap-3 text-[0.62rem] uppercase tracking-[0.25em] text-muted">
-        <span>{t('scroll')}</span>
+      <div
+        className={`absolute bottom-9 left-1/2 z-[2] flex -translate-x-1/2 flex-col items-center gap-3 text-[0.62rem] uppercase tracking-[0.25em] text-muted transition-opacity duration-700 ${
+          scrolled ? 'opacity-0' : 'opacity-100'
+        }`}
+      >
+        <span className={scrolled ? '' : 'hero-blink'}>{t('scroll')}</span>
         <span className="h-10 w-px bg-gradient-to-b from-muted to-transparent" />
       </div>
+
+      <style>{`
+        @keyframes heroBlink { 0%, 100% { opacity: .28; } 50% { opacity: .85; } }
+        .hero-blink { animation: heroBlink 2.4s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .hero-blink { animation: none; } }
+      `}</style>
     </header>
   )
 }
