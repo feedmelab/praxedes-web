@@ -4,13 +4,13 @@ import { prisma } from '@/lib/prisma'
 export const metadata = { title: 'Panel' }
 
 export default async function AdminDashboard() {
-  const [projectsTotal, projectsPublished, rentalTotal, rentalAvailable, framesTotal] =
+  const [projectsTotal, projectsPublished, rentalTotal, rentalAvailable, pendingReservations] =
     await Promise.all([
       prisma.project.count(),
       prisma.project.count({ where: { published: true } }),
       prisma.rentalItem.count(),
       prisma.rentalItem.count({ where: { available: true } }),
-      prisma.videoFrame.count(),
+      prisma.reservation.count({ where: { status: 'PENDING' } }),
     ])
 
   const stats = [
@@ -26,7 +26,12 @@ export default async function AdminDashboard() {
       hint: `${rentalAvailable} disponibles`,
       href: '/admin/rental',
     },
-    { label: 'Frames de vídeo', value: framesTotal, hint: 'documentados', href: '/admin/projects' },
+    {
+      label: 'Solicitudes',
+      value: pendingReservations,
+      hint: 'pendientes de confirmar',
+      href: '/admin/rental/reservations?tab=requests',
+    },
     {
       label: 'Ajustes del sitio',
       value: '·',

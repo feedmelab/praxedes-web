@@ -17,7 +17,7 @@ export default function NewProjectPage() {
         <ProjectForm action={action} submitLabel="Crear proyecto" />
       </Card>
       <p className="mt-4 text-[11px] text-muted">
-        Podrás añadir imágenes y frames después de crear el proyecto.
+        Podrás añadir imágenes y vídeos después de crear el proyecto.
       </p>
     </div>
   )

@@ -8,7 +8,7 @@ export const metadata = { title: 'Proyectos' }
 export default async function ProjectsPage() {
   const projects = await prisma.project.findMany({
     orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
-    include: { _count: { select: { images: true, frames: true } } },
+    include: { _count: { select: { images: true } } },
   })
 
   return (
@@ -31,7 +31,7 @@ export default async function ProjectsPage() {
               meta: `${p.client} · ${p.year} · ${PROJECT_CATEGORIES[p.category]}`,
               published: p.published,
               featured: p.featured,
-              counts: `${p._count.images} img · ${p._count.frames} frames`,
+              counts: `${p._count.images} img`,
             }))}
           />
         </>
