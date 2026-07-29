@@ -26,6 +26,7 @@ uniform sampler2D uTex;
 uniform vec2 uMouse;
 uniform vec2 uVel;
 uniform float uActive;
+uniform float uAmbient;
 uniform float uBass;
 uniform float uMid;
 uniform float uHigh;
@@ -62,7 +63,8 @@ void main(){
     noise(uv * 2.4 + vec2(t * 0.32, 0.0)),
     noise(uv * 2.4 + vec2(0.0, -t * 0.28) + 5.0)
   ) - 0.5;
-  float amp = uBass * 0.06 + uMid * 0.034;
+  // uAmbient da una ondulación base suave siempre activa (para táctil, sin hover).
+  float amp = uAmbient * 0.05 + uBass * 0.06 + uMid * 0.034;
   disp += flow * amp;
   disp += (vec2(noise(uv * 5.0 + t * 0.6), noise(uv * 5.0 - t * 0.5 + 9.0)) - 0.5) * uHigh * 0.016;
 
@@ -101,10 +103,9 @@ export default function LiquidName() {
   const [ok, setOk] = useState(true)
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setOk(false)
-      return
-    }
+    // Con "reduce motion" no auto-animamos, pero sí renderizamos el nombre y
+    // permitimos el sonido si el usuario lo activa con un toque (opt-in).
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const cv = canvas.current
     const wrap = box.current
     if (!cv || !wrap) return
@@ -148,7 +149,8 @@ export default function LiquidName() {
     const U = (n: string) => gl.getUniformLocation(prog, n)
     const uMouse = U('uMouse'),
       uVel = U('uVel'),
-      uActive = U('uActive')
+      uActive = U('uActive'),
+      uAmbient = U('uAmbient')
     const uBass = U('uBass'),
       uMid = U('uMid'),
       uHigh = U('uHigh'),
@@ -209,6 +211,7 @@ export default function LiquidName() {
       vy: 0,
       active: 0,
       targetActive: 0,
+      ambient: 0,
       bass: 0,
       mid: 0,
       high: 0,
@@ -223,6 +226,7 @@ export default function LiquidName() {
       gl!.uniform2f(uMouse, s.mx, s.my)
       gl!.uniform2f(uVel, s.vx, s.vy)
       gl!.uniform1f(uActive, s.active)
+      gl!.uniform1f(uAmbient, s.ambient)
       gl!.uniform1f(uBass, s.bass)
       gl!.uniform1f(uMid, s.mid)
       gl!.uniform1f(uHigh, s.high)
@@ -263,7 +267,7 @@ export default function LiquidName() {
       s.high += (th - s.high) * 0.1
 
       render()
-      const alive = s.targetActive > 0 || s.active > 0.01 || !!audio
+      const alive = s.targetActive > 0 || s.active > 0.01 || !!audio || s.ambient > 0
       if (!alive) {
         s.running = false
         return
@@ -300,10 +304,13 @@ export default function LiquidName() {
     }
 
     async function initAudio() {
-      if (!navigator.mediaDevices?.getUserMedia) return
+      if (audio || !navigator.mediaDevices?.getUserMedia) return
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
         const ctx = new AudioContext()
+        // En iOS el contexto nace suspendido; si estamos dentro de un gesto, se
+        // reanuda aquí. Si no, se reintenta al primer toque/tecla.
+        await ctx.resume().catch(() => {})
         const source = ctx.createMediaStreamSource(stream)
         const analyser = ctx.createAnalyser()
         analyser.fftSize = 1024
@@ -317,14 +324,22 @@ export default function LiquidName() {
         }
         startLoop()
       } catch {
-        // permiso denegado o sin micro → el efecto sigue con cursor
+        // permiso denegado o sin micro → el efecto sigue con cursor/ambiente
       }
     }
 
     let ro: ResizeObserver | null = null
+    let painted = false
+    // Plan B: si el canvas no ha pintado en 1,5 s (fallo WebGL/fuente en iOS…),
+    // mostramos el nombre normal para que nunca quede invisible.
+    const watchdog = window.setTimeout(() => {
+      if (!painted) setOk(false)
+    }, 1500)
+
     const setup = () => {
       drawText()
       render()
+      painted = true
       cv!.style.opacity = '1'
       cv!.addEventListener('pointermove', onMove)
       cv!.addEventListener('pointerenter', onEnter)
@@ -334,6 +349,23 @@ export default function LiquidName() {
         render()
       })
       ro.observe(wrap!)
+      const touch = window.matchMedia('(hover: none), (pointer: coarse)').matches
+      if (touch) {
+        // Sin hover no hay charco → ondulación ambiente (salvo reduce motion).
+        if (!reduce) {
+          s.ambient = 1
+          startLoop()
+        }
+        // iOS exige un gesto para el micro → lo pedimos al primer toque.
+        window.addEventListener('pointerdown', firstGesture, { once: true })
+        window.addEventListener('touchstart', firstGesture, { once: true })
+      } else if (!reduce) {
+        initAudio()
+      } else {
+        window.addEventListener('pointerdown', firstGesture, { once: true })
+      }
+    }
+    function firstGesture() {
       initAudio()
     }
     if (document.fonts?.ready) document.fonts.ready.then(setup)
@@ -341,9 +373,12 @@ export default function LiquidName() {
 
     return () => {
       cancelAnimationFrame(s.raf)
+      clearTimeout(watchdog)
       cv.removeEventListener('pointermove', onMove)
       cv.removeEventListener('pointerenter', onEnter)
       cv.removeEventListener('pointerleave', onLeave)
+      window.removeEventListener('pointerdown', firstGesture)
+      window.removeEventListener('touchstart', firstGesture)
       ro?.disconnect()
       if (audio) {
         audio.stream.getTracks().forEach((t) => t.stop())
