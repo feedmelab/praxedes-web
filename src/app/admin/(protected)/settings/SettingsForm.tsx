@@ -15,6 +15,8 @@ type Settings = {
   homeIntroEn?: string | null
   bioEs?: string | null
   bioEn?: string | null
+  micInfoEs?: string | null
+  micInfoEn?: string | null
   contactEmail?: string | null
   instagramUrl?: string | null
   vimeoUrl?: string | null
@@ -93,6 +95,20 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           </Field>
           <Field label="Bio (EN)" hint="Full text of the About page">
             <TextArea name="bioEn" defaultValue={s.bioEn ?? ''} className="min-h-[12rem]" />
+          </Field>
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">
+          Aviso del micrófono (home)
+        </h2>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <Field label="Texto (ES)" hint="Nota que se abre desde el icono de micro en la portada">
+            <TextArea name="micInfoEs" defaultValue={s.micInfoEs ?? ''} className="min-h-[10rem]" />
+          </Field>
+          <Field label="Texto (EN)" hint="Note shown from the mic icon on the home">
+            <TextArea name="micInfoEn" defaultValue={s.micInfoEn ?? ''} className="min-h-[10rem]" />
           </Field>
         </div>
       </section>

@@ -3,11 +3,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import LiquidName from './LiquidName'
+import MicInfo from './MicInfo'
 
 // Hero de la home. Reel de Vimeo de fondo (si existe) con parallax sutil.
 // El indicador de scroll parpadea finamente y se desvanece al bajar; al volver
 // arriba reaparece y vuelve a parpadear.
-export default function Hero({ reelVimeoId }: { reelVimeoId?: string | null }) {
+export default function Hero({
+  reelVimeoId,
+  micInfo,
+  locale,
+}: {
+  reelVimeoId?: string | null
+  micInfo: string
+  locale: 'es' | 'en'
+}) {
   const t = useTranslations('home')
   const mediaRef = useRef<HTMLDivElement>(null)
   const [scrolled, setScrolled] = useState(false)
@@ -78,6 +87,8 @@ export default function Hero({ reelVimeoId }: { reelVimeoId?: string | null }) {
         <span className={scrolled ? '' : 'hero-blink'}>{t('scroll')}</span>
         <span className="h-10 w-px bg-gradient-to-b from-muted to-transparent" />
       </div>
+
+      <MicInfo text={micInfo} locale={locale} />
 
       <style>{`
         @keyframes heroBlink { 0%, 100% { opacity: .28; } 50% { opacity: .85; } }

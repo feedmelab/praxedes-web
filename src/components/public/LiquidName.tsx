@@ -368,8 +368,13 @@ export default function LiquidName() {
     function firstGesture() {
       initAudio()
     }
-    if (document.fonts?.ready) document.fonts.ready.then(setup)
-    else setup()
+    // Pintamos ya (sin esperar a la fuente) para no depender de fonts.ready en
+    // móvil; al cargar Cormorant, redibujamos.
+    setup()
+    document.fonts?.ready?.then(() => {
+      drawText()
+      render()
+    })
 
     return () => {
       cancelAnimationFrame(s.raf)

@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import Hero from '@/components/public/Hero'
+import { MIC_INFO_DEFAULT } from '@/lib/mic-info'
 import ProjectCard from '@/components/public/ProjectCard'
 import Reveal from '@/components/public/Reveal'
 import {
@@ -36,10 +37,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const homeIntro = locale === 'en' ? settings?.homeIntroEn : settings?.homeIntroEs
   const aboutTitle =
     (locale === 'en' ? settings?.aboutTitleEn : settings?.aboutTitleEs) || t('aboutTitle')
+  const micInfo =
+    (locale === 'en' ? settings?.micInfoEn : settings?.micInfoEs) || MIC_INFO_DEFAULT[locale]
 
   return (
     <>
-      <Hero reelVimeoId={settings?.reelVimeoId} />
+      <Hero reelVimeoId={settings?.reelVimeoId} micInfo={micInfo} locale={locale} />
 
       {/* Trabajo destacado */}
       {projects.length > 0 && (

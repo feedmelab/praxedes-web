@@ -203,6 +203,8 @@ model SiteSettings {
   homeIntroEn  String?  @db.Text
   bioEs        String?  @db.Text
   bioEn        String?  @db.Text
+  micInfoEs    String?  @db.Text
+  micInfoEn    String?  @db.Text
   contactEmail String?
   instagramUrl String?
   vimeoUrl     String?
