@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-// Nombre "líquido" con WebGL. El texto se rasteriza a una textura y un shader lo
-// deforma con: (1) un "charco" que sigue al cursor, (2) metaball que funde las
-// letras donde hay actividad, y (3) reactividad al MICRÓFONO por bandas de
-// frecuencia (graves/medios/agudos, muy suavizadas) que modulan un flujo
-// ondulado de baja frecuencia — grandes olas suaves, no saltitos. El permiso de
-// micro se pide al cargar. Con "reduce motion" o sin WebGL, sale el nombre normal.
+// Nombre "líquido" con WebGL. Deformación por: (1) charco que sigue al cursor,
+// (2) metaball que funde letras donde hay actividad, y (3) reactividad al
+// MICRÓFONO por bandas (graves/medios/agudos, muy suavizadas + noise gate) que
+// modulan un flujo ondulado de baja frecuencia — olas grandes y suaves que
+// respiran con el sonido, sin temblar y quietas en silencio. Con "reduce
+// motion" o sin WebGL, sale el nombre normal.
 const NAME_CLS =
   'font-display text-[clamp(2.8rem,8vw,6.5rem)] font-normal leading-[1.0] tracking-[0.01em] text-light'
 
@@ -56,16 +56,14 @@ void main(){
   ) - 0.5;
   vec2 disp = (nc * 0.05 + uVel * 0.18) * fall;
 
-  // 2) Flujo líquido de baja frecuencia (olas grandes y suaves) cuya amplitud
-  //    respira con las bandas de frecuencia del sonido.
+  // 2) Flujo líquido de baja frecuencia cuya amplitud respira con las bandas.
+  //    Sin término base: en silencio (bandas a 0) el nombre queda quieto.
   vec2 flow = vec2(
     noise(uv * 2.4 + vec2(t * 0.32, 0.0)),
     noise(uv * 2.4 + vec2(0.0, -t * 0.28) + 5.0)
   ) - 0.5;
-  // Sin término base: en silencio (bandas a 0) no hay ondulación → nombre quieto.
   float amp = uBass * 0.06 + uMid * 0.034;
   disp += flow * amp;
-  // rizo fino con agudos, muy sutil
   disp += (vec2(noise(uv * 5.0 + t * 0.6), noise(uv * 5.0 - t * 0.5 + 9.0)) - 0.5) * uHigh * 0.016;
 
   // 3) Metaball: funde letras donde hay actividad (cursor + volumen).
@@ -87,7 +85,6 @@ void main(){
   float blob = smoothstep(0.30, 0.52, bl) * amount;
   vec3 ink = vec3(0.949, 0.929, 0.902);
   float a = max(base.a, blob);
-  // Alfa premultiplicado → sin halo blanco alrededor ni recuadro visible.
   gl_FragColor = vec4(ink * a, a);
 }`
 
@@ -117,7 +114,6 @@ export default function LiquidName() {
       setOk(false)
       return
     }
-    // Limpieza transparente inmediata para que nunca se vea el lienzo vacío.
     gl.clearColor(0, 0, 0, 0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
@@ -256,14 +252,12 @@ export default function LiquidName() {
         th = 0
       if (audio) {
         audio.analyser.getByteFrequencyData(audio.freq)
-        // Noise gate: por debajo del umbral (ruido de fondo) no reacciona.
         const GATE = 0.17
         const gate = (v: number) => (v <= GATE ? 0 : (v - GATE) / (1 - GATE))
         tb = Math.min(1, gate(bandAvg(2, 10)) * 2.0)
         tm = Math.min(1, gate(bandAvg(12, 42)) * 2.2)
         th = Math.min(1, gate(bandAvg(46, 92)) * 2.4)
       }
-      // Suavizado temporal fuerte → nada de temblor, respira con la música.
       s.bass += (tb - s.bass) * 0.1
       s.mid += (tm - s.mid) * 0.1
       s.high += (th - s.high) * 0.1
@@ -331,7 +325,7 @@ export default function LiquidName() {
     const setup = () => {
       drawText()
       render()
-      cv!.style.opacity = '1' // aparece solo cuando ya está dibujado
+      cv!.style.opacity = '1'
       cv!.addEventListener('pointermove', onMove)
       cv!.addEventListener('pointerenter', onEnter)
       cv!.addEventListener('pointerleave', onLeave)
