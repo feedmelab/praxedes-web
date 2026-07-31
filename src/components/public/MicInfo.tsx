@@ -39,6 +39,21 @@ export default function MicInfo({ text, locale }: { text: string; locale: 'es' |
     }
   }, [])
 
+  // Al desplazar hacia abajo, se cierra el popup.
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 40) {
+        if (autoTimer.current) {
+          clearTimeout(autoTimer.current)
+          autoTimer.current = null
+        }
+        setOpen(false)
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   // Cualquier interacción manual cancela el cierre automático.
   function toggle() {
     if (autoTimer.current) {
@@ -83,7 +98,9 @@ export default function MicInfo({ text, locale }: { text: string; locale: 'es' |
                     clearTimeout(autoTimer.current)
                     autoTimer.current = null
                   }
-                  window.dispatchEvent(new Event('px-enable-audio'))
+                  const w = window as Window & { __pxEnableAudio?: () => void }
+                  if (w.__pxEnableAudio) w.__pxEnableAudio()
+                  else window.dispatchEvent(new Event('px-enable-audio'))
                 }}
                 className="inline-flex items-center gap-1.5 rounded-sm border border-accent/50 px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent hover:text-bg"
               >

@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { Field, TextInput, TextArea } from '../_components/ui'
+import { Field, TextInput, TextArea, Card } from '../_components/ui'
 import SubmitButton from '../_components/SubmitButton'
 import { updateSettings } from './actions'
 
@@ -23,104 +23,106 @@ type Settings = {
   vimeoUrl?: string | null
 }
 
+function SectionHead({ title, desc }: { title: string; desc: string }) {
+  return (
+    <header className="mb-6 border-b border-border pb-4">
+      <h2 className="text-[11px] uppercase tracking-[0.2em] text-accent">{title}</h2>
+      <p className="mt-1.5 text-[12px] text-muted">{desc}</p>
+    </header>
+  )
+}
+
 export default function SettingsForm({ settings }: { settings: Settings }) {
   const [state, formAction] = useActionState(updateSettings, null)
   const s = settings
 
   return (
-    <form action={formAction} className="space-y-8">
-      <section className="space-y-6">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">Portada</h2>
-        <Field label="Reel — Vimeo ID" hint="Vídeo destacado de la home">
-          <TextInput
-            name="reelVimeoId"
-            defaultValue={s.reelVimeoId ?? ''}
-            placeholder="123456789"
-          />
-        </Field>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <Field label="Claim (ES)">
-            <TextInput name="claimEs" defaultValue={s.claimEs ?? ''} />
-          </Field>
-          <Field label="Claim (EN)">
-            <TextInput name="claimEn" defaultValue={s.claimEn ?? ''} />
-          </Field>
-        </div>
-      </section>
-
-      <section className="space-y-6">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">
-          Sección «Sobre mí» (home)
-        </h2>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <Field label="Titular (ES)" hint="Título de la sección «Sobre mí» de la home">
+    <form action={formAction} className="space-y-10">
+      <Card>
+        <SectionHead title="Portada" desc="Vídeo de fondo (reel) y claim de la home." />
+        <div className="space-y-6">
+          <Field label="Reel — Vimeo ID" hint="Vídeo destacado de la home">
             <TextInput
-              name="aboutTitleEs"
-              defaultValue={s.aboutTitleEs ?? ''}
-              placeholder="Entre lo poético y lo radical"
+              name="reelVimeoId"
+              defaultValue={s.reelVimeoId ?? ''}
+              placeholder="123456789"
             />
           </Field>
-          <Field label="Titular (EN)" hint="Home «About» section heading">
-            <TextInput
-              name="aboutTitleEn"
-              defaultValue={s.aboutTitleEn ?? ''}
-              placeholder="Between the poetic and the radical"
-            />
-          </Field>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Field label="Claim (ES)">
+              <TextInput name="claimEs" defaultValue={s.claimEs ?? ''} />
+            </Field>
+            <Field label="Claim (EN)">
+              <TextInput name="claimEn" defaultValue={s.claimEn ?? ''} />
+            </Field>
+          </div>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <Field label="Texto breve (ES)" hint="Párrafo corto del teaser de la home">
-            <TextArea
-              name="homeIntroEs"
-              defaultValue={s.homeIntroEs ?? ''}
-              className="min-h-[7rem]"
-            />
-          </Field>
-          <Field label="Texto breve (EN)" hint="Short home teaser paragraph">
-            <TextArea
-              name="homeIntroEn"
-              defaultValue={s.homeIntroEn ?? ''}
-              className="min-h-[7rem]"
-            />
-          </Field>
-        </div>
-      </section>
+      </Card>
 
-      <section className="space-y-6">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">
-          Biografía (página «Sobre mí»)
-        </h2>
+      <Card>
+        <SectionHead
+          title="Sección «Sobre mí» (home)"
+          desc="Titular y párrafo breve del bloque «Sobre mí» de la portada."
+        />
+        <div className="space-y-6">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Field label="Titular (ES)" hint="Título del bloque en la home">
+              <TextInput
+                name="aboutTitleEs"
+                defaultValue={s.aboutTitleEs ?? ''}
+                placeholder="Entre lo poético y lo radical"
+              />
+            </Field>
+            <Field label="Titular (EN)" hint="Home block heading">
+              <TextInput
+                name="aboutTitleEn"
+                defaultValue={s.aboutTitleEn ?? ''}
+                placeholder="Between the poetic and the radical"
+              />
+            </Field>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Field label="Texto breve (ES)" hint="Párrafo corto del teaser">
+              <TextArea
+                name="homeIntroEs"
+                defaultValue={s.homeIntroEs ?? ''}
+                className="min-h-[7rem]"
+              />
+            </Field>
+            <Field label="Texto breve (EN)" hint="Short teaser paragraph">
+              <TextArea
+                name="homeIntroEn"
+                defaultValue={s.homeIntroEn ?? ''}
+                className="min-h-[7rem]"
+              />
+            </Field>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <SectionHead
+          title="Biografía (página «Sobre mí»)"
+          desc="Texto completo que aparece en la página Sobre mí."
+        />
         <div className="grid gap-6 sm:grid-cols-2">
-          <Field label="Bio (ES)" hint="Texto completo de la página Sobre mí">
+          <Field label="Bio (ES)">
             <TextArea name="bioEs" defaultValue={s.bioEs ?? ''} className="min-h-[12rem]" />
           </Field>
-          <Field label="Bio (EN)" hint="Full text of the About page">
+          <Field label="Bio (EN)">
             <TextArea name="bioEn" defaultValue={s.bioEn ?? ''} className="min-h-[12rem]" />
           </Field>
         </div>
-      </section>
+      </Card>
 
-      <section className="space-y-6">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">
-          Aviso del micrófono (home)
-        </h2>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <Field label="Texto (ES)" hint="Nota que se abre desde el icono de micro en la portada">
-            <TextArea name="micInfoEs" defaultValue={s.micInfoEs ?? ''} className="min-h-[10rem]" />
-          </Field>
-          <Field label="Texto (EN)" hint="Note shown from the mic icon on the home">
-            <TextArea name="micInfoEn" defaultValue={s.micInfoEn ?? ''} className="min-h-[10rem]" />
-          </Field>
-        </div>
-      </section>
-
-      <section className="space-y-6">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">
-          Clientes seleccionados (home)
-        </h2>
+      <Card>
+        <SectionHead
+          title="Clientes seleccionados (home)"
+          desc="Lista opcional; si la dejas vacía, los clientes salen de los proyectos."
+        />
         <Field
           label="Clientes (uno por línea)"
-          hint="Opcional. Si lo rellenas, se usa esta lista; si lo dejas vacío, se toman de los proyectos. En la home se muestran unos cuantos al azar en cada carga."
+          hint="En la home se muestran unos cuantos al azar en cada carga."
         >
           <TextArea
             name="clientsList"
@@ -129,36 +131,52 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             placeholder={'Lamborghini\nNike\nCoca-Cola\n…'}
           />
         </Field>
-      </section>
+      </Card>
 
-      <section className="space-y-6">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">Contacto y redes</h2>
-        <Field label="Email de contacto">
-          <TextInput name="contactEmail" type="email" defaultValue={s.contactEmail ?? ''} />
-        </Field>
+      <Card>
+        <SectionHead
+          title="Aviso del micrófono (home)"
+          desc="Nota de privacidad que se abre desde el icono de micro en la portada."
+        />
         <div className="grid gap-6 sm:grid-cols-2">
-          <Field label="Instagram (URL)">
-            <TextInput
-              name="instagramUrl"
-              defaultValue={s.instagramUrl ?? ''}
-              placeholder="https://instagram.com/…"
-            />
+          <Field label="Texto (ES)">
+            <TextArea name="micInfoEs" defaultValue={s.micInfoEs ?? ''} className="min-h-[10rem]" />
           </Field>
-          <Field label="Vimeo (URL)">
-            <TextInput
-              name="vimeoUrl"
-              defaultValue={s.vimeoUrl ?? ''}
-              placeholder="https://vimeo.com/…"
-            />
+          <Field label="Texto (EN)">
+            <TextArea name="micInfoEn" defaultValue={s.micInfoEn ?? ''} className="min-h-[10rem]" />
           </Field>
         </div>
-      </section>
+      </Card>
 
-      {state?.error && <p className="text-xs text-red-400">{state.error}</p>}
-      {state?.ok && <p className="text-xs text-green-400">Ajustes guardados.</p>}
+      <Card>
+        <SectionHead title="Contacto y redes" desc="Email de contacto y enlaces sociales." />
+        <div className="space-y-6">
+          <Field label="Email de contacto">
+            <TextInput name="contactEmail" type="email" defaultValue={s.contactEmail ?? ''} />
+          </Field>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Field label="Instagram (URL)">
+              <TextInput
+                name="instagramUrl"
+                defaultValue={s.instagramUrl ?? ''}
+                placeholder="https://instagram.com/…"
+              />
+            </Field>
+            <Field label="Vimeo (URL)">
+              <TextInput
+                name="vimeoUrl"
+                defaultValue={s.vimeoUrl ?? ''}
+                placeholder="https://vimeo.com/…"
+              />
+            </Field>
+          </div>
+        </div>
+      </Card>
 
-      <div className="pt-2">
+      <div className="sticky bottom-4 flex items-center gap-4 rounded border border-border bg-bg/90 px-4 py-3 backdrop-blur">
         <SubmitButton pendingText="Guardando…">Guardar ajustes</SubmitButton>
+        {state?.error && <p className="text-xs text-red-400">{state.error}</p>}
+        {state?.ok && <p className="text-xs text-green-400">Ajustes guardados.</p>}
       </div>
     </form>
   )

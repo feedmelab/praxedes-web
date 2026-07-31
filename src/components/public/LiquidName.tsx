@@ -383,6 +383,8 @@ export default function LiquidName() {
       initAudio()
     }
     window.addEventListener('px-enable-audio', onEnableAudio)
+    // Función directa (más fiable para el gesto del clic que el evento).
+    ;(window as Window & { __pxEnableAudio?: () => void }).__pxEnableAudio = () => initAudio()
     // Pintamos ya (sin esperar a la fuente) para no depender de fonts.ready en
     // móvil; al cargar Cormorant, redibujamos.
     setup()
@@ -400,6 +402,7 @@ export default function LiquidName() {
       window.removeEventListener('pointerdown', firstGesture)
       window.removeEventListener('touchstart', firstGesture)
       window.removeEventListener('px-enable-audio', onEnableAudio)
+      ;(window as Window & { __pxEnableAudio?: () => void }).__pxEnableAudio = undefined
       ro?.disconnect()
       if (audio) {
         audio.stream.getTracks().forEach((t) => t.stop())
