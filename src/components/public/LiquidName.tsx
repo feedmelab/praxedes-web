@@ -120,6 +120,7 @@ export default function LiquidName() {
     const gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: true })
     if (!gl) {
       setOk(false)
+      window.dispatchEvent(new Event('px-audio-unavailable'))
       return
     }
     gl.clearColor(0, 0, 0, 0)
@@ -142,6 +143,7 @@ export default function LiquidName() {
       if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error('link')
     } catch {
       setOk(false)
+      window.dispatchEvent(new Event('px-audio-unavailable'))
       return
     }
     gl.useProgram(prog)
@@ -324,6 +326,8 @@ export default function LiquidName() {
         analyser.smoothingTimeConstant = 0.85
         source.connect(analyser)
         audio = { analyser, freq: new Uint8Array(analyser.frequencyBinCount), ctx, stream }
+        ;(window as Window & { __pxAudioOn?: boolean }).__pxAudioOn = true
+        window.dispatchEvent(new Event('px-audio-on'))
         if (ctx.state === 'suspended') {
           const resume = () => ctx.resume()
           window.addEventListener('pointerdown', resume, { once: true })
@@ -375,6 +379,10 @@ export default function LiquidName() {
     function firstGesture() {
       initAudio()
     }
+    function onEnableAudio() {
+      initAudio()
+    }
+    window.addEventListener('px-enable-audio', onEnableAudio)
     // Pintamos ya (sin esperar a la fuente) para no depender de fonts.ready en
     // móvil; al cargar Cormorant, redibujamos.
     setup()
@@ -391,6 +399,7 @@ export default function LiquidName() {
       cv.removeEventListener('pointerleave', onLeave)
       window.removeEventListener('pointerdown', firstGesture)
       window.removeEventListener('touchstart', firstGesture)
+      window.removeEventListener('px-enable-audio', onEnableAudio)
       ro?.disconnect()
       if (audio) {
         audio.stream.getTracks().forEach((t) => t.stop())

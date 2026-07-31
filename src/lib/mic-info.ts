@@ -9,7 +9,10 @@ export const MIC_INFO_DEFAULT: Record<'es' | 'en', string> = {
     'It all happens in your browser, on the fly: the audio is only measured for loudness to animate the letters. Nothing is recorded, transcribed, sent to any server, or stored. It’s optional; without permission the site works just the same.',
 }
 
-export const MIC_INFO_LABELS: Record<'es' | 'en', { title: string; close: string }> = {
-  es: { title: 'Sobre el micrófono', close: 'Cerrar' },
-  en: { title: 'About the microphone', close: 'Close' },
+export const MIC_INFO_LABELS: Record<
+  'es' | 'en',
+  { title: string; close: string; enable: string }
+> = {
+  es: { title: 'Sobre el micrófono', close: 'Cerrar', enable: 'Activar sonido' },
+  en: { title: 'About the microphone', close: 'Close', enable: 'Enable sound' },
 }

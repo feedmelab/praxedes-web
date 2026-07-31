@@ -8,19 +8,33 @@ import { MIC_INFO_LABELS } from '@/lib/mic-info'
 // se abre solo una vez por sesión y se cierra a los 8 s.
 export default function MicInfo({ text, locale }: { text: string; locale: 'es' | 'en' }) {
   const [open, setOpen] = useState(false)
+  // Mostrar "Activar sonido" solo si el micro aún no está activo y el efecto está
+  // disponible.
+  const [canEnable, setCanEnable] = useState(false)
   const autoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const labels = MIC_INFO_LABELS[locale]
 
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem('mic-info-seen')) return
-      sessionStorage.setItem('mic-info-seen', '1')
-    } catch {
-      // sessionStorage no disponible → se abre igual esta vez
-    }
-    setOpen(true)
-    autoTimer.current = setTimeout(() => setOpen(false), 8000)
+    if ((window as Window & { __pxAudioOn?: boolean }).__pxAudioOn) return
+    setCanEnable(true)
+    const off = () => setCanEnable(false)
+    window.addEventListener('px-audio-on', off)
+    window.addEventListener('px-audio-unavailable', off)
     return () => {
+      window.removeEventListener('px-audio-on', off)
+      window.removeEventListener('px-audio-unavailable', off)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Se abre al cargar y se cierra a los 8 s (con un pequeño retardo para que
+    // se note la aparición).
+    const openTimer = setTimeout(() => {
+      setOpen(true)
+      autoTimer.current = setTimeout(() => setOpen(false), 8000)
+    }, 600)
+    return () => {
+      clearTimeout(openTimer)
       if (autoTimer.current) clearTimeout(autoTimer.current)
     }
   }, [])
@@ -53,13 +67,31 @@ export default function MicInfo({ text, locale }: { text: string; locale: 'es' |
             {labels.title}
           </p>
           <p className="whitespace-pre-line text-[0.78rem] leading-relaxed text-soft">{text}</p>
-          <button
-            type="button"
-            onClick={close}
-            className="mt-3 text-[0.62rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-accent"
-          >
-            {labels.close}
-          </button>
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={close}
+              className="text-[0.62rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-accent"
+            >
+              {labels.close}
+            </button>
+            {canEnable && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (autoTimer.current) {
+                    clearTimeout(autoTimer.current)
+                    autoTimer.current = null
+                  }
+                  window.dispatchEvent(new Event('px-enable-audio'))
+                }}
+                className="inline-flex items-center gap-1.5 rounded-sm border border-accent/50 px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent hover:text-bg"
+              >
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+                {labels.enable}
+              </button>
+            )}
+          </div>
         </div>
       )}
 
