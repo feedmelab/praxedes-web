@@ -4,9 +4,25 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+// Guarda la URL del vídeo de fondo (subido directamente a ImageKit desde el
+// navegador). Solo acepta URLs de ImageKit por seguridad.
+export async function saveHeroVideoUrl(url: string) {
+  const session = await auth()
+  if (!session) return { error: 'No autorizado' }
+  if (!/^https:\/\/[^/]*imagekit\.io\//.test(url)) return { error: 'URL no válida' }
+  await prisma.siteSettings.upsert({
+    where: { id: 'singleton' },
+    update: { reelMp4Url: url },
+    create: { id: 'singleton', reelMp4Url: url },
+  })
+  revalidatePath('/admin/settings')
+  revalidatePath('/', 'layout')
+  return { ok: true }
+}
 
 const settingsSchema = z.object({
   reelVimeoId: z.string().optional(),
+  reelMp4Url: z.string().url('URL inválida').or(z.literal('')).optional(),
   claimEs: z.string().optional(),
   claimEn: z.string().optional(),
   aboutTitleEs: z.string().optional(),
@@ -45,6 +61,7 @@ export async function updateSettings(
 
   const data = {
     reelVimeoId: parsed.data.reelVimeoId || null,
+    reelMp4Url: parsed.data.reelMp4Url || null,
     claimEs: parsed.data.claimEs || null,
     claimEn: parsed.data.claimEn || null,
     aboutTitleEs: parsed.data.aboutTitleEs || null,

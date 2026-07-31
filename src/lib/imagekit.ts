@@ -17,6 +17,17 @@ function ik(): ImageKit {
   return _imagekit
 }
 
+// Parámetros de autenticación para subir directamente desde el navegador
+// (junto con la publicKey y el urlEndpoint, ambos públicos).
+export function getUploadAuth() {
+  const auth = ik().getAuthenticationParameters()
+  return {
+    ...auth,
+    publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
+    urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT!,
+  }
+}
+
 // Subida de archivo desde buffer
 export async function uploadFile(file: Buffer, fileName: string, folder: string, tags?: string[]) {
   const result = await ik().upload({

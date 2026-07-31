@@ -195,6 +195,7 @@ model EmailTemplate {
 model SiteSettings {
   id           String   @id @default("singleton")
   reelVimeoId  String?
+  reelMp4Url   String? // vídeo de fondo alternativo (MP4 directo)
   claimEs      String?
   claimEn      String?
   aboutTitleEs String?

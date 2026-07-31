@@ -38,6 +38,7 @@ function ColorField({
 
 type Settings = {
   reelVimeoId?: string | null
+  reelMp4Url?: string | null
   claimEs?: string | null
   claimEn?: string | null
   aboutTitleEs?: string | null
@@ -74,11 +75,21 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       <Card>
         <SectionHead title="Portada" desc="Vídeo de fondo (reel) y claim de la home." />
         <div className="space-y-6">
-          <Field label="Reel — Vimeo ID" hint="Vídeo destacado de la home">
+          <Field label="Reel — Vimeo ID" hint="Vídeo de fondo de la home (con ?h=… si es privado)">
             <TextInput
               name="reelVimeoId"
               defaultValue={s.reelVimeoId ?? ''}
               placeholder="123456789"
+            />
+          </Field>
+          <Field
+            label="Vídeo de fondo (MP4, opcional)"
+            hint="Alternativa a Vimeo: URL directa de un .mp4. Si la rellenas, tiene prioridad sobre el reel."
+          >
+            <TextInput
+              name="reelMp4Url"
+              defaultValue={s.reelMp4Url ?? ''}
+              placeholder="https://…/fondo.mp4"
             />
           </Field>
           <div className="grid gap-6 sm:grid-cols-2">

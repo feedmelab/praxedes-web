@@ -43,6 +43,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <>
       <Hero
         reelVimeoId={settings?.reelVimeoId}
+        reelMp4Url={settings?.reelMp4Url}
         micInfo={micInfo}
         locale={locale}
         colorBase={settings?.effectBase}

@@ -11,12 +11,14 @@ import { parseVimeo } from '@/lib/utils'
 // arriba reaparece y vuelve a parpadear.
 export default function Hero({
   reelVimeoId,
+  reelMp4Url,
   micInfo,
   locale,
   colorBase,
   colorAccent,
 }: {
   reelVimeoId?: string | null
+  reelMp4Url?: string | null
   micInfo: string
   locale: 'es' | 'en'
   colorBase?: string | null
@@ -51,7 +53,17 @@ export default function Hero({
   return (
     <header className="relative flex h-screen min-h-[600px] flex-col items-center justify-center overflow-hidden text-center">
       <div ref={mediaRef} className="parallax-layer absolute inset-0 z-0">
-        {reelId ? (
+        {reelMp4Url ? (
+          <video
+            src={reelMp4Url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="absolute left-1/2 top-1/2 h-full min-h-full w-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
+          />
+        ) : reelId ? (
           <iframe
             src={`https://player.vimeo.com/video/${reelId}?${reelHash ? `h=${reelHash}&` : ''}background=1&autoplay=1&loop=1&muted=1&dnt=1`}
             className="absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2"

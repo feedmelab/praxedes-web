@@ -22,8 +22,8 @@ const securityHeaders = [
       "font-src 'self' fonts.gstatic.com",
       "img-src 'self' data: blob: *.imagekit.io i.vimeocdn.com www.googletagmanager.com www.google-analytics.com picsum.photos fastly.picsum.photos images.unsplash.com",
       'frame-src player.vimeo.com',
-      "connect-src 'self' *.neon.tech api.imagekit.io vimeo.com player.vimeo.com www.google-analytics.com www.googletagmanager.com",
-      "media-src 'self' *.vimeocdn.com",
+      "connect-src 'self' *.neon.tech api.imagekit.io upload.imagekit.io vimeo.com player.vimeo.com www.google-analytics.com www.googletagmanager.com",
+      "media-src 'self' blob: *.vimeocdn.com *.imagekit.io https:",
     ].join('; '),
   },
 ]
@@ -31,7 +31,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   experimental: {
     // Permite subir imágenes vía Server Actions (por defecto 1 MB)
-    serverActions: { bodySizeLimit: '12mb' },
+    serverActions: { bodySizeLimit: '64mb' },
   },
   images: {
     remotePatterns: [
