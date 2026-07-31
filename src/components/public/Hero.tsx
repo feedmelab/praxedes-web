@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import LiquidName from './LiquidName'
 import MicInfo from './MicInfo'
+import { parseVimeo } from '@/lib/utils'
 
 // Hero de la home. Reel de Vimeo de fondo (si existe) con parallax sutil.
 // El indicador de scroll parpadea finamente y se desvanece al bajar; al volver
@@ -24,6 +25,10 @@ export default function Hero({
   const t = useTranslations('home')
   const mediaRef = useRef<HTMLDivElement>(null)
   const [scrolled, setScrolled] = useState(false)
+  // Acepta "76979871", "76979871?h=abc", o una URL completa de Vimeo.
+  const { id: reelId, hash: reelHash } = reelVimeoId
+    ? parseVimeo(reelVimeoId)
+    : { id: '', hash: undefined }
 
   useEffect(() => {
     const el = mediaRef.current
@@ -46,9 +51,9 @@ export default function Hero({
   return (
     <header className="relative flex h-screen min-h-[600px] flex-col items-center justify-center overflow-hidden text-center">
       <div ref={mediaRef} className="parallax-layer absolute inset-0 z-0">
-        {reelVimeoId ? (
+        {reelId ? (
           <iframe
-            src={`https://player.vimeo.com/video/${reelVimeoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1`}
+            src={`https://player.vimeo.com/video/${reelId}?${reelHash ? `h=${reelHash}&` : ''}background=1&autoplay=1&loop=1&muted=1&dnt=1`}
             className="absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2"
             allow="autoplay; fullscreen"
             title="Reel"
