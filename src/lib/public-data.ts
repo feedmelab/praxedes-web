@@ -61,6 +61,29 @@ export async function getProjectsByCategory(category: ProjectCategory) {
   }
 }
 
+/** Nombres de cliente distintos de los proyectos publicados, en orden. */
+export async function getClients(): Promise<string[]> {
+  try {
+    const rows = await prisma.project.findMany({
+      where: { published: true },
+      orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
+      select: { client: true },
+    })
+    const seen = new Set<string>()
+    const out: string[] = []
+    for (const r of rows) {
+      const c = r.client?.trim()
+      if (c && !seen.has(c.toLowerCase())) {
+        seen.add(c.toLowerCase())
+        out.push(c)
+      }
+    }
+    return out
+  } catch {
+    return []
+  }
+}
+
 /** Slugs publicados (para generateStaticParams). */
 export async function getPublishedSlugs() {
   try {

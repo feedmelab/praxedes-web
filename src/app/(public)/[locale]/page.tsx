@@ -7,22 +7,12 @@ import Reveal from '@/components/public/Reveal'
 import {
   getSettings,
   getFeaturedProjects,
+  getClients,
   localizedTitle,
   CATEGORY_LABELS,
   type Locale,
 } from '@/lib/public-data'
-
-const CLIENTS = [
-  'Lamborghini',
-  'Jeep',
-  'Nissan',
-  'Citroën',
-  'Nike',
-  'Decathlon',
-  'Nestlé',
-  'Schweppes',
-  'Coca-Cola',
-]
+import { CLIENTS_FALLBACK } from '@/lib/clients'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params
@@ -30,7 +20,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   setRequestLocale(locale)
 
   const t = await getTranslations('home')
-  const [settings, projects] = await Promise.all([getSettings(), getFeaturedProjects()])
+  const [settings, projects, clientRows] = await Promise.all([
+    getSettings(),
+    getFeaturedProjects(),
+    getClients(),
+  ])
+  const clients = clientRows.length > 0 ? clientRows : CLIENTS_FALLBACK
 
   // Texto breve propio del teaser de la home (independiente de la bio completa
   // de la página «Sobre mí»).
@@ -52,7 +47,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {t('selectedWork')}
             </h2>
             <span className="text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-              01 — {t('selectedWorkIdx')}
+              {t('selectedWorkIdx')}
             </span>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-8">
@@ -79,7 +74,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           {t('clientsLabel')}
         </div>
         <div className="flex flex-wrap justify-center gap-4 font-display text-[clamp(1.1rem,2vw,1.6rem)] text-soft sm:gap-8 lg:gap-10">
-          {CLIENTS.map((c) => (
+          {clients.map((c) => (
             <span
               key={c}
               className="cursor-default transition-colors duration-500 ease-out-expo hover:text-light"
