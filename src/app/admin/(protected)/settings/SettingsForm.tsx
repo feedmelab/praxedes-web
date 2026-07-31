@@ -17,6 +17,7 @@ type Settings = {
   bioEn?: string | null
   micInfoEs?: string | null
   micInfoEn?: string | null
+  clientsList?: string | null
   contactEmail?: string | null
   instagramUrl?: string | null
   vimeoUrl?: string | null
@@ -111,6 +112,23 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             <TextArea name="micInfoEn" defaultValue={s.micInfoEn ?? ''} className="min-h-[10rem]" />
           </Field>
         </div>
+      </section>
+
+      <section className="space-y-6">
+        <h2 className="text-[11px] uppercase tracking-[0.2em] text-muted">
+          Clientes seleccionados (home)
+        </h2>
+        <Field
+          label="Clientes (uno por línea)"
+          hint="Opcional. Si lo rellenas, se usa esta lista; si lo dejas vacío, se toman de los proyectos. En la home se muestran unos cuantos al azar en cada carga."
+        >
+          <TextArea
+            name="clientsList"
+            defaultValue={s.clientsList ?? ''}
+            className="min-h-[9rem]"
+            placeholder={'Lamborghini\nNike\nCoca-Cola\n…'}
+          />
+        </Field>
       </section>
 
       <section className="space-y-6">

@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 import Reveal from '@/components/public/Reveal'
 import { getSettings, getClients, type Locale } from '@/lib/public-data'
-import { CLIENTS_FALLBACK } from '@/lib/clients'
+import { CLIENTS_FALLBACK, parseClients } from '@/lib/clients'
+import Clients from '@/components/public/Clients'
 
 const FALLBACK_BIO = {
   es: 'Práxedes de Vilallonga se mueve con fluidez entre el cine, la moda y la publicidad, construyendo un universo visual que oscila entre lo poético y lo radical. Su debut en el cine llegó con Pacifiction (2020), dirigida por Albert Serra y protagonizada por Benoît Magimel — nominada a los premios César y Gaudí — donde su trabajo como estilista dejó una huella singular en el panorama cinematográfico europeo.\n\nDesde entonces, ha colaborado con marcas globales como Lamborghini, Jeep, Nissan, Citroën, Nike, Decathlon, Nestlé, Schweppes y Coca-Cola, siempre con una mirada intuitiva, profundamente conceptual e inconfundiblemente propia. Su estilo — una alquimia de psicología visual, narrativa cinematográfica y diseño de personajes — evita lo evidente para habitar la ambigüedad y la evocación.',
@@ -27,7 +28,9 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   const t = await getTranslations('about')
   const [settings, clientRows] = await Promise.all([getSettings(), getClients()])
   const bio = (locale === 'en' ? settings?.bioEn : settings?.bioEs) ?? FALLBACK_BIO[locale]
-  const clients = clientRows.length > 0 ? clientRows : CLIENTS_FALLBACK
+  const curated = parseClients(settings?.clientsList)
+  const clients =
+    curated.length > 0 ? curated : clientRows.length > 0 ? clientRows : CLIENTS_FALLBACK
 
   return (
     <div className="px-6 pb-24 pt-32 sm:px-10 lg:px-16 lg:pt-44">
@@ -57,14 +60,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           {t('clients')}
         </div>
         <div className="flex flex-wrap gap-4 font-display text-[clamp(1.1rem,2vw,1.7rem)] text-soft sm:gap-8">
-          {clients.map((c) => (
-            <span
-              key={c}
-              className="cursor-default transition-colors duration-500 ease-out-expo hover:text-light"
-            >
-              {c}
-            </span>
-          ))}
+          <Clients clients={clients} />
         </div>
       </div>
     </div>

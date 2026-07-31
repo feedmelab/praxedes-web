@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation'
 import Hero from '@/components/public/Hero'
 import { MIC_INFO_DEFAULT } from '@/lib/mic-info'
 import ProjectCard from '@/components/public/ProjectCard'
+import Clients from '@/components/public/Clients'
 import Reveal from '@/components/public/Reveal'
 import {
   getSettings,
@@ -12,7 +13,7 @@ import {
   CATEGORY_LABELS,
   type Locale,
 } from '@/lib/public-data'
-import { CLIENTS_FALLBACK } from '@/lib/clients'
+import { CLIENTS_FALLBACK, parseClients } from '@/lib/clients'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params
@@ -25,7 +26,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getFeaturedProjects(),
     getClients(),
   ])
-  const clients = clientRows.length > 0 ? clientRows : CLIENTS_FALLBACK
+  // Pool de clientes: lista curada en Ajustes → clientes de proyectos → respaldo.
+  const curated = parseClients(settings?.clientsList)
+  const clients =
+    curated.length > 0 ? curated : clientRows.length > 0 ? clientRows : CLIENTS_FALLBACK
 
   // Texto breve propio del teaser de la home (independiente de la bio completa
   // de la página «Sobre mí»).
@@ -74,14 +78,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           {t('clientsLabel')}
         </div>
         <div className="flex flex-wrap justify-center gap-4 font-display text-[clamp(1.1rem,2vw,1.6rem)] text-soft sm:gap-8 lg:gap-10">
-          {clients.map((c) => (
-            <span
-              key={c}
-              className="cursor-default transition-colors duration-500 ease-out-expo hover:text-light"
-            >
-              {c}
-            </span>
-          ))}
+          <Clients clients={clients} />
         </div>
       </section>
 

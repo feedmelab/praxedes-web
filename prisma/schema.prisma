@@ -205,6 +205,7 @@ model SiteSettings {
   bioEn        String?  @db.Text
   micInfoEs    String?  @db.Text
   micInfoEn    String?  @db.Text
+  clientsList  String?  @db.Text // lista curada (uno por línea); si vacío, se derivan de los proyectos
   contactEmail String?
   instagramUrl String?
   vimeoUrl     String?
