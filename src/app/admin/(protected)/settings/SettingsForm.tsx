@@ -4,6 +4,37 @@ import { useActionState } from 'react'
 import { Field, TextInput, TextArea, Card } from '../_components/ui'
 import SubmitButton from '../_components/SubmitButton'
 import { updateSettings } from './actions'
+import { EFFECT_COLORS_DEFAULT } from '@/lib/effect-colors'
+
+function ColorField({
+  label,
+  name,
+  value,
+  hint,
+}: {
+  label: string
+  name: string
+  value: string
+  hint: string
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-[11px] uppercase tracking-[0.14em] text-soft">
+        {label}
+      </label>
+      <div className="flex items-center gap-3">
+        <input
+          type="color"
+          name={name}
+          defaultValue={value}
+          className="h-10 w-14 cursor-pointer rounded border border-border bg-surface p-1"
+        />
+        <span className="font-mono text-xs text-muted">{value}</span>
+      </div>
+      <p className="mt-1.5 text-[11px] text-muted">{hint}</p>
+    </div>
+  )
+}
 
 type Settings = {
   reelVimeoId?: string | null
@@ -18,6 +49,8 @@ type Settings = {
   micInfoEs?: string | null
   micInfoEn?: string | null
   clientsList?: string | null
+  effectBase?: string | null
+  effectAccent?: string | null
   contactEmail?: string | null
   instagramUrl?: string | null
   vimeoUrl?: string | null
@@ -145,6 +178,27 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           <Field label="Texto (EN)">
             <TextArea name="micInfoEn" defaultValue={s.micInfoEn ?? ''} className="min-h-[10rem]" />
           </Field>
+        </div>
+      </Card>
+
+      <Card>
+        <SectionHead
+          title="Colores del efecto del nombre (home)"
+          desc="Gama del efecto WebGL: color base en reposo y color de acento que aparece con el sonido."
+        />
+        <div className="grid gap-6 sm:grid-cols-2">
+          <ColorField
+            label="Color base"
+            name="effectBase"
+            value={s.effectBase ?? EFFECT_COLORS_DEFAULT.base}
+            hint="Color del nombre en reposo (marfil por defecto)."
+          />
+          <ColorField
+            label="Color de acento"
+            name="effectAccent"
+            value={s.effectAccent ?? EFFECT_COLORS_DEFAULT.accent}
+            hint="Tinte que aparece con el sonido (dorado por defecto)."
+          />
         </div>
       </Card>
 

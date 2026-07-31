@@ -41,7 +41,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <Hero reelVimeoId={settings?.reelVimeoId} micInfo={micInfo} locale={locale} />
+      <Hero
+        reelVimeoId={settings?.reelVimeoId}
+        micInfo={micInfo}
+        locale={locale}
+        colorBase={settings?.effectBase}
+        colorAccent={settings?.effectAccent}
+      />
 
       {/* Trabajo destacado */}
       {projects.length > 0 && (

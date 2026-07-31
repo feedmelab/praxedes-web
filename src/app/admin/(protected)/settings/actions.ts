@@ -18,6 +18,16 @@ const settingsSchema = z.object({
   micInfoEs: z.string().optional(),
   micInfoEn: z.string().optional(),
   clientsList: z.string().optional(),
+  effectBase: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, 'Color inválido')
+    .optional()
+    .or(z.literal('')),
+  effectAccent: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, 'Color inválido')
+    .optional()
+    .or(z.literal('')),
   contactEmail: z.string().email('Email inválido').or(z.literal('')).optional(),
   instagramUrl: z.string().url('URL inválida').or(z.literal('')).optional(),
   vimeoUrl: z.string().url('URL inválida').or(z.literal('')).optional(),
@@ -46,6 +56,8 @@ export async function updateSettings(
     micInfoEs: parsed.data.micInfoEs || null,
     micInfoEn: parsed.data.micInfoEn || null,
     clientsList: parsed.data.clientsList || null,
+    effectBase: parsed.data.effectBase || null,
+    effectAccent: parsed.data.effectAccent || null,
     contactEmail: parsed.data.contactEmail || null,
     instagramUrl: parsed.data.instagramUrl || null,
     vimeoUrl: parsed.data.vimeoUrl || null,

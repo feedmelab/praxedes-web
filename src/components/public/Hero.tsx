@@ -12,10 +12,14 @@ export default function Hero({
   reelVimeoId,
   micInfo,
   locale,
+  colorBase,
+  colorAccent,
 }: {
   reelVimeoId?: string | null
   micInfo: string
   locale: 'es' | 'en'
+  colorBase?: string | null
+  colorAccent?: string | null
 }) {
   const t = useTranslations('home')
   const mediaRef = useRef<HTMLDivElement>(null)
@@ -73,7 +77,7 @@ export default function Hero({
         <p className="mb-6 animate-fade-up text-[0.7rem] uppercase tracking-[0.32em] text-accent">
           {t('eyebrow')}
         </p>
-        <LiquidName />
+        <LiquidName colorBase={colorBase} colorAccent={colorAccent} />
         <p className="mt-6 animate-fade-up text-[clamp(0.8rem,1.6vw,1rem)] uppercase tracking-[0.16em] text-soft">
           {t('claim')}
         </p>

@@ -206,6 +206,8 @@ model SiteSettings {
   micInfoEs    String?  @db.Text
   micInfoEn    String?  @db.Text
   clientsList  String?  @db.Text // lista curada (uno por línea); si vacío, se derivan de los proyectos
+  effectBase   String? // color base del efecto WebGL del nombre (hex)
+  effectAccent String? // color de acento (con el sonido) del efecto WebGL (hex)
   contactEmail String?
   instagramUrl String?
   vimeoUrl     String?

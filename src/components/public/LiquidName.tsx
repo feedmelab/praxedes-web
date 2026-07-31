@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { EFFECT_COLORS_DEFAULT, hexToRgb01 } from '@/lib/effect-colors'
 
 // Nombre "líquido" con WebGL. Deformación por: (1) charco que sigue al cursor,
 // (2) metaball que funde letras donde hay actividad, y (3) reactividad al
@@ -33,6 +34,8 @@ uniform float uHigh;
 uniform float uLevel;
 uniform float uTime;
 uniform float uAspect;
+uniform vec3 uInk;
+uniform vec3 uGold;
 
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p){
@@ -88,8 +91,8 @@ void main(){
 
   // Color muy sutil según frecuencias: graves/medios tiñen hacia oro, los
   // agudos dan un brillo leve. En silencio queda el marfil de siempre.
-  vec3 ink = vec3(0.949, 0.929, 0.902);
-  vec3 gold = vec3(0.82, 0.66, 0.36);
+  vec3 ink = uInk;
+  vec3 gold = uGold;
   float warmth = clamp(uBass * 0.22 + uMid * 0.10, 0.0, 0.26);
   vec3 col = mix(ink, gold, warmth) + uHigh * 0.04;
 
@@ -104,7 +107,13 @@ type AudioState = {
   stream: MediaStream
 }
 
-export default function LiquidName() {
+export default function LiquidName({
+  colorBase,
+  colorAccent,
+}: {
+  colorBase?: string | null
+  colorAccent?: string | null
+} = {}) {
   const box = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const [ok, setOk] = useState(true)
@@ -166,6 +175,18 @@ export default function LiquidName() {
       uLevel = U('uLevel')
     const uTime = U('uTime'),
       uAspect = U('uAspect')
+
+    // Colores del efecto (constantes por carga): base y acento.
+    const inkRgb = hexToRgb01(
+      colorBase,
+      hexToRgb01(EFFECT_COLORS_DEFAULT.base, [0.949, 0.929, 0.902])
+    )
+    const goldRgb = hexToRgb01(
+      colorAccent,
+      hexToRgb01(EFFECT_COLORS_DEFAULT.accent, [0.82, 0.66, 0.36])
+    )
+    gl.uniform3f(U('uInk'), inkRgb[0], inkRgb[1], inkRgb[2])
+    gl.uniform3f(U('uGold'), goldRgb[0], goldRgb[1], goldRgb[2])
 
     const tex = gl.createTexture()
     gl.activeTexture(gl.TEXTURE0)
@@ -410,7 +431,7 @@ export default function LiquidName() {
         audio = null
       }
     }
-  }, [])
+  }, [colorBase, colorAccent])
 
   return (
     <div ref={box} className="relative w-full animate-fade-up font-display">
