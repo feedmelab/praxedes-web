@@ -85,9 +85,16 @@ void main(){
   bl += texture2D(uTex, p + vec2(-rx, -r) * 0.7).a;
   bl /= 9.0;
   float blob = smoothstep(0.30, 0.52, bl) * amount;
+
+  // Color muy sutil según frecuencias: graves/medios tiñen hacia oro, los
+  // agudos dan un brillo leve. En silencio queda el marfil de siempre.
   vec3 ink = vec3(0.949, 0.929, 0.902);
+  vec3 gold = vec3(0.82, 0.66, 0.36);
+  float warmth = clamp(uBass * 0.22 + uMid * 0.10, 0.0, 0.26);
+  vec3 col = mix(ink, gold, warmth) + uHigh * 0.04;
+
   float a = max(base.a, blob);
-  gl_FragColor = vec4(ink * a, a);
+  gl_FragColor = vec4(col * a, a);
 }`
 
 type AudioState = {
