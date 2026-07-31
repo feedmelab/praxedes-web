@@ -1,13 +1,45 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MIC_INFO_LABELS } from '@/lib/mic-info'
 
 // Botón discreto en una esquina que explica el uso del micrófono. El texto es
-// editable desde Ajustes (se pasa por prop, ya localizado).
+// editable desde Ajustes (se pasa por prop, ya localizado). Al cargar la página
+// se abre solo una vez por sesión y se cierra a los 8 s.
 export default function MicInfo({ text, locale }: { text: string; locale: 'es' | 'en' }) {
   const [open, setOpen] = useState(false)
+  const autoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const labels = MIC_INFO_LABELS[locale]
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem('mic-info-seen')) return
+      sessionStorage.setItem('mic-info-seen', '1')
+    } catch {
+      // sessionStorage no disponible → se abre igual esta vez
+    }
+    setOpen(true)
+    autoTimer.current = setTimeout(() => setOpen(false), 8000)
+    return () => {
+      if (autoTimer.current) clearTimeout(autoTimer.current)
+    }
+  }, [])
+
+  // Cualquier interacción manual cancela el cierre automático.
+  function toggle() {
+    if (autoTimer.current) {
+      clearTimeout(autoTimer.current)
+      autoTimer.current = null
+    }
+    setOpen((v) => !v)
+  }
+  function close() {
+    if (autoTimer.current) {
+      clearTimeout(autoTimer.current)
+      autoTimer.current = null
+    }
+    setOpen(false)
+  }
 
   return (
     <div className="absolute bottom-6 left-5 z-[3] sm:bottom-8 sm:left-8">
@@ -23,7 +55,7 @@ export default function MicInfo({ text, locale }: { text: string; locale: 'es' |
           <p className="whitespace-pre-line text-[0.78rem] leading-relaxed text-soft">{text}</p>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={close}
             className="mt-3 text-[0.62rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-accent"
           >
             {labels.close}
@@ -33,7 +65,7 @@ export default function MicInfo({ text, locale }: { text: string; locale: 'es' |
 
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         aria-expanded={open}
         aria-label={labels.title}
         className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-bg/60 text-muted backdrop-blur transition-colors hover:border-accent hover:text-accent"
