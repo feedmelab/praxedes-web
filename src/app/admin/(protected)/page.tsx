@@ -38,6 +38,12 @@ export default async function AdminDashboard() {
       hint: 'reel, bio, contacto',
       href: '/admin/settings',
     },
+    {
+      label: 'Biblioteca Vimeo',
+      value: '·',
+      hint: 'IDs y hash para frames',
+      href: '/admin/vimeo',
+    },
   ]
 
   return (

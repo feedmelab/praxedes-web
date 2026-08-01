@@ -200,6 +200,65 @@ export async function generateVimeoThumbnail(
   return { url: best.link, width: best.width ?? 0, height: best.height ?? 0 }
 }
 
+export type VimeoListItem = {
+  id: string
+  hash: string | null // hash de privacidad (vídeos «no listados»)
+  param: string // lo que se pega en el campo (id o id?h=hash)
+  name: string
+  duration: number
+  privacy: string // public | unlisted | private | …
+  thumb: string | null
+  link: string
+}
+
+/**
+ * Lista los vídeos de la cuenta propietaria del token (/me/videos), con su ID,
+ * el hash de privacidad (para vídeos «no listados») y una miniatura. Pensado
+ * para que en el admin se copie el parámetro y se use en el extractor de frames.
+ */
+export async function listVimeoVideos(page = 1, perPage = 60): Promise<VimeoListItem[]> {
+  const token = process.env.VIMEO_ACCESS_TOKEN
+  if (!token) throw new VimeoError('NO_TOKEN', 'Falta VIMEO_ACCESS_TOKEN en el entorno')
+
+  const fields = 'uri,name,duration,link,privacy.view,pictures.sizes'
+  const res = await fetch(
+    `${API}/me/videos?per_page=${perPage}&page=${page}&sort=date&direction=desc&fields=${fields}`,
+    { headers: { Authorization: `bearer ${token}` }, cache: 'no-store' }
+  )
+  if (!res.ok) throw new VimeoError('API', `Vimeo API: ${await vimeoErrorMessage(res)}`)
+
+  const data = (await res.json()) as {
+    data?: Array<{
+      uri?: string
+      name?: string
+      duration?: number
+      link?: string
+      privacy?: { view?: string }
+      pictures?: { sizes?: VimeoSize[] }
+    }>
+  }
+
+  return (data.data ?? []).map((v) => {
+    const id = (v.uri ?? '').split('/').pop() || ''
+    // El hash de «no listado» aparece como segundo segmento del link:
+    //   https://vimeo.com/123456789/abcdef0123
+    const m = (v.link ?? '').match(/vimeo\.com\/\d+\/([0-9a-z]+)/i)
+    const hash = m ? m[1] : null
+    const sizes = v.pictures?.sizes ?? []
+    const thumb = sizes.length ? (sizes[sizes.length - 1]?.link ?? null) : null
+    return {
+      id,
+      hash,
+      param: hash ? `${id}?h=${hash}` : id,
+      name: v.name ?? `vimeo_${id}`,
+      duration: v.duration ?? 0,
+      privacy: v.privacy?.view ?? 'unknown',
+      thumb,
+      link: v.link ?? `https://vimeo.com/${id}`,
+    }
+  })
+}
+
 /** True si el host es de la CDN de imágenes de Vimeo (allowlist anti-SSRF). */
 export function isVimeoImageHost(url: string): boolean {
   try {
