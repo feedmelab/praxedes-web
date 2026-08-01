@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "SiteSettings" ADD COLUMN     "heroDarken" INTEGER NOT NULL DEFAULT 35,
+ADD COLUMN     "heroFadeBottom" INTEGER NOT NULL DEFAULT 70,
+ADD COLUMN     "heroScrollFade" INTEGER NOT NULL DEFAULT 85;

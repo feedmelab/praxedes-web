@@ -16,6 +16,9 @@ export default function Hero({
   locale,
   colorBase,
   colorAccent,
+  darken,
+  fadeBottom,
+  scrollFade,
 }: {
   reelVimeoId?: string | null
   reelMp4Url?: string | null
@@ -23,10 +26,17 @@ export default function Hero({
   locale: 'es' | 'en'
   colorBase?: string | null
   colorAccent?: string | null
+  darken?: number | null
+  fadeBottom?: number | null
+  scrollFade?: number | null
 }) {
+  const darkenPct = (darken ?? 35) / 100
+  const fadeBottomPct = (fadeBottom ?? 70) / 100
+  const scrollFadePct = (scrollFade ?? 85) / 100
   const t = useTranslations('home')
   const mediaRef = useRef<HTMLDivElement>(null)
   const [scrolled, setScrolled] = useState(false)
+  const [progress, setProgress] = useState(0)
   // Acepta "76979871", "76979871?h=abc", o una URL completa de Vimeo.
   const { id: reelId, hash: reelHash } = reelVimeoId
     ? parseVimeo(reelVimeoId)
@@ -40,6 +50,7 @@ export default function Hero({
       raf = requestAnimationFrame(() => {
         const y = window.scrollY
         setScrolled(y > 4)
+        setProgress(Math.min(1, y / window.innerHeight))
         if (el && y < window.innerHeight) el.style.transform = `translateY(${y * 0.18}px)`
       })
     }
@@ -81,6 +92,9 @@ export default function Hero({
         )}
       </div>
 
+      {/* Oscurecido general del vídeo para dar profundidad y legibilidad */}
+      <div className="absolute inset-0 z-[1] bg-black" style={{ opacity: darkenPct }} />
+
       {/* Viñeta para legibilidad */}
       <div
         className="absolute inset-0 z-[1]"
@@ -88,6 +102,23 @@ export default function Hero({
           background:
             'radial-gradient(ellipse at center, transparent 40%, rgba(10,10,10,.75) 100%)',
         }}
+      />
+
+      {/* Fundido inferior al color de la página (#0a0a0a). Siempre presente para
+          un empalme suave con la sección siguiente; se intensifica al bajar. */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[55%]"
+        style={{
+          background: 'linear-gradient(to bottom, transparent 0%, #0a0a0a 92%)',
+          opacity: fadeBottomPct + progress * (1 - fadeBottomPct),
+        }}
+      />
+
+      {/* Velo global que funde todo el vídeo al color de la página al hacer
+          scroll (el nombre, en z-2, permanece por encima). */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] bg-bg"
+        style={{ opacity: progress * scrollFadePct }}
       />
 
       <div className="relative z-[2] px-6">

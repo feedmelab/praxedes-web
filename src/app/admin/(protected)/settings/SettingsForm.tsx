@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { Field, TextInput, TextArea, Card } from '../_components/ui'
 import SubmitButton from '../_components/SubmitButton'
 import { updateSettings } from './actions'
@@ -36,6 +36,38 @@ function ColorField({
   )
 }
 
+function RangeField({
+  label,
+  name,
+  value,
+  hint,
+}: {
+  label: string
+  name: string
+  value: number
+  hint: string
+}) {
+  const [v, setV] = useState(value)
+  return (
+    <div>
+      <label className="mb-1.5 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-soft">
+        <span>{label}</span>
+        <span className="font-mono text-muted">{v}%</span>
+      </label>
+      <input
+        type="range"
+        name={name}
+        min={0}
+        max={100}
+        value={v}
+        onChange={(e) => setV(Number(e.target.value))}
+        className="h-1.5 w-full cursor-pointer accent-accent"
+      />
+      <p className="mt-1.5 text-[11px] text-muted">{hint}</p>
+    </div>
+  )
+}
+
 type Settings = {
   reelVimeoId?: string | null
   reelMp4Url?: string | null
@@ -52,6 +84,9 @@ type Settings = {
   clientsList?: string | null
   effectBase?: string | null
   effectAccent?: string | null
+  heroDarken?: number | null
+  heroFadeBottom?: number | null
+  heroScrollFade?: number | null
   contactEmail?: string | null
   instagramUrl?: string | null
   vimeoUrl?: string | null
@@ -209,6 +244,33 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             name="effectAccent"
             value={s.effectAccent ?? EFFECT_COLORS_DEFAULT.accent}
             hint="Tinte que aparece con el sonido (dorado por defecto)."
+          />
+        </div>
+      </Card>
+
+      <Card>
+        <SectionHead
+          title="Capas del vídeo de portada"
+          desc="Oscurecido del vídeo y fundido al color de la página. El fundido global se aplica al hacer scroll."
+        />
+        <div className="grid gap-6 sm:grid-cols-3">
+          <RangeField
+            label="Oscurecido"
+            name="heroDarken"
+            value={s.heroDarken ?? 35}
+            hint="Oscurece el vídeo de forma constante."
+          />
+          <RangeField
+            label="Fundido inferior"
+            name="heroFadeBottom"
+            value={s.heroFadeBottom ?? 70}
+            hint="Funde el borde inferior al color de la página."
+          />
+          <RangeField
+            label="Fundido al scroll"
+            name="heroScrollFade"
+            value={s.heroScrollFade ?? 85}
+            hint="Cubre el vídeo al bajar (el nombre permanece)."
           />
         </div>
       </Card>

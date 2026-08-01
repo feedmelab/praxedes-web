@@ -48,6 +48,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         locale={locale}
         colorBase={settings?.effectBase}
         colorAccent={settings?.effectAccent}
+        darken={settings?.heroDarken}
+        fadeBottom={settings?.heroFadeBottom}
+        scrollFade={settings?.heroScrollFade}
       />
 
       {/* Trabajo destacado */}

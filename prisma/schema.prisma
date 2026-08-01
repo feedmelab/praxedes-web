@@ -209,6 +209,9 @@ model SiteSettings {
   clientsList  String?  @db.Text // lista curada (uno por línea); si vacío, se derivan de los proyectos
   effectBase   String? // color base del efecto WebGL del nombre (hex)
   effectAccent String? // color de acento (con el sonido) del efecto WebGL (hex)
+  heroDarken     Int @default(35) // oscurecido general del vídeo del hero (0–100)
+  heroFadeBottom Int @default(70) // fundido inferior al color de la página (0–100)
+  heroScrollFade Int @default(85) // fundido global al hacer scroll (0–100)
   contactEmail String?
   instagramUrl String?
   vimeoUrl     String?

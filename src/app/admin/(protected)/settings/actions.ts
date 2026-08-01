@@ -86,6 +86,9 @@ const settingsSchema = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/, 'Color inválido')
     .optional()
     .or(z.literal('')),
+  heroDarken: z.coerce.number().int().min(0).max(100).optional(),
+  heroFadeBottom: z.coerce.number().int().min(0).max(100).optional(),
+  heroScrollFade: z.coerce.number().int().min(0).max(100).optional(),
   contactEmail: z.string().email('Email inválido').or(z.literal('')).optional(),
   instagramUrl: z.string().url('URL inválida').or(z.literal('')).optional(),
   vimeoUrl: z.string().url('URL inválida').or(z.literal('')).optional(),
@@ -117,6 +120,9 @@ export async function updateSettings(
     clientsList: parsed.data.clientsList || null,
     effectBase: parsed.data.effectBase || null,
     effectAccent: parsed.data.effectAccent || null,
+    heroDarken: parsed.data.heroDarken ?? 35,
+    heroFadeBottom: parsed.data.heroFadeBottom ?? 70,
+    heroScrollFade: parsed.data.heroScrollFade ?? 85,
     contactEmail: parsed.data.contactEmail || null,
     instagramUrl: parsed.data.instagramUrl || null,
     vimeoUrl: parsed.data.vimeoUrl || null,
