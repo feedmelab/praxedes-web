@@ -108,6 +108,11 @@ export function getThumbUrl(url: string, width: number, height?: number) {
 }
 
 // Borrado
+// Lista archivos de una carpeta (para el gestor de vídeos de fondo).
+export async function listFiles(path: string, limit = 100) {
+  return ik().listFiles({ path, limit })
+}
+
 export async function deleteFile(fileId: string) {
   return ik().deleteFile(fileId)
 }

@@ -4,6 +4,48 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { listFiles, deleteFile } from '@/lib/imagekit'
+export type HeroVideo = { fileId: string; name: string; url: string; size: number }
+
+// Lista los vídeos subidos a la carpeta del hero en ImageKit.
+export async function listHeroVideos(): Promise<HeroVideo[]> {
+  const session = await auth()
+  if (!session) return []
+  try {
+    const files = (await listFiles('/praxedes/hero', 100)) as Array<{
+      fileId?: string
+      name?: string
+      url?: string
+      size?: number
+      fileType?: string
+      mime?: string
+    }>
+    return files
+      .filter((f) => f.fileId && (f.fileType === 'non-image' || (f.mime ?? '').startsWith('video')))
+      .map((f) => ({ fileId: f.fileId!, name: f.name ?? '', url: f.url ?? '', size: f.size ?? 0 }))
+  } catch {
+    return []
+  }
+}
+
+// Borra un vídeo de ImageKit; si era el fondo activo, lo quita.
+export async function deleteHeroVideo(fileId: string, url: string) {
+  const session = await auth()
+  if (!session) return { error: 'No autorizado' }
+  try {
+    await deleteFile(fileId)
+  } catch {
+    return { error: 'No se pudo borrar en ImageKit' }
+  }
+  const current = await prisma.siteSettings.findUnique({ where: { id: 'singleton' } })
+  if (current?.reelMp4Url === url) {
+    await prisma.siteSettings.update({ where: { id: 'singleton' }, data: { reelMp4Url: null } })
+  }
+  revalidatePath('/admin/settings')
+  revalidatePath('/', 'layout')
+  return { ok: true }
+}
+
 // Guarda la URL del vídeo de fondo (subido directamente a ImageKit desde el
 // navegador). Solo acepta URLs de ImageKit por seguridad.
 export async function saveHeroVideoUrl(url: string) {

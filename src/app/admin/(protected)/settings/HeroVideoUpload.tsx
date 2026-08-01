@@ -1,19 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { Card, Field, TextInput } from '../_components/ui'
-import { saveHeroVideoUrl } from './actions'
+import { saveHeroVideoUrl, deleteHeroVideo, type HeroVideo } from './actions'
 
 // Sube un vídeo de fondo (.mp4) DIRECTAMENTE a ImageKit desde el navegador (sin
-// pasar por el server action → sin límite de tamaño) y guarda su URL.
-export default function HeroVideoUpload({ current }: { current?: string | null }) {
+// pasar por el server action → sin límite del server), lista los ya subidos y
+// permite usarlos como fondo o borrarlos de ImageKit.
+export default function HeroVideoUpload({
+  current,
+  videos,
+}: {
+  current?: string | null
+  videos: HeroVideo[]
+}) {
   const [url, setUrl] = useState(current ?? '')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<{ error?: string; ok?: boolean } | null>(null)
+  const [pending, startTransition] = useTransition()
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (file.size > 100 * 1024 * 1024) {
+      setMsg({
+        error: `El vídeo pesa ${(file.size / 1024 / 1024).toFixed(0)} MB y el máximo es 100 MB. Usa uno más corto o de menor resolución (720p/1080p).`,
+      })
+      e.target.value = ''
+      return
+    }
     setBusy(true)
     setMsg(null)
     try {
@@ -50,38 +65,94 @@ export default function HeroVideoUpload({ current }: { current?: string | null }
     }
   }
 
+  function use(u: string) {
+    startTransition(async () => {
+      const res = await saveHeroVideoUrl(u)
+      if (!res?.error) setUrl(u)
+    })
+  }
+  function remove(v: HeroVideo) {
+    if (!confirm(`¿Borrar "${v.name}" de ImageKit? No se puede deshacer.`)) return
+    startTransition(async () => {
+      await deleteHeroVideo(v.fileId, v.url)
+      if (url === v.url) setUrl('')
+    })
+  }
+
   return (
     <Card>
       <header className="mb-6 border-b border-border pb-4">
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-accent">
-          Subir vídeo de fondo (home)
+          Vídeo de fondo (home)
         </h2>
         <p className="mt-1.5 text-[12px] text-muted">
-          Sube un .mp4 (loop oscuro); se aloja en ImageKit y tiene prioridad sobre el reel de Vimeo.
-          La subida va directa desde tu navegador, sin límite de tamaño.
+          Sube un .mp4 (loop oscuro, máx. 100 MB); se aloja en ImageKit y tiene prioridad sobre el
+          reel de Vimeo. Abajo puedes reutilizar o borrar los ya subidos.
         </p>
       </header>
 
-      <Field label={busy ? 'Subiendo…' : 'Archivo de vídeo (.mp4)'}>
+      <Field label={busy ? 'Subiendo…' : 'Subir vídeo (.mp4)'}>
         <TextInput type="file" accept="video/mp4,video/*" onChange={onFile} disabled={busy} />
       </Field>
 
-      {url && (
-        <div className="mt-4 space-y-2">
-          <p className="break-all font-mono text-[11px] text-muted">{url}</p>
-          <video
-            src={url}
-            muted
-            loop
-            autoPlay
-            playsInline
-            className="aspect-video w-full max-w-sm rounded border border-border object-cover"
-          />
+      {msg?.error && <p className="mt-2 text-xs text-red-400">{msg.error}</p>}
+      {msg?.ok && <p className="mt-2 text-xs text-green-400">Vídeo subido y activado.</p>}
+
+      {videos.length > 0 && (
+        <div className="mt-6 space-y-3">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted">
+            Vídeos subidos ({videos.length})
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {videos.map((v) => {
+              const active = v.url === url
+              return (
+                <div
+                  key={v.fileId}
+                  className={`rounded border bg-surface p-3 ${active ? 'border-accent' : 'border-border'}`}
+                >
+                  <video
+                    src={v.url}
+                    muted
+                    loop
+                    playsInline
+                    className="aspect-video w-full rounded object-cover"
+                    onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
+                    onMouseLeave={(e) => e.currentTarget.pause()}
+                  />
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <span className="min-w-0 flex-1 truncate font-mono text-[10px] text-muted">
+                      {v.name} · {(v.size / 1024 / 1024).toFixed(1)} MB
+                    </span>
+                    <div className="flex shrink-0 gap-2 text-[10px] uppercase tracking-wider">
+                      {active ? (
+                        <span className="text-accent">En uso</span>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => use(v.url)}
+                          className="text-accent hover:underline disabled:opacity-40"
+                        >
+                          Usar
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => remove(v)}
+                        className="text-red-400 hover:underline disabled:opacity-40"
+                      >
+                        Borrar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
-
-      {msg?.error && <p className="mt-2 text-xs text-red-400">{msg.error}</p>}
-      {msg?.ok && <p className="mt-2 text-xs text-green-400">Vídeo subido y guardado.</p>}
     </Card>
   )
 }
