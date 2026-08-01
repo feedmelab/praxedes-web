@@ -9,6 +9,8 @@ type Props = {
   meta: string
   coverImage?: string | null
   coverFocal?: Focal | null
+  /** La portada es un fotograma con franjas negras → recortar en la tarjeta. */
+  letterbox?: boolean
   /** Índice para variar el placeholder cuando no hay portada. */
   index?: number
 }
@@ -27,6 +29,7 @@ export default function ProjectCard({
   meta,
   coverImage,
   coverFocal,
+  letterbox = false,
   index = 0,
 }: Props) {
   return (
@@ -40,7 +43,11 @@ export default function ProjectCard({
           alt={`${client} — ${title}`}
           fill
           sizes="(max-width: 760px) 100vw, 50vw"
-          className={`object-cover ${focalClass(coverFocal)} brightness-[0.72] grayscale-[0.35] transition-all duration-[1100ms] ease-out-expo group-hover:scale-105 group-hover:brightness-[0.85] group-hover:grayscale-0`}
+          // `letterbox`: la portada es un fotograma con franjas negras → se
+          // amplía un poco para recortarlas SOLO en la tarjeta del listado.
+          className={`object-cover ${focalClass(coverFocal)} brightness-[0.72] grayscale-[0.35] transition-all duration-[1100ms] ease-out-expo group-hover:brightness-[0.85] group-hover:grayscale-0 ${
+            letterbox ? 'scale-[1.26] group-hover:scale-[1.32]' : 'group-hover:scale-105'
+          }`}
         />
       ) : (
         <div

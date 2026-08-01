@@ -74,6 +74,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   meta={`${CATEGORY_LABELS[locale][p.category]} · ${p.year}`}
                   coverImage={p.coverImage}
                   coverFocal={p.coverFocal}
+                  letterbox={p.coverLetterbox}
                   index={i}
                 />
               </Reveal>

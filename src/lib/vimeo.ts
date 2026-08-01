@@ -131,9 +131,20 @@ export async function getVimeoMeta(id: string, hash?: string): Promise<VimeoMeta
           access: 'private',
         }
       }
-      // El token no da ficheros (plan sin acceso): caemos al config público.
+      // Tenemos acceso al vídeo (res.ok) pero el plan no expone MP4 progresivo:
+      // usamos el modo MINIATURA por timecode (Pictures API, con el token). Antes
+      // caíamos a la vía pública, que falla en vídeos privados → «no accesible».
+      return {
+        name: data.name ?? `vimeo_${id}`,
+        width: data.width ?? 1920,
+        height: data.height ?? 1080,
+        duration: data.duration ?? 0,
+        mode: 'thumbnail',
+        fileUrl: null,
+        access: 'private',
+      }
     }
-    // Si la API falla, probamos igualmente la vía pública abajo.
+    // Si la API falla (403/404: no es de esta cuenta), probamos la vía pública.
   }
 
   // Sin token (o token sin ficheros): config del reproductor público.

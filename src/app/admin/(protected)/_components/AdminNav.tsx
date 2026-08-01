@@ -11,6 +11,7 @@ const links = [
   { href: '/admin/rental', label: 'Alquiler' },
   { href: '/admin/rental/reservations', label: 'Reservas' },
   { href: '/admin/emails', label: 'Emails' },
+  { href: '/admin/vimeo', label: 'Vimeo' },
   { href: '/admin/settings', label: 'Ajustes' },
   { href: '/admin/account', label: 'Cuenta' },
 ]

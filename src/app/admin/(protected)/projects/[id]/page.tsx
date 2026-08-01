@@ -80,7 +80,12 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           Sube fotos, añade vídeos de Vimeo, y ordena todo. Las imágenes extraídas del vídeo (abajo)
           también aparecen aquí como una foto más.
         </p>
-        <ImageManager projectId={project.id} images={media} coverFocal={project.coverFocal} />
+        <ImageManager
+          projectId={project.id}
+          images={media}
+          coverFocal={project.coverFocal}
+          coverLetterbox={project.coverLetterbox}
+        />
       </Card>
 
       <Card>

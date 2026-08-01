@@ -11,6 +11,7 @@ import {
   deleteProjectImage,
   setCoverImage,
   setCoverFocal,
+  setCoverLetterbox,
   setImageFocal,
   toggleImageWide,
   updateImageAlt,
@@ -65,10 +66,12 @@ export default function ImageManager({
   projectId,
   images,
   coverFocal,
+  coverLetterbox,
 }: {
   projectId: string
   images: ImageVM[]
   coverFocal: Focal
+  coverLetterbox: boolean
 }) {
   const [pending, startTransition] = useTransition()
   const [videoInput, setVideoInput] = useState('')
@@ -133,15 +136,29 @@ export default function ImageManager({
       {videoErr && <p className="text-xs text-red-400">{videoErr}</p>}
 
       {/* Encuadre de la portada (cómo se recorta en las tarjetas de la web) */}
-      <div className="flex flex-wrap items-center gap-3 rounded border border-border bg-bg/40 px-3 py-2">
-        <span className="text-[11px] uppercase tracking-[0.14em] text-muted">
-          Encuadre de la portada
-        </span>
-        <FocalPicker
-          value={coverFocal}
-          disabled={pending}
-          onChange={(f) => startTransition(() => setCoverFocal(projectId, f))}
-        />
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded border border-border bg-bg/40 px-3 py-2">
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] uppercase tracking-[0.14em] text-muted">
+            Encuadre de la portada
+          </span>
+          <FocalPicker
+            value={coverFocal}
+            disabled={pending}
+            onChange={(f) => startTransition(() => setCoverFocal(projectId, f))}
+          />
+        </div>
+        <label className="flex cursor-pointer items-center gap-2 text-[11px] text-soft">
+          <input
+            type="checkbox"
+            defaultChecked={coverLetterbox}
+            disabled={pending}
+            onChange={(e) =>
+              startTransition(() => setCoverLetterbox(projectId, e.currentTarget.checked))
+            }
+            className="h-3.5 w-3.5 accent-accent"
+          />
+          Recortar franjas negras (fotograma) en el listado
+        </label>
       </div>
 
       {images.length === 0 ? (

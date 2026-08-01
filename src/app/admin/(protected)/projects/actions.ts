@@ -286,6 +286,14 @@ export async function setCoverFocal(projectId: string, focal: 'TOP' | 'CENTER' |
   revalidatePublic()
 }
 
+// Recortar las franjas negras (fotograma de vídeo) en el listado de la web.
+export async function setCoverLetterbox(projectId: string, value: boolean) {
+  await requireAuth()
+  await prisma.project.update({ where: { id: projectId }, data: { coverLetterbox: value } })
+  revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePublic()
+}
+
 /* ── Frames de vídeo ─────────────────────────────────────────── */
 
 export async function addFrame(projectId: string, formData: FormData) {
