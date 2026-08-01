@@ -157,7 +157,7 @@ export default function ImageManager({
             }
             className="h-3.5 w-3.5 accent-accent"
           />
-          Recortar franjas negras (fotograma) en el listado
+          Mostrar portada completa (no recortar franjas)
         </label>
       </div>
 

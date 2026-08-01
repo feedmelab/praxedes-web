@@ -74,7 +74,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   meta={`${CATEGORY_LABELS[locale][p.category]} · ${p.year}`}
                   coverImage={p.coverImage}
                   coverFocal={p.coverFocal}
-                  letterbox={p.coverLetterbox}
+                  // Por defecto recorta las franjas negras; se desactiva por
+                  // proyecto con «mostrar portada completa» (coverLetterbox).
+                  letterbox={!p.coverLetterbox}
                   index={i}
                 />
               </Reveal>
