@@ -65,7 +65,9 @@ export default async function ProjectPage({
             <img
               src={project.coverImage}
               alt=""
-              className="h-full w-full object-cover brightness-[0.55]"
+              className={`h-full w-full object-cover brightness-[0.55] ${
+                project.coverLetterbox ? '' : 'scale-[1.12]'
+              }`}
             />
           ) : (
             <div

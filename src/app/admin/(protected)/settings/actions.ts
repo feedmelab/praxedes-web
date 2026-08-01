@@ -62,6 +62,23 @@ export async function saveHeroVideoUrl(url: string) {
   return { ok: true }
 }
 
+// Guarda (o borra con '') la URL de la foto de «Sobre mí» subida directamente a
+// ImageKit desde el navegador. Solo acepta URLs de ImageKit por seguridad.
+export async function saveAboutImage(url: string) {
+  const session = await auth()
+  if (!session) return { error: 'No autorizado' }
+  const clean = url.trim()
+  if (clean && !/^https:\/\/[^/]*imagekit\.io\//.test(clean)) return { error: 'URL no válida' }
+  await prisma.siteSettings.upsert({
+    where: { id: 'singleton' },
+    update: { aboutImage: clean || null },
+    create: { id: 'singleton', aboutImage: clean || null },
+  })
+  revalidatePath('/admin/settings')
+  revalidatePath('/', 'layout')
+  return { ok: true }
+}
+
 const settingsSchema = z.object({
   reelVimeoId: z.string().optional(),
   reelMp4Url: z.string().url('URL inválida').or(z.literal('')).optional(),

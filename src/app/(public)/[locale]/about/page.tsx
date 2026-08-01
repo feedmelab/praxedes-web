@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server'
 import Reveal from '@/components/public/Reveal'
 import { getSettings, getClients, type Locale } from '@/lib/public-data'
 import { CLIENTS_FALLBACK, parseClients } from '@/lib/clients'
+import { signedDisplayUrl } from '@/lib/imagekit'
 import Clients from '@/components/public/Clients'
 
 const FALLBACK_BIO = {
@@ -39,10 +40,19 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           className="aspect-[4/5] max-w-[380px] overflow-hidden border border-border"
           as="div"
         >
-          <div
-            className="h-full w-full"
-            style={{ background: 'linear-gradient(160deg,#17140f,#241d14 70%,#0d0b09)' }}
-          />
+          {settings?.aboutImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={signedDisplayUrl(settings.aboutImage)}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div
+              className="h-full w-full"
+              style={{ background: 'linear-gradient(160deg,#17140f,#241d14 70%,#0d0b09)' }}
+            />
+          )}
         </Reveal>
 
         <Reveal delay={100}>

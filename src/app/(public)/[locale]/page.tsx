@@ -14,6 +14,7 @@ import {
   type Locale,
 } from '@/lib/public-data'
 import { CLIENTS_FALLBACK, parseClients } from '@/lib/clients'
+import { signedDisplayUrl } from '@/lib/imagekit'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params
@@ -101,10 +102,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           className="aspect-[4/5] max-w-[340px] overflow-hidden border border-border md:max-w-none"
           as="div"
         >
-          <div
-            className="h-full w-full"
-            style={{ background: 'linear-gradient(160deg,#17140f,#241d14 70%,#0d0b09)' }}
-          />
+          {settings?.aboutImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={signedDisplayUrl(settings.aboutImage)}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div
+              className="h-full w-full"
+              style={{ background: 'linear-gradient(160deg,#17140f,#241d14 70%,#0d0b09)' }}
+            />
+          )}
         </Reveal>
         <Reveal delay={100}>
           <h2 className="mb-6 font-display text-[clamp(1.8rem,4vw,3rem)] font-normal leading-[1.05]">
