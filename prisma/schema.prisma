@@ -214,6 +214,8 @@ model SiteSettings {
   heroDarken     Int @default(35) // oscurecido general del vídeo del hero (0–100)
   heroFadeBottom Int @default(70) // fundido inferior al color de la página (0–100)
   heroScrollFade Int @default(85) // fundido global al hacer scroll (0–100)
+  waterOpacity   Int @default(100) // intensidad del fondo de agua parallax (0–250 %)
+  waterDarken    Int @default(0) // velo oscuro sobre el fondo de agua (0–100)
   contactEmail String?
   instagramUrl String?
   vimeoUrl     String?

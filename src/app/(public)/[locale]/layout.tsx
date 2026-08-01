@@ -36,6 +36,8 @@ export default async function PublicLayout({
       {/* Fondo de «agua» global (home: tras el hero; internas: en el header) */}
       <SiteWaterBackdrop
         darken={(settings?.heroDarken ?? 35) / 100}
+        waterOpacity={settings?.waterOpacity ?? 100}
+        waterDarken={settings?.waterDarken ?? 0}
         mp4={settings?.reelMp4Url}
         vimeoId={settings?.reelVimeoId}
       />

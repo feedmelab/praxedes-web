@@ -42,11 +42,13 @@ function RangeField({
   name,
   value,
   hint,
+  max = 100,
 }: {
   label: string
   name: string
   value: number
   hint: string
+  max?: number
 }) {
   const [v, setV] = useState(value)
   return (
@@ -59,7 +61,7 @@ function RangeField({
         type="range"
         name={name}
         min={0}
-        max={100}
+        max={max}
         value={v}
         onChange={(e) => setV(Number(e.target.value))}
         className="h-1.5 w-full cursor-pointer accent-accent"
@@ -89,6 +91,8 @@ type Settings = {
   heroDarken?: number | null
   heroFadeBottom?: number | null
   heroScrollFade?: number | null
+  waterOpacity?: number | null
+  waterDarken?: number | null
   contactEmail?: string | null
   instagramUrl?: string | null
   vimeoUrl?: string | null
@@ -132,6 +136,28 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             name="heroScrollFade"
             value={s.heroScrollFade ?? 85}
             hint="Cubre el vídeo al bajar (el nombre permanece)."
+          />
+        </div>
+      </Card>
+
+      <Card>
+        <SectionHead
+          title="Fondo de agua (parallax)"
+          desc="El vídeo de agua que asoma de fondo (más marcado en el header de las páginas internas)."
+        />
+        <div className="grid gap-6 sm:grid-cols-2">
+          <RangeField
+            label="Intensidad"
+            name="waterOpacity"
+            value={s.waterOpacity ?? 100}
+            max={250}
+            hint="Cuánto se ve el vídeo de agua del fondo (100 % = por defecto)."
+          />
+          <RangeField
+            label="Oscuridad"
+            name="waterDarken"
+            value={s.waterDarken ?? 0}
+            hint="Añade un velo oscuro sobre el fondo para bajar el tono."
           />
         </div>
       </Card>

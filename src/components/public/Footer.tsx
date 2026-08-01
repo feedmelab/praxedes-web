@@ -39,7 +39,19 @@ export default function Footer({ instagramUrl, vimeoUrl }: Props) {
 
       <div className="flex flex-wrap justify-between gap-4 text-[0.64rem] uppercase tracking-[0.1em] text-muted">
         <span>Barcelona · {t('available')}</span>
-        <span>© {year} Práxedes de Vilallonga</span>
+        <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span>© {year} Práxedes de Vilallonga</span>
+          <span className="text-border">·</span>
+          <span>
+            Creado por{' '}
+            <a
+              href="mailto:xtorner@gmail.com"
+              className="text-soft transition-colors hover:text-accent"
+            >
+              xtm
+            </a>
+          </span>
+        </span>
       </div>
     </footer>
   )

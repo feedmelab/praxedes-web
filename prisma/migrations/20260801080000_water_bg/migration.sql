@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "SiteSettings" ADD COLUMN     "waterOpacity" INTEGER NOT NULL DEFAULT 100,
+ADD COLUMN     "waterDarken" INTEGER NOT NULL DEFAULT 0;
