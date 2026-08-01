@@ -110,6 +110,54 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
   return (
     <form action={formAction} className="space-y-10">
       <Card>
+        <SectionHead
+          title="Capas del vídeo de portada"
+          desc="Oscurecido y fundidos del vídeo. El «oscurecido» se aplica también a las franjas de vídeo que asoman al hacer scroll."
+        />
+        <div className="grid gap-6 sm:grid-cols-3">
+          <RangeField
+            label="Oscurecido"
+            name="heroDarken"
+            value={s.heroDarken ?? 35}
+            hint="Oscurece el vídeo de forma constante."
+          />
+          <RangeField
+            label="Fundido inferior"
+            name="heroFadeBottom"
+            value={s.heroFadeBottom ?? 70}
+            hint="Funde el borde inferior al color de la página."
+          />
+          <RangeField
+            label="Fundido al scroll"
+            name="heroScrollFade"
+            value={s.heroScrollFade ?? 85}
+            hint="Cubre el vídeo al bajar (el nombre permanece)."
+          />
+        </div>
+      </Card>
+
+      <Card>
+        <SectionHead
+          title="Colores del efecto del nombre (home)"
+          desc="Gama del efecto WebGL: color base en reposo y color de acento que aparece con el sonido."
+        />
+        <div className="grid gap-6 sm:grid-cols-2">
+          <ColorField
+            label="Color base"
+            name="effectBase"
+            value={s.effectBase ?? EFFECT_COLORS_DEFAULT.base}
+            hint="Color del nombre en reposo (marfil por defecto)."
+          />
+          <ColorField
+            label="Color de acento"
+            name="effectAccent"
+            value={s.effectAccent ?? EFFECT_COLORS_DEFAULT.accent}
+            hint="Tinte que aparece con el sonido (dorado por defecto)."
+          />
+        </div>
+      </Card>
+
+      <Card>
         <SectionHead title="Portada" desc="Vídeo de fondo (reel) y claim de la home." />
         <div className="space-y-6">
           <Field label="Reel — Vimeo ID" hint="Vídeo de fondo de la home (con ?h=… si es privado)">
@@ -227,54 +275,6 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           <Field label="Texto (EN)">
             <TextArea name="micInfoEn" defaultValue={s.micInfoEn ?? ''} className="min-h-[10rem]" />
           </Field>
-        </div>
-      </Card>
-
-      <Card>
-        <SectionHead
-          title="Colores del efecto del nombre (home)"
-          desc="Gama del efecto WebGL: color base en reposo y color de acento que aparece con el sonido."
-        />
-        <div className="grid gap-6 sm:grid-cols-2">
-          <ColorField
-            label="Color base"
-            name="effectBase"
-            value={s.effectBase ?? EFFECT_COLORS_DEFAULT.base}
-            hint="Color del nombre en reposo (marfil por defecto)."
-          />
-          <ColorField
-            label="Color de acento"
-            name="effectAccent"
-            value={s.effectAccent ?? EFFECT_COLORS_DEFAULT.accent}
-            hint="Tinte que aparece con el sonido (dorado por defecto)."
-          />
-        </div>
-      </Card>
-
-      <Card>
-        <SectionHead
-          title="Capas del vídeo de portada"
-          desc="Oscurecido y fundidos del vídeo. El «oscurecido» se aplica también a las franjas de vídeo que asoman al hacer scroll."
-        />
-        <div className="grid gap-6 sm:grid-cols-3">
-          <RangeField
-            label="Oscurecido"
-            name="heroDarken"
-            value={s.heroDarken ?? 35}
-            hint="Oscurece el vídeo de forma constante."
-          />
-          <RangeField
-            label="Fundido inferior"
-            name="heroFadeBottom"
-            value={s.heroFadeBottom ?? 70}
-            hint="Funde el borde inferior al color de la página."
-          />
-          <RangeField
-            label="Fundido al scroll"
-            name="heroScrollFade"
-            value={s.heroScrollFade ?? 85}
-            hint="Cubre el vídeo al bajar (el nombre permanece)."
-          />
         </div>
       </Card>
 
