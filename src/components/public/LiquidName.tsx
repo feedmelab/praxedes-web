@@ -334,7 +334,12 @@ export default function LiquidName({
     }
 
     async function initAudio() {
-      if (audio || !navigator.mediaDevices?.getUserMedia) return
+      if (audio) return
+      // Contexto no seguro (http sin localhost) → no hay API de micrófono.
+      if (!navigator.mediaDevices?.getUserMedia) {
+        window.dispatchEvent(new Event('px-audio-unavailable'))
+        return
+      }
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
         const ctx = new AudioContext()
@@ -391,9 +396,10 @@ export default function LiquidName({
         // iOS exige un gesto para el micro → lo pedimos al primer toque.
         window.addEventListener('pointerdown', firstGesture, { once: true })
         window.addEventListener('touchstart', firstGesture, { once: true })
-      } else if (!reduce) {
-        initAudio()
       } else {
+        // Escritorio: NO pedir el micro al cargar (el navegador lo bloquea sin
+        // gesto y deja el botón «muerto»). Se activa con el botón «Activar
+        // sonido» o al primer clic en la página.
         window.addEventListener('pointerdown', firstGesture, { once: true })
       }
     }
