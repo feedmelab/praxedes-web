@@ -23,9 +23,12 @@ type MediaItem = {
 export default function ProjectGallery({
   images,
   locale,
+  letterbox = true,
 }: {
   images: MediaItem[]
   locale: 'es' | 'en'
+  /** Recortar franjas negras (fotograma) en las miniaturas. El visor no recorta. */
+  letterbox?: boolean
 }) {
   const [open, setOpen] = useState<number | null>(null)
   if (images.length === 0) return null
@@ -81,7 +84,9 @@ export default function ProjectGallery({
                   alt={alt}
                   fill
                   sizes={wide ? '100vw' : '(max-width: 640px) 100vw, 50vw'}
-                  className={`object-cover ${focalClass(m.focal)} brightness-[0.85] transition-all duration-700 ease-out-expo group-hover:scale-[1.03] group-hover:brightness-100`}
+                  className={`object-cover ${focalClass(m.focal)} brightness-[0.85] transition-all duration-700 ease-out-expo group-hover:brightness-100 ${
+                    letterbox ? 'scale-[1.38] group-hover:scale-[1.42]' : 'group-hover:scale-[1.03]'
+                  }`}
                 />
               )}
             </Reveal>

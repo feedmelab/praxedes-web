@@ -112,7 +112,11 @@ export default async function ProjectPage({
               {t('gallerySub')}
             </span>
           </div>
-          <ProjectGallery images={project.images} locale={locale} />
+          <ProjectGallery
+            images={project.images}
+            locale={locale}
+            letterbox={!project.coverLetterbox}
+          />
         </section>
       )}
 

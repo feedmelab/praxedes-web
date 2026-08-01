@@ -46,7 +46,7 @@ export default function ProjectCard({
           // `letterbox`: la portada es un fotograma con franjas negras → se
           // amplía un poco para recortarlas SOLO en la tarjeta del listado.
           className={`object-cover ${focalClass(coverFocal)} brightness-[0.72] grayscale-[0.35] transition-all duration-[1100ms] ease-out-expo group-hover:brightness-[0.85] group-hover:grayscale-0 ${
-            letterbox ? 'scale-[1.26] group-hover:scale-[1.32]' : 'group-hover:scale-105'
+            letterbox ? 'scale-[1.38] group-hover:scale-[1.44]' : 'group-hover:scale-105'
           }`}
         />
       ) : (
