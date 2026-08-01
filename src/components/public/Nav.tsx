@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Link } from '@/i18n/navigation'
+import { Link, usePathname } from '@/i18n/navigation'
 import LanguageSwitch from './LanguageSwitch'
 
 const LINKS = [
@@ -16,8 +16,13 @@ const LINKS = [
 
 export default function Nav() {
   const t = useTranslations('nav')
+  const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+
+  // Activo si la ruta actual empieza por el href del enlace (p. ej. un proyecto
+  // dentro de /gallery no marca nada, pero /about sí marca «Sobre mí»).
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
@@ -45,7 +50,10 @@ export default function Nav() {
           <Link
             key={l.key}
             href={l.href}
-            className="underline-hover text-[0.7rem] uppercase tracking-[0.18em] text-soft transition-colors hover:text-light"
+            aria-current={isActive(l.href) ? 'page' : undefined}
+            className={`underline-hover text-[0.7rem] uppercase tracking-[0.18em] transition-colors hover:text-light ${
+              isActive(l.href) ? 'text-accent' : 'text-soft'
+            }`}
           >
             {t(l.key)}
           </Link>
@@ -72,7 +80,10 @@ export default function Nav() {
               key={l.key}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="text-sm uppercase tracking-[0.18em] text-soft"
+              aria-current={isActive(l.href) ? 'page' : undefined}
+              className={`text-sm uppercase tracking-[0.18em] ${
+                isActive(l.href) ? 'text-accent' : 'text-soft'
+              }`}
             >
               {t(l.key)}
             </Link>
