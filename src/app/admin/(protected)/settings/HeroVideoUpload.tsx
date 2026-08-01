@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, Field, TextInput } from '../_components/ui'
 import { saveHeroVideoUrl, deleteHeroVideo, type HeroVideo } from './actions'
 
@@ -14,10 +15,16 @@ export default function HeroVideoUpload({
   current?: string | null
   videos: HeroVideo[]
 }) {
+  const router = useRouter()
   const [url, setUrl] = useState(current ?? '')
+  const [list, setList] = useState<HeroVideo[]>(videos)
   const [busy, setBusy] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [msg, setMsg] = useState<{ error?: string; ok?: boolean } | null>(null)
   const [pending, startTransition] = useTransition()
+
+  // Sincroniza con el listado del servidor cuando cambie (tras router.refresh()).
+  useEffect(() => setList(videos), [videos])
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -30,6 +37,7 @@ export default function HeroVideoUpload({
       return
     }
     setBusy(true)
+    setProgress(0)
     setMsg(null)
     try {
       const authRes = await fetch('/api/imagekit-auth')
@@ -46,17 +54,45 @@ export default function HeroVideoUpload({
       fd.append('folder', '/praxedes/hero')
       fd.append('useUniqueFileName', 'true')
 
-      const up = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
-        method: 'POST',
-        body: fd,
+      // XHR para tener progreso real de subida.
+      const j = await new Promise<{ url: string; message?: string }>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', 'https://upload.imagekit.io/api/v1/files/upload')
+        xhr.upload.onprogress = (ev) => {
+          if (ev.lengthComputable) setProgress(Math.round((ev.loaded / ev.total) * 100))
+        }
+        xhr.onload = () => {
+          try {
+            const data = JSON.parse(xhr.responseText)
+            if (xhr.status >= 200 && xhr.status < 300) resolve(data)
+            else reject(new Error(data?.message || 'Error al subir'))
+          } catch {
+            reject(new Error('Respuesta inválida al subir'))
+          }
+        }
+        xhr.onerror = () => reject(new Error('Error de red al subir'))
+        xhr.send(fd)
       })
-      const j = await up.json()
-      if (!up.ok) throw new Error(j?.message || 'Error al subir')
 
+      setProgress(100)
       const res = await saveHeroVideoUrl(j.url)
       if (res?.error) throw new Error(res.error)
       setUrl(j.url)
       setMsg({ ok: true })
+      // Optimista: añade el vídeo al listado ya mismo…
+      const jj = j as { url: string; fileId?: string; name?: string; size?: number }
+      if (jj.fileId) {
+        setList((prev) => [
+          {
+            fileId: jj.fileId!,
+            name: jj.name ?? file.name,
+            url: jj.url,
+            size: jj.size ?? file.size,
+          },
+          ...prev.filter((x) => x.fileId !== jj.fileId),
+        ])
+      }
+      router.refresh() // …y sincroniza con el servidor
     } catch (err) {
       setMsg({ error: err instanceof Error ? err.message : 'Error al subir' })
     } finally {
@@ -73,9 +109,17 @@ export default function HeroVideoUpload({
   }
   function remove(v: HeroVideo) {
     if (!confirm(`¿Borrar "${v.name}" de ImageKit? No se puede deshacer.`)) return
+    // Optimista: quítalo del listado ya mismo.
+    setList((prev) => prev.filter((x) => x.fileId !== v.fileId))
+    if (url === v.url) setUrl('')
     startTransition(async () => {
-      await deleteHeroVideo(v.fileId, v.url)
-      if (url === v.url) setUrl('')
+      const res = await deleteHeroVideo(v.fileId, v.url)
+      if (res?.error) {
+        // Falló: restáuralo y avisa.
+        setList((prev) => [v, ...prev])
+        setMsg({ error: res.error })
+      }
+      router.refresh()
     })
   }
 
@@ -91,20 +135,32 @@ export default function HeroVideoUpload({
         </p>
       </header>
 
-      <Field label={busy ? 'Subiendo…' : 'Subir vídeo (.mp4)'}>
+      <Field label={busy ? `Subiendo… ${progress}%` : 'Subir vídeo (.mp4)'}>
         <TextInput type="file" accept="video/mp4,video/*" onChange={onFile} disabled={busy} />
       </Field>
 
-      {msg?.error && <p className="mt-2 text-xs text-red-400">{msg.error}</p>}
-      {msg?.ok && <p className="mt-2 text-xs text-green-400">Vídeo subido y activado.</p>}
+      {busy && (
+        <div className="mt-3 flex items-center gap-3">
+          <div className="h-1 flex-1 overflow-hidden rounded bg-border">
+            <div
+              className="h-full bg-accent transition-[width] duration-200 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="text-[11px] tabular-nums text-muted">{progress}%</span>
+        </div>
+      )}
 
-      {videos.length > 0 && (
+      {msg?.error && <p className="mt-2 text-xs text-red-400">{msg.error}</p>}
+      {msg?.ok && !busy && <p className="mt-2 text-xs text-green-400">Vídeo subido y activado.</p>}
+
+      {list.length > 0 && (
         <div className="mt-6 space-y-3">
           <p className="text-[11px] uppercase tracking-[0.14em] text-muted">
-            Vídeos subidos ({videos.length})
+            Vídeos subidos ({list.length})
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
-            {videos.map((v) => {
+            {list.map((v) => {
               const active = v.url === url
               return (
                 <div
@@ -113,12 +169,12 @@ export default function HeroVideoUpload({
                 >
                   <video
                     src={v.url}
+                    autoPlay
                     muted
                     loop
                     playsInline
-                    className="aspect-video w-full rounded object-cover"
-                    onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
-                    onMouseLeave={(e) => e.currentTarget.pause()}
+                    preload="auto"
+                    className="aspect-video w-full rounded bg-black object-cover"
                   />
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <span className="min-w-0 flex-1 truncate font-mono text-[10px] text-muted">

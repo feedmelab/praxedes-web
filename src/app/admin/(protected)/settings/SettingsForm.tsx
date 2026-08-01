@@ -251,7 +251,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       <Card>
         <SectionHead
           title="Capas del vídeo de portada"
-          desc="Oscurecido del vídeo y fundido al color de la página. El fundido global se aplica al hacer scroll."
+          desc="Oscurecido y fundidos del vídeo. El «oscurecido» se aplica también a las franjas de vídeo que asoman al hacer scroll."
         />
         <div className="grid gap-6 sm:grid-cols-3">
           <RangeField
