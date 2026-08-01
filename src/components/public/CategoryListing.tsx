@@ -43,6 +43,7 @@ export default async function CategoryListing({
                 meta={`${CATEGORY_LABELS[locale][p.category]} · ${p.year}`}
                 coverImage={p.coverImage}
                 coverFocal={p.coverFocal}
+                letterbox={!p.coverLetterbox}
                 index={i}
               />
             </Reveal>
