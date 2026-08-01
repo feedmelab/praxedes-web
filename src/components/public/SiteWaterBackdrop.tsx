@@ -31,7 +31,7 @@ export default function SiteWaterBackdrop({
       vimeoId={vimeoId}
       heroBelow={isHome}
       headerBias={!isHome}
-      opacityScale={isHome ? 1 : 0.6}
+      opacityScale={isHome ? 1 : 1.8}
     />
   )
 }
