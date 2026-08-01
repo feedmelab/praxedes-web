@@ -37,7 +37,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
     <div className="px-6 pb-24 pt-32 sm:px-10 lg:px-16 lg:pt-44">
       <div className="grid grid-cols-1 gap-10 md:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <Reveal
-          className="mx-auto aspect-[4/5] w-full max-w-[460px] self-center overflow-hidden border border-border"
+          className="aspect-[4/5] max-w-[340px] overflow-hidden border border-border md:max-w-none"
           as="div"
         >
           {settings?.aboutImage ? (

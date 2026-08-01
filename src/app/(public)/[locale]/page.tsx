@@ -99,7 +99,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* Sobre mí (teaser) */}
       <section className="grid grid-cols-1 items-center gap-8 px-6 py-16 sm:px-10 md:grid-cols-2 lg:gap-20 lg:px-16 lg:py-36">
         <Reveal
-          className="aspect-[4/5] max-w-[340px] overflow-hidden border border-border md:max-w-none"
+          className="mx-auto aspect-[4/5] w-full max-w-[460px] self-center overflow-hidden border border-border"
           as="div"
         >
           {settings?.aboutImage ? (
