@@ -92,7 +92,10 @@ export default function Intro() {
       )
 
       // Levanta cuando todo esté completo, respetando el mínimo en pantalla.
-      const ready = page >= 1 && (!hasVideo || video >= 0.995)
+      // En iOS el vídeo puede no bufferar al 100 % aunque ya se reproduzca;
+      // con que esté listo para reproducir (readyState alto) basta para abrir.
+      const anyPlayable = vids.some((v) => v.readyState >= 3)
+      const ready = page >= 1 && (!hasVideo || video >= 0.9 || anyPlayable)
       if (ready && elapsed >= MIN) lift()
       if (!lifted) raf = requestAnimationFrame(tick)
     }

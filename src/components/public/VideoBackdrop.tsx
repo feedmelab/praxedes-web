@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { parseVimeo } from '@/lib/utils'
+import BackgroundVideo from './BackgroundVideo'
 
 // Máscaras SVG con formas de «agua»: manchas orgánicas (blobs + elipses)
 // desenfocadas con feGaussianBlur, así los bordes se difuminan por completo y
@@ -134,15 +135,7 @@ export function WaterVideoLayer({
         style={{ top: '-24%', height: '148%' }}
       >
         {mp4 ? (
-          <video
-            src={mp4}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            className="h-full w-full object-cover"
-          />
+          <BackgroundVideo src={mp4} className="h-full w-full object-cover" />
         ) : (
           <iframe
             src={`https://player.vimeo.com/video/${id}?${hash ? `h=${hash}&` : ''}background=1&autoplay=1&loop=1&muted=1&dnt=1`}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import LiquidName from './LiquidName'
 import MicInfo from './MicInfo'
+import BackgroundVideo from './BackgroundVideo'
 import { parseVimeo } from '@/lib/utils'
 
 // Hero de la home. Reel de Vimeo de fondo (si existe) con parallax sutil.
@@ -65,13 +66,8 @@ export default function Hero({
     <header className="relative flex h-screen min-h-[600px] flex-col items-center justify-center overflow-hidden text-center">
       <div ref={mediaRef} className="parallax-layer absolute inset-0 z-0">
         {reelMp4Url ? (
-          <video
+          <BackgroundVideo
             src={reelMp4Url}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
             className="absolute left-1/2 top-1/2 h-full min-h-full w-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
           />
         ) : reelId ? (
