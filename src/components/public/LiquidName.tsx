@@ -387,24 +387,20 @@ export default function LiquidName({
       })
       ro.observe(wrap!)
       const touch = window.matchMedia('(hover: none), (pointer: coarse)').matches
-      if (touch) {
+      if (touch && !reduce) {
         // Sin hover no hay charco → ondulación ambiente (salvo reduce motion).
-        if (!reduce) {
-          s.ambient = 1
-          startLoop()
-        }
-        // iOS exige un gesto para el micro → lo pedimos al primer toque.
-        window.addEventListener('pointerdown', firstGesture, { once: true })
-        window.addEventListener('touchstart', firstGesture, { once: true })
-      } else {
-        // Escritorio: NO pedir el micro al cargar (el navegador lo bloquea sin
-        // gesto y deja el botón «muerto»). Se activa con el botón «Activar
-        // sonido» o al primer clic en la página.
-        window.addEventListener('pointerdown', firstGesture, { once: true })
+        s.ambient = 1
+        startLoop()
       }
-    }
-    function firstGesture() {
-      initAudio()
+      // Si el permiso del micro YA está concedido (visitas anteriores), se
+      // activa solo al cargar (getUserMedia no vuelve a preguntar). Si está en
+      // «prompt»/«denied», no se pide al cargar: queda para el botón del popup.
+      navigator.permissions
+        ?.query?.({ name: 'microphone' as PermissionName })
+        .then((st) => {
+          if (st.state === 'granted') initAudio()
+        })
+        .catch(() => {})
     }
     function onEnableAudio() {
       initAudio()
@@ -426,8 +422,6 @@ export default function LiquidName({
       cv.removeEventListener('pointermove', onMove)
       cv.removeEventListener('pointerenter', onEnter)
       cv.removeEventListener('pointerleave', onLeave)
-      window.removeEventListener('pointerdown', firstGesture)
-      window.removeEventListener('touchstart', firstGesture)
       window.removeEventListener('px-enable-audio', onEnableAudio)
       ;(window as Window & { __pxEnableAudio?: () => void }).__pxEnableAudio = undefined
       ro?.disconnect()
