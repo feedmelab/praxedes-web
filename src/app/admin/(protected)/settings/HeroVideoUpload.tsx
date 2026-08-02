@@ -18,13 +18,17 @@ export default function HeroVideoUpload({
   const router = useRouter()
   const [url, setUrl] = useState(current ?? '')
   const [list, setList] = useState<HeroVideo[]>(videos)
+  const [removed, setRemoved] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState(false)
   const [progress, setProgress] = useState(0)
   const [msg, setMsg] = useState<{ error?: string; ok?: boolean } | null>(null)
   const [pending, startTransition] = useTransition()
 
-  // Sincroniza con el listado del servidor cuando cambie (tras router.refresh()).
-  useEffect(() => setList(videos), [videos])
+  // Sincroniza con el listado del servidor, pero SIN resucitar los que ya se
+  // han borrado (ImageKit tarda un poco en reflejar el borrado en su listado).
+  useEffect(() => {
+    setList(videos.filter((v) => !removed.has(v.fileId)))
+  }, [videos, removed])
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -118,7 +122,10 @@ export default function HeroVideoUpload({
         // Falló: restáuralo y avisa.
         setList((prev) => [v, ...prev])
         setMsg({ error: res.error })
+        return
       }
+      // Recuérdalo como borrado para que el refresco no lo resucite.
+      setRemoved((prev) => new Set(prev).add(v.fileId))
       router.refresh()
     })
   }
