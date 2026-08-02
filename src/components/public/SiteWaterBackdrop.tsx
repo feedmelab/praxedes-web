@@ -24,7 +24,10 @@ export default function SiteWaterBackdrop({
 }) {
   const pathname = usePathname()
   const isHome = pathname === '/'
-  const scale = ((isHome ? 1 : 2.6) * waterOpacity) / 100
+  // Misma intensidad en home y en páginas internas: el slider reacciona igual
+  // en todas. (La diferencia real entre ellas es solo la posición: home cubre
+  // todo tras el hero; internas se concentran en el header.)
+  const scale = waterOpacity / 100
   const veil = Math.min(1, Math.max(0, waterDarken / 100))
 
   return (
