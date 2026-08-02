@@ -21,7 +21,15 @@ export default function BackgroundVideo({ src, className }: { src: string; class
       const p = v.play()
       if (p && typeof p.catch === 'function') p.catch(() => {})
     }
+    // iOS a veces no arranca hasta un load() explícito de la <source>.
+    try {
+      v.load()
+    } catch {
+      /* noop */
+    }
     tryPlay()
+    // Reintento corto por si el primer play() llega antes de estar listo.
+    const t = setTimeout(tryPlay, 400)
 
     const onGesture = () => tryPlay()
     const onVis = () => {
@@ -31,6 +39,7 @@ export default function BackgroundVideo({ src, className }: { src: string; class
     window.addEventListener('pointerdown', onGesture, { once: true })
     document.addEventListener('visibilitychange', onVis)
     return () => {
+      clearTimeout(t)
       window.removeEventListener('touchstart', onGesture)
       window.removeEventListener('pointerdown', onGesture)
       document.removeEventListener('visibilitychange', onVis)
@@ -38,15 +47,9 @@ export default function BackgroundVideo({ src, className }: { src: string; class
   }, [src])
 
   return (
-    <video
-      ref={ref}
-      src={src}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
-      className={className}
-    />
+    <video ref={ref} autoPlay muted loop playsInline preload="auto" className={className}>
+      {/* La <source> con type explícito ayuda a iOS a decidir reproducir. */}
+      <source src={src} type="video/mp4" />
+    </video>
   )
 }
