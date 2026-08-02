@@ -10,7 +10,6 @@ import {
   reconfirmReservation,
   deleteReservation,
   createBlock,
-  confirmGroup,
   cancelGroup,
   resolveGroup,
 } from '../actions'
@@ -109,9 +108,6 @@ export default function ReservationsManager({
   function onDelete(id: string) {
     startTransition(() => deleteReservation(id))
   }
-  function onConfirmGroup(groupId: string) {
-    startTransition(() => confirmGroup(groupId))
-  }
   function onCancelGroup(groupId: string) {
     if (!confirm('¿Rechazar/cancelar TODA la petición (todas sus prendas)?')) return
     startTransition(() => cancelGroup(groupId))
@@ -188,14 +184,6 @@ export default function ReservationsManager({
           </div>
           {anyPending && (
             <div className="flex shrink-0 flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => onConfirmGroup(groupId)}
-                className="rounded-sm bg-accent px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.15em] text-bg transition-all hover:bg-accent/90 disabled:opacity-40"
-              >
-                Confirmar petición
-              </button>
               <button
                 type="button"
                 disabled={pending}
@@ -416,26 +404,6 @@ export default function ReservationsManager({
                     )}
                   </div>
                   <div className="flex shrink-0 flex-wrap justify-end gap-2">
-                    {r.groupId && r.status === 'PENDING' && groupCounts[r.groupId] > 1 && (
-                      <>
-                        <button
-                          type="button"
-                          disabled={pending}
-                          onClick={() => onConfirmGroup(r.groupId!)}
-                          className="rounded-sm border border-accent bg-accent/10 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.15em] text-accent transition-all hover:bg-accent/20 disabled:opacity-40"
-                        >
-                          Confirmar petición
-                        </button>
-                        <button
-                          type="button"
-                          disabled={pending}
-                          onClick={() => onCancelGroup(r.groupId!)}
-                          className="rounded-sm border border-border px-3 py-1.5 text-[11px] uppercase tracking-[0.15em] text-soft transition-colors hover:border-red-400 hover:text-red-400 disabled:opacity-40"
-                        >
-                          Rechazar petición
-                        </button>
-                      </>
-                    )}
                     {r.status === 'PENDING' && (
                       <button
                         type="button"
