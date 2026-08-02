@@ -104,11 +104,40 @@
     "back": "Volver",
     "viewProject": "Ver proyecto",
     "loading": "Cargando…",
-    "noResults": "Sin resultados"
+    "noResults": "Sin resultados",
+    "bookOnlyThis": "Reservar solo esta prenda"
   },
   "notFound": {
     "title": "Página no encontrada",
     "text": "La página que buscas no existe o se ha movido.",
     "home": "Volver al inicio"
+  },
+  "cart": {
+    "title": "Tu selección",
+    "qty": "Cantidad",
+    "add": "Añadir al carrito",
+    "addMore": "Añadir otra",
+    "goToCart": "Ir al carrito",
+    "remove": "Quitar",
+    "start": "Desde",
+    "end": "Hasta",
+    "name": "Nombre",
+    "email": "Email",
+    "phone": "Teléfono",
+    "notes": "Notas",
+    "submit": "Enviar solicitud",
+    "sending": "Enviando…",
+    "sent": "Solicitud enviada",
+    "thanksTitle": "¡Gracias!",
+    "thanksBody": "Hemos recibido tu solicitud. Te escribiremos para confirmar la disponibilidad.",
+    "backToRental": "Volver al alquiler",
+    "emptyTitle": "Tu carrito está vacío",
+    "emptyBody": "Añade prendas desde el catálogo de alquiler.",
+    "browse": "Ver alquiler",
+    "onlyFree": "Solo quedan {n} en esas fechas",
+    "noStock": "Sin disponibilidad en esas fechas",
+    "someUnavailable": "Alguna prenda no está disponible en esas fechas. Ajusta cantidades o fechas.",
+    "invalid": "Revisa las fechas y tus datos.",
+    "error": "No se pudo enviar. Inténtalo de nuevo."
   }
 }

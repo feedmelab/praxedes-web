@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import BookingWidget from '@/components/public/BookingWidget'
+import AddToCart from '@/components/public/AddToCart'
 import RentalGallery from '@/components/public/RentalGallery'
 import { signedDisplayUrl } from '@/lib/imagekit'
 import {
@@ -74,13 +75,27 @@ export default async function RentalItemPage({
           </h1>
           {desc && <p className="mt-4 max-w-[46ch] text-soft">{desc}</p>}
 
-          <div className="mt-8">
-            <BookingWidget
+          <div className="mt-8 space-y-4">
+            <AddToCart
               itemId={item.id}
+              nameEs={item.nameEs}
+              nameEn={item.nameEn}
+              image={images[0]?.url ?? null}
               stock={item.stock}
-              reservations={reservations}
-              locale={locale}
             />
+            <details className="border border-border">
+              <summary className="cursor-pointer px-5 py-3 text-[0.66rem] uppercase tracking-[0.16em] text-muted transition-colors hover:text-accent">
+                {tc('bookOnlyThis')}
+              </summary>
+              <div className="border-t border-border p-5">
+                <BookingWidget
+                  itemId={item.id}
+                  stock={item.stock}
+                  reservations={reservations}
+                  locale={locale}
+                />
+              </div>
+            </details>
           </div>
         </div>
       </div>

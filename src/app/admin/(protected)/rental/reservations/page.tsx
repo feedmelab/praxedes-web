@@ -61,6 +61,7 @@ export default async function ReservationsPage({
     quantity: r.quantity,
     status: r.status,
     kind: r.kind,
+    groupId: r.groupId,
     customerName: r.customerName,
     customerEmail: r.customerEmail,
     customerPhone: r.customerPhone,

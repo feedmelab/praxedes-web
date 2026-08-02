@@ -7,6 +7,7 @@ import Nav from '@/components/public/Nav'
 import Footer from '@/components/public/Footer'
 import SiteWaterBackdrop from '@/components/public/SiteWaterBackdrop'
 import { NavSectionProvider } from '@/components/public/NavSection'
+import { CartProvider } from '@/components/public/CartContext'
 import Analytics from '@/components/public/Analytics'
 import HtmlLang from '@/components/public/HtmlLang'
 import MediaProtection from '@/components/public/MediaProtection'
@@ -42,11 +43,13 @@ export default async function PublicLayout({
         mp4={settings?.reelMp4Url}
         vimeoId={settings?.reelVimeoId}
       />
-      <NavSectionProvider>
-        <Nav />
-        <main className="protected-media">{children}</main>
-      </NavSectionProvider>
-      <Footer instagramUrl={settings?.instagramUrl} vimeoUrl={settings?.vimeoUrl} />
+      <CartProvider>
+        <NavSectionProvider>
+          <Nav />
+          <main className="protected-media">{children}</main>
+        </NavSectionProvider>
+        <Footer instagramUrl={settings?.instagramUrl} vimeoUrl={settings?.vimeoUrl} />
+      </CartProvider>
       <Analytics />
     </NextIntlClientProvider>
   )

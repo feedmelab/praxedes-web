@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Link, usePathname } from '@/i18n/navigation'
 import LanguageSwitch from './LanguageSwitch'
 import { useNavSection } from './NavSection'
+import CartLink from './CartLink'
 
 const LINKS = [
   { href: '/commercials', key: 'commercials' },
@@ -61,19 +62,23 @@ export default function Nav() {
             {t(l.key)}
           </Link>
         ))}
+        <CartLink />
         <LanguageSwitch />
       </div>
 
       {/* Mobile toggle */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="text-light md:hidden"
-        aria-label="Menú"
-        aria-expanded={open}
-      >
-        {open ? '✕' : '☰'}
-      </button>
+      <div className="flex items-center gap-5 md:hidden">
+        <CartLink onClick={() => setOpen(false)} />
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="text-light"
+          aria-label="Menú"
+          aria-expanded={open}
+        >
+          {open ? '✕' : '☰'}
+        </button>
+      </div>
 
       {/* Mobile panel */}
       {open && (

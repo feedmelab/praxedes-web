@@ -165,6 +165,7 @@ model Reservation {
   quantity  Int               @default(1)
   status    ReservationStatus @default(CONFIRMED)
   kind      ReservationKind   @default(CUSTOMER)
+  groupId   String? // agrupa varias prendas de una misma petición (carrito)
 
   customerName  String?
   customerEmail String?
@@ -177,6 +178,7 @@ model Reservation {
 
   @@index([itemId, startDate, endDate])
   @@index([status])
+  @@index([groupId])
 }
 
 // ── Site settings (singleton) ─────────────────────────────────

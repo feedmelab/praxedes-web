@@ -9,6 +9,7 @@ export const routing = defineRouting({
     '/film': { es: '/cine', en: '/film' },
     '/gallery': { es: '/galeria', en: '/gallery' },
     '/rental': { es: '/alquiler', en: '/rental' },
+    '/rental/cart': { es: '/alquiler/carrito', en: '/rental/cart' },
     '/rental/[id]': { es: '/alquiler/[id]', en: '/rental/[id]' },
     '/about': { es: '/sobre-mi', en: '/about' },
     '/contact': { es: '/contacto', en: '/contact' },

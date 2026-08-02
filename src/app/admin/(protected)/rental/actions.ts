@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { uploadFile, deleteFile } from '@/lib/imagekit'
-import { sendConfirmedEmail } from '@/lib/rental-emails'
+import { sendConfirmedEmail, sendConfirmedEmailMulti } from '@/lib/rental-emails'
 import type { RentalCategory } from '@prisma/client'
 
 import type { Focal } from '@/lib/focal'
@@ -256,6 +256,46 @@ export async function confirmReservation(id: string) {
 export async function cancelReservation(id: string) {
   await requireAuth()
   await prisma.reservation.update({ where: { id }, data: { status: 'CANCELLED' } })
+  revalidatePath('/admin/rental/reservations')
+  revalidatePublicRental()
+}
+
+// ── Acciones sobre toda una PETICIÓN (carrito: mismas groupId) ──
+
+export async function confirmGroup(groupId: string) {
+  await requireAuth()
+  const rows = await prisma.reservation.findMany({
+    where: { groupId, status: 'PENDING' },
+    include: { item: { select: { nameEs: true } } },
+  })
+  if (rows.length === 0) return
+  await prisma.reservation.updateMany({
+    where: { groupId, status: 'PENDING' },
+    data: { status: 'CONFIRMED' },
+  })
+  const first = rows[0]
+  if (first.customerEmail) {
+    await sendConfirmedEmailMulti(
+      {
+        items: rows.map((r) => ({ name: r.item.nameEs, quantity: r.quantity })),
+        name: first.customerName || '',
+        email: first.customerEmail,
+        start: first.startDate.toISOString().slice(0, 10),
+        end: first.endDate.toISOString().slice(0, 10),
+      },
+      first.locale
+    )
+  }
+  revalidatePath('/admin/rental/reservations')
+  revalidatePublicRental()
+}
+
+export async function cancelGroup(groupId: string) {
+  await requireAuth()
+  await prisma.reservation.updateMany({
+    where: { groupId, status: { in: ['PENDING', 'CONFIRMED'] } },
+    data: { status: 'CANCELLED' },
+  })
   revalidatePath('/admin/rental/reservations')
   revalidatePublicRental()
 }

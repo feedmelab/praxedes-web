@@ -4,7 +4,14 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { Card, Badge } from '../../_components/ui'
 import Pagination from '../../_components/Pagination'
-import { cancelReservation, confirmReservation, deleteReservation, createBlock } from '../actions'
+import {
+  cancelReservation,
+  confirmReservation,
+  deleteReservation,
+  createBlock,
+  confirmGroup,
+  cancelGroup,
+} from '../actions'
 
 type Tab = 'requests' | 'upcoming' | 'past' | 'cancelled'
 const BASE = '/admin/rental/reservations'
@@ -18,6 +25,7 @@ type Reservation = {
   quantity: number
   status: 'PENDING' | 'CONFIRMED' | 'CANCELLED'
   kind: 'CUSTOMER' | 'BLOCK'
+  groupId: string | null
   customerName: string | null
   customerEmail: string | null
   customerPhone: string | null
@@ -90,6 +98,19 @@ export default function ReservationsManager({
   function onDelete(id: string) {
     startTransition(() => deleteReservation(id))
   }
+  function onConfirmGroup(groupId: string) {
+    startTransition(() => confirmGroup(groupId))
+  }
+  function onCancelGroup(groupId: string) {
+    if (!confirm('¿Rechazar/cancelar TODA la petición (todas sus prendas)?')) return
+    startTransition(() => cancelGroup(groupId))
+  }
+
+  // Nº de prendas por petición dentro de la página actual (para el badge).
+  const groupCounts = reservations.reduce<Record<string, number>>((acc, r) => {
+    if (r.groupId) acc[r.groupId] = (acc[r.groupId] ?? 0) + 1
+    return acc
+  }, {})
   function onBlock(fd: FormData) {
     startTransition(async () => {
       const res = await createBlock(null, fd)
@@ -176,8 +197,34 @@ export default function ReservationsManager({
                     </Badge>
                     {r.status === 'PENDING' && <Badge tone="accent">Pendiente</Badge>}
                     {r.status === 'CANCELLED' && <Badge tone="red">Cancelada</Badge>}
+                    {r.groupId && (
+                      <Badge tone="muted">
+                        Petición #{r.groupId.slice(0, 6)}
+                        {groupCounts[r.groupId] > 1 ? ` · ${groupCounts[r.groupId]} prendas` : ''}
+                      </Badge>
+                    )}
                   </div>
-                  <div className="flex shrink-0 gap-2">
+                  <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                    {r.groupId && r.status === 'PENDING' && groupCounts[r.groupId] > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => onConfirmGroup(r.groupId!)}
+                          className="rounded-sm border border-accent bg-accent/10 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.15em] text-accent transition-all hover:bg-accent/20 disabled:opacity-40"
+                        >
+                          Confirmar petición
+                        </button>
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => onCancelGroup(r.groupId!)}
+                          className="rounded-sm border border-border px-3 py-1.5 text-[11px] uppercase tracking-[0.15em] text-soft transition-colors hover:border-red-400 hover:text-red-400 disabled:opacity-40"
+                        >
+                          Rechazar petición
+                        </button>
+                      </>
+                    )}
                     {r.status === 'PENDING' && (
                       <button
                         type="button"

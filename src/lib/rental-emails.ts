@@ -87,3 +87,73 @@ export async function sendConfirmedEmail(r: ReservationInfo, locale: string) {
   const t = await renderForCustomer('rental_confirmed', r, norm(locale))
   await resend(r.email, t.subject, t.body)
 }
+
+// ── Petición con VARIAS prendas (carrito) ────────────────────
+type MultiRequestInfo = {
+  items: { name: string; quantity: number }[]
+  name: string
+  email: string
+  phone?: string
+  notes?: string
+  start: string
+  end: string
+}
+
+// Solicitud recibida con varias prendas: un email al admin con el listado y un
+// email de recepción al cliente (reutiliza la plantilla 'rental_request', con
+// {item} = listado de prendas y {quantity} = total de unidades).
+export async function sendRequestEmailsMulti(r: MultiRequestInfo, locale: string) {
+  const period = `${r.start} → ${r.end}`
+  const list = r.items.map((i) => `${i.name} (x${i.quantity})`).join(', ')
+  const totalQty = r.items.reduce((n, i) => n + i.quantity, 0)
+
+  const owner = await ownerEmail()
+  if (owner) {
+    const lines = r.items.map((i) => `  · ${i.name} (x${i.quantity})`).join('\n')
+    await resend(
+      owner,
+      `Nueva SOLICITUD de reserva — ${r.items.length} prenda(s)`,
+      `Tienes una nueva solicitud pendiente de confirmar.\n\n` +
+        `Prendas:\n${lines}\n\nFechas: ${period}\n\n` +
+        `Cliente: ${r.name}\nEmail: ${r.email}\nTeléfono: ${r.phone || '—'}\nNotas: ${r.notes || '—'}\n\n` +
+        `Entra en el panel → Reservas para confirmarla o rechazarla.`
+    )
+  } else {
+    console.error('Resend alquiler: sin email de destino (contactEmail/CONTACT_TO)')
+  }
+
+  const t = await renderForCustomer(
+    'rental_request',
+    {
+      itemName: list,
+      name: r.name,
+      email: r.email,
+      phone: r.phone,
+      notes: r.notes,
+      start: r.start,
+      end: r.end,
+      quantity: totalQty,
+    },
+    norm(locale)
+  )
+  await resend(r.email, t.subject, t.body)
+}
+
+// Petición con varias prendas CONFIRMADA: un email al cliente en su idioma.
+export async function sendConfirmedEmailMulti(r: MultiRequestInfo, locale: string) {
+  const list = r.items.map((i) => `${i.name} (x${i.quantity})`).join(', ')
+  const totalQty = r.items.reduce((n, i) => n + i.quantity, 0)
+  const t = await renderForCustomer(
+    'rental_confirmed',
+    {
+      itemName: list,
+      name: r.name,
+      email: r.email,
+      start: r.start,
+      end: r.end,
+      quantity: totalQty,
+    },
+    norm(locale)
+  )
+  await resend(r.email, t.subject, t.body)
+}

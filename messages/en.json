@@ -104,11 +104,40 @@
     "back": "Back",
     "viewProject": "View project",
     "loading": "Loading…",
-    "noResults": "No results"
+    "noResults": "No results",
+    "bookOnlyThis": "Book only this piece"
   },
   "notFound": {
     "title": "Page not found",
     "text": "The page you’re looking for doesn’t exist or has moved.",
     "home": "Back to home"
+  },
+  "cart": {
+    "title": "Your selection",
+    "qty": "Quantity",
+    "add": "Add to cart",
+    "addMore": "Add another",
+    "goToCart": "Go to cart",
+    "remove": "Remove",
+    "start": "From",
+    "end": "To",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "notes": "Notes",
+    "submit": "Send request",
+    "sending": "Sending…",
+    "sent": "Request sent",
+    "thanksTitle": "Thank you!",
+    "thanksBody": "We received your request. We will get in touch to confirm availability.",
+    "backToRental": "Back to rental",
+    "emptyTitle": "Your cart is empty",
+    "emptyBody": "Add pieces from the rental catalogue.",
+    "browse": "Browse rental",
+    "onlyFree": "Only {n} left for those dates",
+    "noStock": "Not available for those dates",
+    "someUnavailable": "Some piece is unavailable for those dates. Adjust quantities or dates.",
+    "invalid": "Check the dates and your details.",
+    "error": "Could not send. Please try again."
   }
 }
