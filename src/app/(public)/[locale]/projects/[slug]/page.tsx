@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import ProjectGallery from '@/components/public/ProjectGallery'
+import { SetNavSection } from '@/components/public/NavSection'
 import {
   getProjectBySlug,
   getPublishedSlugs,
@@ -55,8 +56,16 @@ export default async function ProjectPage({
   const title = localizedTitle(project, locale)
   const desc = localizedDesc(project, locale)
 
+  // Sección del menú a resaltar según la categoría del proyecto.
+  const sectionHref: Record<string, string> = {
+    COMMERCIALS: '/commercials',
+    FILM_TV: '/film',
+    EDITORIAL: '/gallery',
+  }
+
   return (
     <>
+      <SetNavSection href={sectionHref[project.category] ?? '/gallery'} />
       {/* Hero */}
       <header className="relative flex h-[82vh] min-h-[520px] items-end overflow-hidden px-6 pb-10 pt-32 sm:px-10 lg:px-16 lg:pb-20">
         <div className="absolute inset-0 z-0">

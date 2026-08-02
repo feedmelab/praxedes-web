@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link, usePathname } from '@/i18n/navigation'
 import LanguageSwitch from './LanguageSwitch'
+import { useNavSection } from './NavSection'
 
 const LINKS = [
   { href: '/commercials', key: 'commercials' },
@@ -17,12 +18,14 @@ const LINKS = [
 export default function Nav() {
   const t = useTranslations('nav')
   const pathname = usePathname()
+  const { override } = useNavSection()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
-  // Activo si la ruta actual empieza por el href del enlace (p. ej. un proyecto
-  // dentro de /gallery no marca nada, pero /about sí marca «Sobre mí»).
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
+  // Si una página fuerza sección (p. ej. el detalle de un proyecto indica su
+  // categoría), se marca ese enlace; si no, según la ruta actual.
+  const isActive = (href: string) =>
+    override ? override === href : pathname === href || pathname.startsWith(`${href}/`)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
