@@ -19,8 +19,8 @@ function signCover<T extends { coverImage: string | null }>(p: T): T {
 
 // Etiquetas de categoría por idioma para la web pública.
 export const CATEGORY_LABELS: Record<'es' | 'en', Record<ProjectCategory, string>> = {
-  es: { COMMERCIALS: 'Publicidad', FILM_TV: 'Cine y TV', EDITORIAL: 'Galería' },
-  en: { COMMERCIALS: 'Commercials', FILM_TV: 'Film & TV', EDITORIAL: 'Gallery' },
+  es: { COMMERCIALS: 'Publicidad', FILM_TV: 'Cine y TV', EDITORIAL: 'Editorial' },
+  en: { COMMERCIALS: 'Commercials', FILM_TV: 'Film & TV', EDITORIAL: 'Editorial' },
 }
 
 export type Locale = 'es' | 'en'

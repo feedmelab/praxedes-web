@@ -2,7 +2,7 @@
   "nav": {
     "commercials": "Publicidad",
     "film": "Cine y TV",
-    "gallery": "Galería",
+    "gallery": "Editorial",
     "rental": "Alquiler",
     "about": "Sobre mí",
     "contact": "Contacto"
@@ -31,7 +31,7 @@
     "subtitle": "Largometrajes y series"
   },
   "gallery": {
-    "title": "Galería",
+    "title": "Editorial",
     "subtitle": "Imágenes de producción"
   },
   "rental": {
