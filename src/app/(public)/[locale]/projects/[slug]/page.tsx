@@ -68,7 +68,15 @@ export default async function ProjectPage({
       <SetNavSection href={sectionHref[project.category] ?? '/gallery'} />
       {/* Hero */}
       <header className="relative flex h-[82vh] min-h-[520px] items-end overflow-hidden px-6 pb-10 pt-32 sm:px-10 lg:px-16 lg:pb-20">
-        <div className="absolute inset-0 z-0">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            // La imagen del fondo se FUNDE A TRANSPARENTE en la parte inferior
+            // (deja ver el color/página detrás), en vez de taparse con un color.
+            maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+          }}
+        >
           {project.coverImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -85,10 +93,8 @@ export default async function ProjectPage({
             />
           )}
         </div>
-        <div className="absolute inset-0 z-[1] bg-gradient-to-t from-bg via-bg/20 to-transparent" />
-        {/* Fundido inferior reforzado para que el borde de la imagen se funda
-            con el color de la página y no se note el corte. */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-2/5 bg-gradient-to-t from-bg via-bg/80 to-transparent" />
+        {/* Velo suave solo para legibilidad del texto (no solidifica el fondo). */}
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-bg/45 via-transparent to-transparent" />
         <div className="relative z-[2] w-full max-w-[1100px]">
           <div className="mb-4 text-[0.72rem] uppercase tracking-[0.28em] text-accent">
             {project.client}
