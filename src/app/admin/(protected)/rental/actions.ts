@@ -6,8 +6,13 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { uploadFile, deleteFile } from '@/lib/imagekit'
-import { sendConfirmedEmail, sendConfirmedEmailMulti } from '@/lib/rental-emails'
+import {
+  sendConfirmedEmail,
+  sendConfirmedEmailMulti,
+  sendGroupResolutionEmail,
+} from '@/lib/rental-emails'
 import type { RentalCategory } from '@prisma/client'
+import { freeUnits, BUFFER_DAYS } from '@/lib/rental-availability'
 
 import type { Focal } from '@/lib/focal'
 
@@ -260,6 +265,43 @@ export async function cancelReservation(id: string) {
   revalidatePublicRental()
 }
 
+// Reactivar una reserva CANCELADA → CONFIRMED, re-comprobando que aún hay
+// stock en esas fechas (excluyéndose a sí misma). Avisa al cliente.
+export async function reconfirmReservation(id: string): Promise<{ error?: string } | void> {
+  await requireAuth()
+  const r = await prisma.reservation.findUnique({
+    where: { id },
+    include: { item: { select: { nameEs: true, stock: true } } },
+  })
+  if (!r) return { error: 'No encontrada' }
+
+  const others = await prisma.reservation.findMany({
+    where: { itemId: r.itemId, status: { in: ['PENDING', 'CONFIRMED'] }, id: { not: id } },
+    select: { startDate: true, endDate: true, quantity: true },
+  })
+  const free = freeUnits(r.item.stock, { start: r.startDate, end: r.endDate }, others, BUFFER_DAYS)
+  if (free < r.quantity) {
+    return { error: `Sin disponibilidad en esas fechas (libres: ${Math.max(0, free)}).` }
+  }
+
+  await prisma.reservation.update({ where: { id }, data: { status: 'CONFIRMED' } })
+  if (r.customerEmail) {
+    await sendConfirmedEmail(
+      {
+        itemName: r.item.nameEs,
+        name: r.customerName || '',
+        email: r.customerEmail,
+        start: r.startDate.toISOString().slice(0, 10),
+        end: r.endDate.toISOString().slice(0, 10),
+        quantity: r.quantity,
+      },
+      r.locale
+    )
+  }
+  revalidatePath('/admin/rental/reservations')
+  revalidatePublicRental()
+}
+
 // ── Acciones sobre toda una PETICIÓN (carrito: mismas groupId) ──
 
 export async function confirmGroup(groupId: string) {
@@ -296,6 +338,56 @@ export async function cancelGroup(groupId: string) {
     where: { groupId, status: { in: ['PENDING', 'CONFIRMED'] } },
     data: { status: 'CANCELLED' },
   })
+  revalidatePath('/admin/rental/reservations')
+  revalidatePublicRental()
+}
+
+// Disponibilidad PARCIAL: confirma las prendas de `confirmIds` y rechaza el
+// resto de las PENDIENTES del grupo, con UN ÚNICO email resumen al cliente.
+export async function resolveGroup(groupId: string, confirmIds: string[]) {
+  await requireAuth()
+  const rows = await prisma.reservation.findMany({
+    where: { groupId, status: 'PENDING' },
+    include: { item: { select: { nameEs: true } } },
+  })
+  if (rows.length === 0) return
+  const confirmSet = new Set(confirmIds)
+  const confirmed = rows.filter((r) => confirmSet.has(r.id))
+  const rejected = rows.filter((r) => !confirmSet.has(r.id))
+
+  await prisma.$transaction([
+    ...(confirmed.length
+      ? [
+          prisma.reservation.updateMany({
+            where: { id: { in: confirmed.map((r) => r.id) } },
+            data: { status: 'CONFIRMED' },
+          }),
+        ]
+      : []),
+    ...(rejected.length
+      ? [
+          prisma.reservation.updateMany({
+            where: { id: { in: rejected.map((r) => r.id) } },
+            data: { status: 'CANCELLED' },
+          }),
+        ]
+      : []),
+  ])
+
+  const head = rows[0]
+  if (head.customerEmail) {
+    await sendGroupResolutionEmail(
+      {
+        confirmed: confirmed.map((r) => ({ name: r.item.nameEs, quantity: r.quantity })),
+        rejected: rejected.map((r) => ({ name: r.item.nameEs, quantity: r.quantity })),
+        name: head.customerName || '',
+        email: head.customerEmail,
+        start: head.startDate.toISOString().slice(0, 10),
+        end: head.endDate.toISOString().slice(0, 10),
+      },
+      head.locale
+    )
+  }
   revalidatePath('/admin/rental/reservations')
   revalidatePublicRental()
 }

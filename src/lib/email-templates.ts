@@ -18,33 +18,47 @@ export const TEMPLATE_LABELS: Record<TemplateKey, string> = {
 }
 
 // Variables disponibles en asunto y cuerpo.
-export const TEMPLATE_VARS = ['{name}', '{item}', '{quantity}', '{period}', '{start}', '{end}']
+// {items} = listado de prendas, una por línea (para peticiones con varias).
+// {item}  = nombre (o listado en una línea) — se mantiene por compatibilidad.
+export const TEMPLATE_VARS = [
+  '{name}',
+  '{items}',
+  '{item}',
+  '{quantity}',
+  '{period}',
+  '{start}',
+  '{end}',
+]
 
 export const TEMPLATE_DEFAULTS: Record<TemplateKey, TemplateFields> = {
   rental_request: {
-    subjectEs: 'Solicitud recibida — {item}',
+    subjectEs: 'Solicitud recibida',
     bodyEs:
       'Hola {name},\n\n' +
-      'Hemos recibido tu solicitud de alquiler de "{item}" (x{quantity}) para {period}.\n\n' +
+      'Hemos recibido tu solicitud de alquiler para {period}:\n\n' +
+      '{items}\n\n' +
       'Todavía NO está confirmada: la revisaremos y te enviaremos un email en cuanto quede confirmada.\n\n' +
       'Gracias,\nPráxedes de Vilallonga',
-    subjectEn: 'Request received — {item}',
+    subjectEn: 'Request received',
     bodyEn:
       'Hi {name},\n\n' +
-      'We’ve received your rental request for “{item}” (x{quantity}) for {period}.\n\n' +
+      'We’ve received your rental request for {period}:\n\n' +
+      '{items}\n\n' +
       'It is NOT confirmed yet: we’ll review it and email you as soon as the booking is confirmed.\n\n' +
       'Thank you,\nPráxedes de Vilallonga',
   },
   rental_confirmed: {
-    subjectEs: 'Reserva confirmada — {item}',
+    subjectEs: 'Reserva confirmada',
     bodyEs:
       'Hola {name},\n\n' +
-      'Tu reserva de "{item}" (x{quantity}) para {period} ya está CONFIRMADA.\n\n' +
+      'Tu reserva para {period} ya está CONFIRMADA:\n\n' +
+      '{items}\n\n' +
       'Gracias,\nPráxedes de Vilallonga',
-    subjectEn: 'Booking confirmed — {item}',
+    subjectEn: 'Booking confirmed',
     bodyEn:
       'Hi {name},\n\n' +
-      'Your rental of “{item}” (x{quantity}) for {period} is now CONFIRMED.\n\n' +
+      'Your rental for {period} is now CONFIRMED:\n\n' +
+      '{items}\n\n' +
       'Thank you,\nPráxedes de Vilallonga',
   },
 }

@@ -46,10 +46,22 @@ async function ownerEmail() {
 const norm = (l: string): EmailLocale => (l === 'en' ? 'en' : 'es')
 
 // Renderiza una plantilla (guardada o por defecto) con los datos de la reserva.
-async function renderForCustomer(key: TemplateKey, r: ReservationInfo, locale: EmailLocale) {
+// `itemsList` (opcional) es el listado de prendas de una petición con varias;
+// alimenta la variable {items} (una prenda por línea). Si no se pasa, {items}
+// muestra la única prenda.
+async function renderForCustomer(
+  key: TemplateKey,
+  r: ReservationInfo,
+  locale: EmailLocale,
+  itemsList?: { name: string; quantity: number }[]
+) {
   const tpl = await getTemplate(key)
+  const list =
+    itemsList && itemsList.length ? itemsList : [{ name: r.itemName, quantity: r.quantity }]
+  const items = list.map((i) => `· ${i.name} (x${i.quantity})`).join('\n')
   const vars = {
     name: r.name,
+    items,
     item: r.itemName,
     quantity: r.quantity,
     period: `${r.start} → ${r.end}`,
@@ -134,9 +146,58 @@ export async function sendRequestEmailsMulti(r: MultiRequestInfo, locale: string
       end: r.end,
       quantity: totalQty,
     },
-    norm(locale)
+    norm(locale),
+    r.items
   )
   await resend(r.email, t.subject, t.body)
+}
+
+// Resolución de una petición con disponibilidad PARCIAL: un ÚNICO email al
+// cliente con lo confirmado y lo no disponible, en su idioma.
+export async function sendGroupResolutionEmail(
+  r: {
+    confirmed: { name: string; quantity: number }[]
+    rejected: { name: string; quantity: number }[]
+    name: string
+    email: string
+    start: string
+    end: string
+  },
+  locale: string
+) {
+  const l = norm(locale)
+  const period = `${r.start} → ${r.end}`
+  const line = (i: { name: string; quantity: number }) => `  · ${i.name} (x${i.quantity})`
+  const conf = r.confirmed.map(line).join('\n')
+  const rej = r.rejected.map(line).join('\n')
+
+  const subject =
+    l === 'en'
+      ? r.rejected.length === 0
+        ? 'Your rental is confirmed'
+        : 'Your rental — availability update'
+      : r.rejected.length === 0
+        ? 'Tu reserva está confirmada'
+        : 'Tu reserva — actualización de disponibilidad'
+
+  const body =
+    l === 'en'
+      ? `Hi ${r.name},\n\nWe reviewed your rental request for ${period}.\n\n` +
+        (r.confirmed.length ? `Confirmed:\n${conf}\n\n` : '') +
+        (r.rejected.length ? `Not available for those dates:\n${rej}\n\n` : '') +
+        (r.rejected.length
+          ? `We're sorry for the unavailable pieces. Reply to this email and we'll help you find an alternative or new dates.\n\n`
+          : `Everything is confirmed. See you soon!\n\n`) +
+        `Thank you.`
+      : `Hola ${r.name},\n\nHemos revisado tu solicitud de alquiler para ${period}.\n\n` +
+        (r.confirmed.length ? `Confirmadas:\n${conf}\n\n` : '') +
+        (r.rejected.length ? `No disponibles en esas fechas:\n${rej}\n\n` : '') +
+        (r.rejected.length
+          ? `Sentimos las prendas no disponibles. Responde a este email y te ayudamos a buscar una alternativa o nuevas fechas.\n\n`
+          : `Todo queda confirmado. ¡Nos vemos pronto!\n\n`) +
+        `Gracias.`
+
+  await resend(r.email, subject, body)
 }
 
 // Petición con varias prendas CONFIRMADA: un email al cliente en su idioma.
@@ -153,7 +214,8 @@ export async function sendConfirmedEmailMulti(r: MultiRequestInfo, locale: strin
       end: r.end,
       quantity: totalQty,
     },
-    norm(locale)
+    norm(locale),
+    r.items
   )
   await resend(r.email, t.subject, t.body)
 }
