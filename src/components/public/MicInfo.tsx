@@ -12,27 +12,41 @@ export default function MicInfo({ text, locale }: { text: string; locale: 'es' |
   // disponible.
   const [canEnable, setCanEnable] = useState(false)
   const autoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autoOpened = useRef(false) // el popup se abrió solo (no por el usuario)
   const labels = MIC_INFO_LABELS[locale]
 
   useEffect(() => {
     if ((window as Window & { __pxAudioOn?: boolean }).__pxAudioOn) return
     setCanEnable(true)
-    const off = () => setCanEnable(false)
-    window.addEventListener('px-audio-on', off)
-    window.addEventListener('px-audio-unavailable', off)
+    const disable = () => setCanEnable(false)
+    const onAudioOn = () => {
+      setCanEnable(false)
+      // Si el popup se había abierto solo, ciérralo al activarse el micro.
+      if (autoOpened.current) {
+        if (autoTimer.current) {
+          clearTimeout(autoTimer.current)
+          autoTimer.current = null
+        }
+        setOpen(false)
+      }
+    }
+    window.addEventListener('px-audio-on', onAudioOn)
+    window.addEventListener('px-audio-unavailable', disable)
     return () => {
-      window.removeEventListener('px-audio-on', off)
-      window.removeEventListener('px-audio-unavailable', off)
+      window.removeEventListener('px-audio-on', onAudioOn)
+      window.removeEventListener('px-audio-unavailable', disable)
     }
   }, [])
 
   useEffect(() => {
-    // Se abre al cargar y se cierra a los 8 s (con un pequeño retardo para que
-    // se note la aparición).
+    // Se abre solo al cargar (y se cierra a los 8 s) SÓLO si el micro no está
+    // ya activado. Un pequeño retardo para dar tiempo a la auto-activación.
     const openTimer = setTimeout(() => {
+      if ((window as Window & { __pxAudioOn?: boolean }).__pxAudioOn) return
+      autoOpened.current = true
       setOpen(true)
       autoTimer.current = setTimeout(() => setOpen(false), 8000)
-    }, 600)
+    }, 1200)
     return () => {
       clearTimeout(openTimer)
       if (autoTimer.current) clearTimeout(autoTimer.current)
