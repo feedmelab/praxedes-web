@@ -86,6 +86,9 @@ export default async function ProjectPage({
           )}
         </div>
         <div className="absolute inset-0 z-[1] bg-gradient-to-t from-bg via-bg/20 to-transparent" />
+        {/* Fundido inferior reforzado para que el borde de la imagen se funda
+            con el color de la página y no se note el corte. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-2/5 bg-gradient-to-t from-bg via-bg/80 to-transparent" />
         <div className="relative z-[2] w-full max-w-[1100px]">
           <div className="mb-4 text-[0.72rem] uppercase tracking-[0.28em] text-accent">
             {project.client}
