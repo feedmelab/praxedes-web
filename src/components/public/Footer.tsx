@@ -43,7 +43,7 @@ export default function Footer({ instagramUrl, vimeoUrl }: Props) {
           <span>© {year} Práxedes de Vilallonga</span>
           <span className="text-border">·</span>
           <span>
-            Creado por{' '}
+            Made by{' '}
             <a
               href="mailto:xtorner@gmail.com"
               className="text-soft transition-colors hover:text-accent"
