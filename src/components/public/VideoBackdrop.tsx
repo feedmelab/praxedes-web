@@ -49,11 +49,10 @@ export function WaterVideoLayer({
   const { id, hash } = vimeoId ? parseVimeo(vimeoId) : { id: '', hash: undefined }
   const layerRef = useRef<HTMLDivElement>(null)
   const mediaRef = useRef<HTMLDivElement>(null)
-  // El fondo global (fixed) es muy tenue; las franjas por-sección (clientes,
-  // etc.) tienen más presencia como acento. Más «oscurecido» en Ajustes → menos.
-  const opacity = fixed
-    ? Math.max(0.03, 0.2 - darken * 0.24) * opacityScale
-    : Math.max(0.07, 0.2 - darken * 0.2)
+  // El fondo global (fixed) tiene su propia intensidad (opacityScale, editable
+  // en Ajustes) e IGNORA el «oscurecido» del hero para que subir aquél no lo
+  // apague. Las franjas por-sección (si se usan) sí atienden a `darken`.
+  const opacity = fixed ? Math.min(1, 0.12 * opacityScale) : Math.max(0.07, 0.2 - darken * 0.2)
 
   // Parallax vertical: al hacer scroll, el vídeo se desplaza más lento que la
   // página, simulando profundidad. En modo `fixed` (fondo global de toda la
