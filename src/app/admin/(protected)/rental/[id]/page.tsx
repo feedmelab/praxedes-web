@@ -28,7 +28,7 @@ export default async function EditRentalPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-10">
-      <PageHeader title={item.nameEs} back={{ href: '/admin/rental', label: 'Alquiler' }}>
+      <PageHeader title={item.nameEs} back={{ href: '/admin/rental', label: 'Archivo' }}>
         <a
           href="/es/alquiler"
           target="_blank"

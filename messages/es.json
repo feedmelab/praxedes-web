@@ -3,13 +3,13 @@
     "commercials": "Publicidad",
     "film": "Cine y TV",
     "gallery": "Editorial",
-    "rental": "Alquiler",
+    "rental": "Archivo",
     "about": "Sobre mí",
     "contact": "Contacto"
   },
   "home": {
     "eyebrow": "Estilismo · Diseño de vestuario",
-    "claim": "Estilista · Diseñadora de vestuario · Costume rental",
+    "claim": "Estilista · Diseñadora de vestuario · Costume archive",
     "scroll": "Desliza",
     "selectedWork": "Trabajo destacado",
     "selectedWorkIdx": "Cine · Publicidad · Moda",
@@ -35,7 +35,7 @@
     "subtitle": "Imágenes de producción"
   },
   "rental": {
-    "title": "Alquiler de vestuario",
+    "title": "Archivo de vestuario",
     "subtitle": "Fondo de vestuario para cine y publicidad",
     "cta": "Consultar disponibilidad",
     "all": "Todo",
@@ -130,10 +130,10 @@
     "sent": "Solicitud enviada",
     "thanksTitle": "¡Gracias!",
     "thanksBody": "Hemos recibido tu solicitud. Te escribiremos para confirmar la disponibilidad.",
-    "backToRental": "Volver al alquiler",
+    "backToRental": "Volver al archivo",
     "emptyTitle": "Tu carrito está vacío",
-    "emptyBody": "Añade prendas desde el catálogo de alquiler.",
-    "browse": "Ver alquiler",
+    "emptyBody": "Añade prendas desde el catálogo del archivo.",
+    "browse": "Ver archivo",
     "onlyFree": "Solo quedan {n} en esas fechas",
     "noStock": "Sin disponibilidad en esas fechas",
     "someUnavailable": "Alguna prenda no está disponible en esas fechas. Ajusta cantidades o fechas.",

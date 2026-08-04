@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 const links = [
   { href: '/admin', label: 'Panel' },
   { href: '/admin/projects', label: 'Proyectos' },
-  { href: '/admin/rental', label: 'Alquiler' },
+  { href: '/admin/rental', label: 'Archivo' },
   { href: '/admin/rental/reservations', label: 'Reservas' },
   { href: '/admin/emails', label: 'Emails' },
   { href: '/admin/vimeo', label: 'Vimeo' },
@@ -20,7 +20,7 @@ export default function AdminNav() {
   const pathname = usePathname()
 
   // La coincidencia más específica (href más largo) gana, para no marcar
-  // "Alquiler" y "Reservas" a la vez.
+  // "Archivo" y "Reservas" a la vez.
   const best = links
     .filter((l) => (l.href === '/admin' ? pathname === '/admin' : pathname.startsWith(l.href)))
     .sort((a, b) => b.href.length - a.href.length)[0]

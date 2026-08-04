@@ -11,6 +11,7 @@ export type HeroVideo = { fileId: string; name: string; url: string; size: numbe
 export async function listHeroVideos(): Promise<HeroVideo[]> {
   const session = await auth()
   if (!session) return []
+
   try {
     const files = (await listFiles('/praxedes/hero', 100)) as Array<{
       fileId?: string

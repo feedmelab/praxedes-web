@@ -73,10 +73,7 @@ export default async function ReservationsPage({
 
   return (
     <div className="space-y-8">
-      <PageHeader
-        title="Reservas de alquiler"
-        back={{ href: '/admin/rental', label: 'Alquiler' }}
-      />
+      <PageHeader title="Reservas del archivo" back={{ href: '/admin/rental', label: 'Archivo' }} />
       <ReservationsManager
         reservations={data}
         items={itemOptions}

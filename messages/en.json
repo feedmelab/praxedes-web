@@ -3,13 +3,13 @@
     "commercials": "Commercials",
     "film": "Film & TV",
     "gallery": "Editorial",
-    "rental": "Rental",
+    "rental": "Archive",
     "about": "About",
     "contact": "Contact"
   },
   "home": {
     "eyebrow": "Styling · Costume design",
-    "claim": "Stylist · Costume designer · Costume rental",
+    "claim": "Stylist · Costume designer · Costume archive",
     "scroll": "Scroll",
     "selectedWork": "Selected work",
     "selectedWorkIdx": "Film · Commercials · Fashion",
@@ -35,7 +35,7 @@
     "subtitle": "Production stills"
   },
   "rental": {
-    "title": "Costume rental",
+    "title": "Costume archive",
     "subtitle": "Costume stock for film and advertising",
     "cta": "Check availability",
     "all": "All",
@@ -130,10 +130,10 @@
     "sent": "Request sent",
     "thanksTitle": "Thank you!",
     "thanksBody": "We received your request. We will get in touch to confirm availability.",
-    "backToRental": "Back to rental",
+    "backToRental": "Back to archive",
     "emptyTitle": "Your cart is empty",
-    "emptyBody": "Add pieces from the rental catalogue.",
-    "browse": "Browse rental",
+    "emptyBody": "Add pieces from the archive.",
+    "browse": "Browse archive",
     "onlyFree": "Only {n} left for those dates",
     "noStock": "Not available for those dates",
     "someUnavailable": "Some piece is unavailable for those dates. Adjust quantities or dates.",

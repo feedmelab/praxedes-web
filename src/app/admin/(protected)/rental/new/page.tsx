@@ -12,7 +12,7 @@ export default function NewRentalPage() {
 
   return (
     <div>
-      <PageHeader title="Nueva pieza" back={{ href: '/admin/rental', label: 'Alquiler' }} />
+      <PageHeader title="Nueva pieza" back={{ href: '/admin/rental', label: 'Archivo' }} />
       <Card>
         <RentalForm action={action} submitLabel="Crear pieza" />
       </Card>

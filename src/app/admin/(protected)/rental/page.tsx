@@ -4,7 +4,7 @@ import { RENTAL_CATEGORIES } from '../projects/labels'
 import type { RentalImage } from './actions'
 import RentalList from './RentalList'
 
-export const metadata = { title: 'Alquiler' }
+export const metadata = { title: 'Archivo' }
 
 export default async function RentalPage() {
   const items = await prisma.rentalItem.findMany({
@@ -13,7 +13,7 @@ export default async function RentalPage() {
 
   return (
     <div>
-      <PageHeader title="Alquiler">
+      <PageHeader title="Archivo">
         <ButtonLink href="/admin/rental/new" variant="solid">
           + Nuevo
         </ButtonLink>

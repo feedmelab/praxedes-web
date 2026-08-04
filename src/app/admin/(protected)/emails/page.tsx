@@ -17,7 +17,7 @@ export default async function EmailsPage() {
     <div>
       <PageHeader title="Plantillas de email" />
       <p className="mb-6 max-w-[60ch] text-sm text-muted">
-        Textos de los correos automáticos de alquiler. Puedes usar estas variables, que se
+        Textos de los correos automáticos del archivo. Puedes usar estas variables, que se
         sustituyen al enviar: <code className="text-accent">{TEMPLATE_VARS.join('  ')}</code>.
       </p>
       <EmailTemplatesForm templates={templates} />

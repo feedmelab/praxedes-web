@@ -21,7 +21,7 @@ export default async function AdminDashboard() {
       href: '/admin/projects',
     },
     {
-      label: 'Alquiler',
+      label: 'Archivo',
       value: rentalTotal,
       hint: `${rentalAvailable} disponibles`,
       href: '/admin/rental',
