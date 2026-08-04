@@ -207,7 +207,11 @@ model SiteSettings {
   homeIntroEn  String?  @db.Text
   bioEs        String?  @db.Text
   bioEn        String?  @db.Text
-  aboutImage   String? // foto de «Sobre mí» (URL de ImageKit)
+  aboutImage       String? // foto de «Sobre mí» — centro (URL de ImageKit)
+  aboutImageTop    String? // variante arriba
+  aboutImageBottom String? // variante abajo
+  aboutImageLeft   String? // variante izquierda
+  aboutImageRight  String? // variante derecha
   micInfoEs    String?  @db.Text
   micInfoEn    String?  @db.Text
   clientsList  String?  @db.Text // lista curada (uno por línea); si vacío, se derivan de los proyectos

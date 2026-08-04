@@ -83,6 +83,10 @@ type Settings = {
   bioEs?: string | null
   bioEn?: string | null
   aboutImage?: string | null
+  aboutImageTop?: string | null
+  aboutImageBottom?: string | null
+  aboutImageLeft?: string | null
+  aboutImageRight?: string | null
   micInfoEs?: string | null
   micInfoEn?: string | null
   clientsList?: string | null
@@ -268,7 +272,15 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             <TextArea name="bioEn" defaultValue={s.bioEn ?? ''} className="min-h-[12rem]" />
           </Field>
         </div>
-        <AboutImageUpload current={s.aboutImage} />
+        <AboutImageUpload
+          images={{
+            center: s.aboutImage,
+            top: s.aboutImageTop,
+            bottom: s.aboutImageBottom,
+            left: s.aboutImageLeft,
+            right: s.aboutImageRight,
+          }}
+        />
       </Card>
 
       <Card>

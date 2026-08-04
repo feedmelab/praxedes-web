@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 import Reveal from '@/components/public/Reveal'
+import AboutPhotoStage from '@/components/public/AboutPhotoStage'
 import { getSettings, getClients, type Locale } from '@/lib/public-data'
 import { CLIENTS_FALLBACK, parseClients } from '@/lib/clients'
 import { signedDisplayUrl } from '@/lib/imagekit'
@@ -41,11 +42,16 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           as="div"
         >
           {settings?.aboutImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={signedDisplayUrl(settings.aboutImage)}
-              alt=""
-              className="h-full w-full object-cover"
+            <AboutPhotoStage
+              images={{
+                center: signedDisplayUrl(settings.aboutImage),
+                top: settings.aboutImageTop ? signedDisplayUrl(settings.aboutImageTop) : null,
+                bottom: settings.aboutImageBottom
+                  ? signedDisplayUrl(settings.aboutImageBottom)
+                  : null,
+                left: settings.aboutImageLeft ? signedDisplayUrl(settings.aboutImageLeft) : null,
+                right: settings.aboutImageRight ? signedDisplayUrl(settings.aboutImageRight) : null,
+              }}
             />
           ) : (
             <div

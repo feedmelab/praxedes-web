@@ -63,17 +63,28 @@ export async function saveHeroVideoUrl(url: string) {
   return { ok: true }
 }
 
-// Guarda (o borra con '') la URL de la foto de «Sobre mí» subida directamente a
-// ImageKit desde el navegador. Solo acepta URLs de ImageKit por seguridad.
-export async function saveAboutImage(url: string) {
+// Guarda (o borra con '') la URL de una foto de «Sobre mí» subida a ImageKit.
+// `slot` elige la posición del efecto cruz: centro (por defecto) o los 4 puntos.
+export type AboutSlot = 'center' | 'top' | 'bottom' | 'left' | 'right'
+const ABOUT_FIELD: Record<AboutSlot, string> = {
+  center: 'aboutImage',
+  top: 'aboutImageTop',
+  bottom: 'aboutImageBottom',
+  left: 'aboutImageLeft',
+  right: 'aboutImageRight',
+}
+
+export async function saveAboutImage(url: string, slot: AboutSlot = 'center') {
   const session = await auth()
   if (!session) return { error: 'No autorizado' }
   const clean = url.trim()
   if (clean && !/^https:\/\/[^/]*imagekit\.io\//.test(clean)) return { error: 'URL no válida' }
+  const field = ABOUT_FIELD[slot] ?? 'aboutImage'
+  const data = { [field]: clean || null } as Record<string, string | null>
   await prisma.siteSettings.upsert({
     where: { id: 'singleton' },
-    update: { aboutImage: clean || null },
-    create: { id: 'singleton', aboutImage: clean || null },
+    update: data,
+    create: { id: 'singleton', ...data },
   })
   revalidatePath('/admin/settings')
   revalidatePath('/', 'layout')
