@@ -223,3 +223,14 @@ model SiteSettings {
   vimeoUrl     String?
   updatedAt    DateTime @updatedAt
 }
+
+// Usuario con acceso privado al «Archivo» (catálogo de vestuario).
+model ArchiveUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String // hash bcrypt
+  name      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

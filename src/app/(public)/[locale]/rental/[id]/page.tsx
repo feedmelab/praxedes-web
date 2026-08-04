@@ -1,23 +1,16 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
-import { Link } from '@/i18n/navigation'
+import { Link, redirect } from '@/i18n/navigation'
 import BookingWidget from '@/components/public/BookingWidget'
 import AddToCart from '@/components/public/AddToCart'
 import RentalGallery from '@/components/public/RentalGallery'
 import { signedDisplayUrl } from '@/lib/imagekit'
-import {
-  getRentalItem,
-  getRentalItemIds,
-  RENTAL_LABELS,
-  type Locale,
-  type RentalImage,
-} from '@/lib/public-data'
+import { getRentalItem, RENTAL_LABELS, type Locale, type RentalImage } from '@/lib/public-data'
+import { getArchiveSession } from '@/lib/archive-auth'
 
-export async function generateStaticParams() {
-  const ids = await getRentalItemIds()
-  return ids.map((id) => ({ id }))
-}
+// Archivo privado (usa cookies) → siempre dinámico.
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({
   params,
@@ -39,6 +32,9 @@ export default async function RentalItemPage({
   const { locale: raw, id } = await params
   const locale = raw as Locale
   setRequestLocale(locale)
+
+  const session = await getArchiveSession()
+  if (!session) redirect('/rental/login')
 
   const item = await getRentalItem(id)
   if (!item) notFound()

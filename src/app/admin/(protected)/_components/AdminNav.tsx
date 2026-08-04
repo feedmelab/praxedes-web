@@ -10,6 +10,7 @@ const links = [
   { href: '/admin/projects', label: 'Proyectos' },
   { href: '/admin/rental', label: 'Archivo' },
   { href: '/admin/rental/reservations', label: 'Reservas' },
+  { href: '/admin/archive-users', label: 'Accesos' },
   { href: '/admin/emails', label: 'Emails' },
   { href: '/admin/vimeo', label: 'Vimeo' },
   { href: '/admin/settings', label: 'Ajustes' },

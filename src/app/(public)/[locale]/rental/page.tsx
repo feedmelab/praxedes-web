@@ -1,10 +1,15 @@
 import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
-import { Link } from '@/i18n/navigation'
+import { Link, redirect } from '@/i18n/navigation'
 import RentalGrid from '@/components/public/RentalGrid'
+import ArchiveLogout from '@/components/public/ArchiveLogout'
 import { getRentalItems, RENTAL_LABELS, type Locale, type RentalImage } from '@/lib/public-data'
 import { signedDisplayUrl } from '@/lib/imagekit'
 import { freeToday, nextAvailableDay } from '@/lib/rental-availability'
+import { getArchiveSession } from '@/lib/archive-auth'
+
+// El Archivo es privado: nada de caché estática.
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({
   params,
@@ -20,6 +25,10 @@ export default async function RentalPage({ params }: { params: Promise<{ locale:
   const { locale: raw } = await params
   const locale = raw as Locale
   setRequestLocale(locale)
+
+  // Acceso privado: sin sesión → login.
+  const session = await getArchiveSession()
+  if (!session) redirect('/rental/login')
 
   const t = await getTranslations('rental')
   const rows = await getRentalItems()
@@ -46,6 +55,9 @@ export default async function RentalPage({ params }: { params: Promise<{ locale:
   return (
     <div className="px-6 pb-24 pt-32 sm:px-10 lg:px-16 lg:pt-44">
       <header className="mb-10 lg:mb-16">
+        <div className="mb-2 flex items-center justify-end">
+          <ArchiveLogout />
+        </div>
         <h1 className="font-display text-[clamp(2.4rem,6vw,4.5rem)] font-normal leading-[1]">
           {t('title')}
         </h1>

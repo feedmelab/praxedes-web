@@ -139,5 +139,16 @@
     "someUnavailable": "Alguna prenda no está disponible en esas fechas. Ajusta cantidades o fechas.",
     "invalid": "Revisa las fechas y tus datos.",
     "error": "No se pudo enviar. Inténtalo de nuevo."
+  },
+  "archive": {
+    "title": "Archivo privado",
+    "subtitle": "Introduce tus datos de acceso para ver el archivo de vestuario.",
+    "email": "Email",
+    "password": "Contraseña",
+    "submit": "Entrar",
+    "loading": "Entrando…",
+    "error": "Email o contraseña incorrectos, o cuenta sin acceso.",
+    "help": "¿No tienes acceso? Escríbeme para solicitarlo.",
+    "logout": "Salir"
   }
 }

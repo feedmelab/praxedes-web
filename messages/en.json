@@ -139,5 +139,16 @@
     "someUnavailable": "Some piece is unavailable for those dates. Adjust quantities or dates.",
     "invalid": "Check the dates and your details.",
     "error": "Could not send. Please try again."
+  },
+  "archive": {
+    "title": "Private archive",
+    "subtitle": "Enter your access details to view the costume archive.",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Enter",
+    "loading": "Signing in…",
+    "error": "Wrong email or password, or account without access.",
+    "help": "No access yet? Get in touch to request it.",
+    "logout": "Log out"
   }
 }
