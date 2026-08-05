@@ -32,16 +32,42 @@ export default function AboutPhotoStage({ images }: { images: Imgs }) {
     let tx = 0
     let ty = 0 // objetivo (fracción -1..1)
     let cx = 0
-    let cy = 0 // actual (suavizado)
+    let cy = 0 // posición actual
+    let vx = 0
+    let vy = 0 // velocidad (para el muelle)
+    let cs = 1
+    let vsc = 0 // escala actual + su velocidad
     let raf = 0
     let running = false
 
+    // Muelle: rigidez baja + amortiguación media → entra con un rebote elástico.
+    const STIFF = 0.09
+    const DAMP = 0.76
+
     const loop = () => {
-      cx += (tx - cx) * 0.12
-      cy += (ty - cy) * 0.12
-      // Traslada la escena una celda como máximo (100% del marco por lado).
-      st.style.transform = `translate(${(-cx * 100) / 3}%, ${(-cy * 100) / 3}%)`
-      if (Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) {
+      vx += (tx - cx) * STIFF
+      vx *= DAMP
+      cx += vx
+      vy += (ty - cy) * STIFF
+      vy *= DAMP
+      cy += vy
+
+      // Zoom sutil cuanto más arrastrado esté (da cuerpo al gesto).
+      const pull = Math.min(1, Math.abs(cx) + Math.abs(cy))
+      const targetScale = 1 + pull * 0.08
+      vsc += (targetScale - cs) * 0.12
+      vsc *= 0.8
+      cs += vsc
+
+      st.style.transform = `translate(${(-cx * 100) / 3}%, ${(-cy * 100) / 3}%) scale(${cs.toFixed(4)})`
+
+      const settled =
+        Math.abs(tx - cx) < 0.0004 &&
+        Math.abs(ty - cy) < 0.0004 &&
+        Math.abs(vx) < 0.0004 &&
+        Math.abs(vy) < 0.0004 &&
+        Math.abs(targetScale - cs) < 0.0004
+      if (!settled) {
         raf = requestAnimationFrame(loop)
       } else {
         running = false
@@ -101,6 +127,11 @@ export default function AboutPhotoStage({ images }: { images: Imgs }) {
         <img src={bottom} alt="" className={`${cell} left-1/3 top-2/3`} />
         {/* eslint-enable @next/next/no-img-element */}
       </div>
+      {/* Viñeta interior para dar profundidad al arrastre */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ boxShadow: 'inset 0 0 90px rgba(0,0,0,.5)' }}
+      />
     </div>
   )
 }
