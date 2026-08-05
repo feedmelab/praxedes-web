@@ -4,6 +4,7 @@ import { useTransition } from 'react'
 import Image from 'next/image'
 import SubmitButton from '../../_components/SubmitButton'
 import { Field, TextInput } from '../../_components/ui'
+import FileButton from '../../_components/FileButton'
 import { useSortableList, SortableArea, SortableItem, DragHandle } from '../../_components/sortable'
 import {
   addFrame,
@@ -58,7 +59,7 @@ export default function FrameManager({
       >
         <div className="flex-1">
           <Field label="Añadir frame">
-            <TextInput type="file" name="file" accept="image/*" required />
+            <FileButton name="file" accept="image/*" caption="Añadir frame" required />
           </Field>
         </div>
         <div className="w-28">

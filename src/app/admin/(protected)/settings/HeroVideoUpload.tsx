@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, Field, TextInput } from '../_components/ui'
+import { Card } from '../_components/ui'
+import FileButton from '../_components/FileButton'
 import { saveHeroVideoUrl, deleteHeroVideo, type HeroVideo } from './actions'
 
 // Sube un vídeo de fondo (.mp4) DIRECTAMENTE a ImageKit desde el navegador (sin
@@ -142,9 +143,12 @@ export default function HeroVideoUpload({
         </p>
       </header>
 
-      <Field label={busy ? `Subiendo… ${progress}%` : 'Subir vídeo (.mp4)'}>
-        <TextInput type="file" accept="video/mp4,video/*" onChange={onFile} disabled={busy} />
-      </Field>
+      <FileButton
+        accept="video/mp4,video/*"
+        caption={busy ? `Subiendo… ${progress}%` : 'Añadir vídeo (.mp4)'}
+        onChange={onFile}
+        busy={busy}
+      />
 
       {busy && (
         <div className="mt-3 flex items-center gap-3">
