@@ -7,6 +7,7 @@ import ProjectActions from './ProjectActions'
 import ImageManager from './ImageManager'
 import VimeoCapture from './VimeoCapture'
 import { updateProject } from '../actions'
+import { previewHref } from '@/lib/maintenance'
 
 export const metadata = { title: 'Editar proyecto' }
 
@@ -38,7 +39,9 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     altEn: m.altEn ?? '',
   }))
 
-  const previewUrl = `/es/proyectos/${project.slug}`
+  // Pasa por /api/preview para activar el bypass del modo mantenimiento y poder
+  // previsualizar aunque la web esté en mantenimiento.
+  const previewUrl = previewHref(`/es/proyectos/${project.slug}`)
 
   return (
     <div className="space-y-10">

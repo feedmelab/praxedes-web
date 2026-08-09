@@ -2,9 +2,11 @@ import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
+import { cookies } from 'next/headers'
 import { routing } from '@/i18n/routing'
 import { getSettings } from '@/lib/public-data'
 import { auth } from '@/lib/auth'
+import { bypassToken, BYPASS_COOKIE } from '@/lib/maintenance'
 import Nav from '@/components/public/Nav'
 import Footer from '@/components/public/Footer'
 import SiteWaterBackdrop from '@/components/public/SiteWaterBackdrop'
@@ -45,11 +47,16 @@ export default async function PublicLayout({
     /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?$/i.test(host) || host.endsWith('.local')
   let maintenance =
     settings?.maintenanceMode === true && process.env.NODE_ENV === 'production' && !isLocalHost
-  // Excepción: un admin con sesión válida ve la web completa aunque esté en
-  // mantenimiento (para poder previsualizar y verificar antes de desactivarlo).
+  // Excepción (previsualización del admin): se salta el mantenimiento si hay
+  // cookie de bypass válida (activada desde el enlace de vista previa) o una
+  // sesión de admin válida (cuando admin y web comparten dominio).
   if (maintenance) {
-    const session = await auth()
-    if (session) maintenance = false
+    const hasBypass = (await cookies()).get(BYPASS_COOKIE)?.value === bypassToken()
+    if (hasBypass) maintenance = false
+    else {
+      const session = await auth()
+      if (session) maintenance = false
+    }
   }
   if (maintenance) {
     const loc = locale as Locale
