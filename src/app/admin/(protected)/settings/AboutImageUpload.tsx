@@ -18,10 +18,6 @@ const KIND_LABEL: Record<Kind, string> = {
   video: 'Solo vídeo',
 }
 const isVideoUrl = (src: string) => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(src)
-// Miniatura de vídeo: transcodifica a H.264/MP4 (ImageKit) para que se reproduzca
-// aunque el original sea HEVC/.mov.
-const videoThumbSrc = (src: string) =>
-  src.includes('?') ? `${src}&tr=f-mp4,q-80,vc-h264` : `${src}?tr=f-mp4,q-80,vc-h264`
 
 function SlotUpload({
   label,
@@ -102,7 +98,7 @@ function SlotUpload({
         {url ? (
           <>
             {isVideoUrl(url) ? (
-              <BackgroundVideo src={videoThumbSrc(url)} className="h-full w-full object-cover" />
+              <BackgroundVideo src={url} className="h-full w-full object-cover" />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={url} alt={label} className="h-full w-full object-cover" />

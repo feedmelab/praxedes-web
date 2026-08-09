@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import BackgroundVideo from './BackgroundVideo'
 
 type Imgs = {
@@ -13,30 +13,22 @@ type Imgs = {
 
 const isVideo = (src: string) => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(src)
 
-function Media({
-  src,
-  alt = '',
-  style,
-}: {
-  src: string
-  alt?: string
-  style?: React.CSSProperties
-}) {
-  const cls = 'absolute inset-0 h-full w-full object-cover'
+function Media({ src, alt = '' }: { src: string; alt?: string }) {
+  const cls = 'h-full w-full object-cover'
   return isVideo(src) ? (
-    <div className={cls} style={style}>
-      <BackgroundVideo src={src} className="h-full w-full object-cover" />
-    </div>
+    <BackgroundVideo src={src} className={cls} />
   ) : (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={alt} className={cls} style={style} />
+    <img src={src} alt={alt} className={cls} />
   )
 }
 
-// Las fotos van pasando solas, de vez en cuando, con un cross-dissolve de
-// opacidad auténtico y sutil. La entrante se funde por encima de la anterior
-// (que queda opaca debajo), así nunca se ve el fondo. Con «reduce motion» queda
-// fija en la primera.
+// Cross-dissolve auténtico y sutil entre fotos y/o vídeos. Todas las capas se
+// montan UNA vez y permanecen (los vídeos siguen reproduciéndose de fondo), así
+// nunca aparecen en negro por recargarse en cada transición. Solo se cruza la
+// opacidad: la entrante (cur) se funde por encima de la anterior (prev), que
+// queda opaca debajo hasta terminar. Con «reduce motion» queda fija en la
+// primera.
 export default function AboutPhotoStage({ images }: { images: Imgs }) {
   const pics = Array.from(
     new Set(
@@ -50,57 +42,39 @@ export default function AboutPhotoStage({ images }: { images: Imgs }) {
     () =>
       typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   )
-  const [baseSrc, setBaseSrc] = useState(pics[0] ?? '')
-  const [trans, setTrans] = useState<{ src: string; dur: number } | null>(null)
-  const [on, setOn] = useState(false) // dispara el fundido de la capa entrante
-  const layerRef = useRef<HTMLDivElement>(null)
+  const [cur, setCur] = useState(0)
+  const [prev, setPrev] = useState(0)
 
-  // Programa la próxima transición cuando la base está asentada.
   useEffect(() => {
-    if (reduce || pics.length < 2 || trans) return
+    if (reduce || pics.length < 2) return
     const delay = 4500 + Math.random() * 4000
     const id = setTimeout(() => {
-      const others = pics.filter((p) => p !== baseSrc)
-      const next = others[Math.floor(Math.random() * others.length)]
-      setOn(false)
-      setTrans({ src: next, dur: 2200 + Math.random() * 1400 }) // 2.2–3.6 s, sutil
+      setPrev(cur)
+      setCur((c) => {
+        let n = c
+        while (n === c) n = Math.floor(Math.random() * pics.length)
+        return n
+      })
     }, delay)
     return () => clearTimeout(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [baseSrc, reduce, pics.length, trans])
-
-  // Arranca el fundido en el frame siguiente al montar la capa entrante.
-  useEffect(() => {
-    if (!trans) return
-    const raf = requestAnimationFrame(() => requestAnimationFrame(() => setOn(true)))
-    return () => cancelAnimationFrame(raf)
-  }, [trans])
+  }, [cur, reduce, pics.length])
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      {/* Base: imagen asentada, siempre visible debajo. */}
-      <Media src={baseSrc} alt="Sobre mí" />
-
-      {/* Entrante: se funde por encima; al terminar, pasa a ser la base. */}
-      {trans && (
+      {pics.map((src, i) => (
         <div
-          ref={layerRef}
+          key={src}
           className="absolute inset-0"
           style={{
-            opacity: on ? 1 : 0,
-            transition: `opacity ${trans.dur}ms ease-in-out`,
+            opacity: i === cur || i === prev ? 1 : 0,
+            zIndex: i === cur ? 2 : i === prev ? 1 : 0,
+            transition: 'opacity 1800ms ease-in-out',
             willChange: 'opacity',
           }}
-          onTransitionEnd={(e) => {
-            if (e.propertyName !== 'opacity') return
-            setBaseSrc(trans.src)
-            setTrans(null)
-            setOn(false)
-          }}
         >
-          <Media src={trans.src} />
+          <Media src={src} alt={i === 0 ? 'Sobre mí' : ''} />
         </div>
-      )}
+      ))}
 
       {/* Viñeta interior para dar profundidad. */}
       <div

@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
@@ -36,9 +37,13 @@ export default async function PublicLayout({
 
   // Modo mantenimiento: la web pública se reduce a la portada (vídeo + nombre),
   // sin menú, sin footer y sin el resto de contenido ni el resto de páginas.
-  // Solo se aplica en producción; en desarrollo se ve siempre todo para poder
-  // seguir trabajando aunque esté activado.
-  const maintenance = settings?.maintenanceMode === true && process.env.NODE_ENV === 'production'
+  // NUNCA se aplica en local (aunque esté activado en producción y aunque se
+  // arranque con un build de producción): se detecta por el host de la petición.
+  const host = (await headers()).get('host') || ''
+  const isLocalHost =
+    /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?$/i.test(host) || host.endsWith('.local')
+  const maintenance =
+    settings?.maintenanceMode === true && process.env.NODE_ENV === 'production' && !isLocalHost
   if (maintenance) {
     const loc = locale as Locale
     const micInfo =
