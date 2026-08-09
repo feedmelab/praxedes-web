@@ -18,6 +18,10 @@ const KIND_LABEL: Record<Kind, string> = {
   video: 'Solo vídeo',
 }
 const isVideoUrl = (src: string) => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(src)
+// Miniatura de vídeo: transcodifica a H.264/MP4 (ImageKit) para que se reproduzca
+// aunque el original sea HEVC/.mov.
+const videoThumbSrc = (src: string) =>
+  src.includes('?') ? `${src}&tr=f-mp4,q-80,vc-h264` : `${src}?tr=f-mp4,q-80,vc-h264`
 
 function SlotUpload({
   label,
@@ -37,10 +41,18 @@ function SlotUpload({
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 15 * 1024 * 1024) {
-      setMsg('Máx. 15 MB.')
+    const isVid = file.type.startsWith('video/')
+    const maxMb = isVid ? 100 : 15
+    if (file.size > maxMb * 1024 * 1024) {
+      setMsg(`Máx. ${maxMb} MB.`)
       e.target.value = ''
       return
+    }
+    if (isVid && !/(mp4|webm)$/i.test(file.type)) {
+      // Aviso (no bloquea): .mov suele ser HEVC y no se reproduce en Chrome/Firefox.
+      setMsg(
+        'Aviso: usa .mp4 (H.264) o .webm; otros formatos pueden no reproducirse en el navegador.'
+      )
     }
     setBusy(true)
     setMsg(null)
@@ -90,7 +102,7 @@ function SlotUpload({
         {url ? (
           <>
             {isVideoUrl(url) ? (
-              <BackgroundVideo src={url} className="h-full w-full object-cover" />
+              <BackgroundVideo src={videoThumbSrc(url)} className="h-full w-full object-cover" />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={url} alt={label} className="h-full w-full object-cover" />

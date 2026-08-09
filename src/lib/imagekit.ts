@@ -73,6 +73,11 @@ export function isImageKitUrl(url: string): boolean {
  * dentro del día y next/image pueda cachear la imagen optimizada.
  * Las URLs que no son de ImageKit (p.ej. las de demo) se devuelven sin tocar.
  */
+// Transcodificación de vídeo a H.264/MP4: garantiza reproducción en todos los
+// navegadores aunque el original sea HEVC/.mov (que Chrome/Firefox no decodifican).
+export const VIDEO_DISPLAY_TR = 'f-mp4,q-80,vc-h264'
+const isVideoSrc = (u: string) => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u)
+
 export function signedDisplayUrl(url: string): string {
   if (!isImageKitUrl(url)) return url
   try {
@@ -82,6 +87,8 @@ export function signedDisplayUrl(url: string): string {
     const expireAbsolute = (Math.floor(nowSec / DAY) + 3) * DAY
     return ik().url({
       src: url,
+      // Vídeos: se entregan transcodificados a H.264/MP4.
+      transformation: isVideoSrc(url) ? [{ raw: VIDEO_DISPLAY_TR }] : undefined,
       signed: true,
       expireSeconds: expireAbsolute - nowSec, // ik-t = now + esto = valor estable del día
     })
