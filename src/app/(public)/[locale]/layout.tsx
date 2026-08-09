@@ -36,7 +36,9 @@ export default async function PublicLayout({
 
   // Modo mantenimiento: la web pública se reduce a la portada (vídeo + nombre),
   // sin menú, sin footer y sin el resto de contenido ni el resto de páginas.
-  const maintenance = settings?.maintenanceMode === true
+  // Solo se aplica en producción; en desarrollo se ve siempre todo para poder
+  // seguir trabajando aunque esté activado.
+  const maintenance = settings?.maintenanceMode === true && process.env.NODE_ENV === 'production'
   if (maintenance) {
     const loc = locale as Locale
     const micInfo =
