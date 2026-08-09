@@ -225,6 +225,7 @@ model SiteSettings {
   contactEmail String?
   instagramUrl String?
   vimeoUrl     String?
+  maintenanceMode Boolean @default(false) // si true, la web pública muestra solo el hero de la home
   updatedAt    DateTime @updatedAt
 }
 

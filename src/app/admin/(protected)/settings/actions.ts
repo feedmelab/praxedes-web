@@ -123,6 +123,8 @@ const settingsSchema = z.object({
   contactEmail: z.string().email('Email inválido').or(z.literal('')).optional(),
   instagramUrl: z.string().url('URL inválida').or(z.literal('')).optional(),
   vimeoUrl: z.string().url('URL inválida').or(z.literal('')).optional(),
+  // Checkbox: llega "on" si está marcado, ausente si no.
+  maintenanceMode: z.preprocess((v) => v === 'on' || v === 'true' || v === true, z.boolean()),
 })
 
 export async function updateSettings(
@@ -159,6 +161,7 @@ export async function updateSettings(
     contactEmail: parsed.data.contactEmail || null,
     instagramUrl: parsed.data.instagramUrl || null,
     vimeoUrl: parsed.data.vimeoUrl || null,
+    maintenanceMode: parsed.data.maintenanceMode ?? false,
   }
 
   await prisma.siteSettings.upsert({

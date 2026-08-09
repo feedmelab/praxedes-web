@@ -100,6 +100,7 @@ type Settings = {
   contactEmail?: string | null
   instagramUrl?: string | null
   vimeoUrl?: string | null
+  maintenanceMode?: boolean | null
 }
 
 function SectionHead({ title, desc }: { title: string; desc: string }) {
@@ -117,6 +118,29 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
 
   return (
     <form action={formAction} className="space-y-10">
+      <Card>
+        <SectionHead
+          title="Modo mantenimiento"
+          desc="Si lo activas, la web pública muestra solo la portada (vídeo y nombre): sin menú, sin el resto de la home ni las demás páginas. El panel admin sigue accesible."
+        />
+        <label className="flex cursor-pointer items-center gap-3 text-sm text-soft">
+          <input
+            type="checkbox"
+            name="maintenanceMode"
+            defaultChecked={!!s.maintenanceMode}
+            className="h-4 w-4 accent-accent"
+          />
+          <span>
+            Activar modo mantenimiento
+            {s.maintenanceMode ? (
+              <span className="ml-2 rounded-full border border-amber-400/50 bg-amber-400/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-amber-300">
+                Activo
+              </span>
+            ) : null}
+          </span>
+        </label>
+      </Card>
+
       <Card>
         <SectionHead
           title="Capas del vídeo de portada"

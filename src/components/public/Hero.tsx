@@ -20,6 +20,7 @@ export default function Hero({
   darken,
   fadeBottom,
   scrollFade,
+  hideScroll = false,
 }: {
   reelVimeoId?: string | null
   reelMp4Url?: string | null
@@ -30,6 +31,7 @@ export default function Hero({
   darken?: number | null
   fadeBottom?: number | null
   scrollFade?: number | null
+  hideScroll?: boolean
 }) {
   const darkenPct = (darken ?? 35) / 100
   const fadeBottomPct = (fadeBottom ?? 70) / 100
@@ -127,21 +129,23 @@ export default function Hero({
         </p>
       </div>
 
-      <button
-        type="button"
-        onClick={() => {
-          const el = document.getElementById('work')
-          if (el) el.scrollIntoView({ behavior: 'smooth' })
-          else window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
-        }}
-        aria-label={t('scroll')}
-        className={`absolute bottom-9 left-1/2 z-[2] flex -translate-x-1/2 flex-col items-center gap-3 text-[0.62rem] uppercase tracking-[0.25em] text-muted transition-[opacity,color] duration-700 hover:text-accent ${
-          scrolled ? 'pointer-events-none opacity-0' : 'opacity-100'
-        }`}
-      >
-        <span className={scrolled ? '' : 'hero-blink'}>{t('scroll')}</span>
-        <span className="h-10 w-px bg-gradient-to-b from-current to-transparent" />
-      </button>
+      {!hideScroll && (
+        <button
+          type="button"
+          onClick={() => {
+            const el = document.getElementById('work')
+            if (el) el.scrollIntoView({ behavior: 'smooth' })
+            else window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
+          }}
+          aria-label={t('scroll')}
+          className={`absolute bottom-9 left-1/2 z-[2] flex -translate-x-1/2 flex-col items-center gap-3 text-[0.62rem] uppercase tracking-[0.25em] text-muted transition-[opacity,color] duration-700 hover:text-accent ${
+            scrolled ? 'pointer-events-none opacity-0' : 'opacity-100'
+          }`}
+        >
+          <span className={scrolled ? '' : 'hero-blink'}>{t('scroll')}</span>
+          <span className="h-10 w-px bg-gradient-to-b from-current to-transparent" />
+        </button>
+      )}
 
       <MicInfo text={micInfo} locale={locale} />
 
