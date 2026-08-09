@@ -37,18 +37,24 @@ export default function BackgroundVideo({ src, className }: { src: string; class
       /* noop */
     }
     tryPlay()
-    // Reintento corto por si el primer play() llega antes de estar listo.
-    const t = setTimeout(tryPlay, 400)
+    // Reintentos escalonados por si el vídeo aún no está listo (p. ej. ImageKit
+    // transcodificando la primera vez): varios cortes + al estar disponible.
+    const timers = [200, 500, 1000, 2000, 4000].map((ms) => setTimeout(tryPlay, ms))
 
     const onGesture = () => tryPlay()
     const onVis = () => {
       if (document.visibilityState === 'visible') tryPlay()
     }
+    // En cuanto el navegador tiene datos suficientes, arranca.
+    v.addEventListener('loadeddata', tryPlay)
+    v.addEventListener('canplay', tryPlay)
     window.addEventListener('touchstart', onGesture, { once: true, passive: true })
     window.addEventListener('pointerdown', onGesture, { once: true })
     document.addEventListener('visibilitychange', onVis)
     return () => {
-      clearTimeout(t)
+      timers.forEach(clearTimeout)
+      v.removeEventListener('loadeddata', tryPlay)
+      v.removeEventListener('canplay', tryPlay)
       window.removeEventListener('touchstart', onGesture)
       window.removeEventListener('pointerdown', onGesture)
       document.removeEventListener('visibilitychange', onVis)
