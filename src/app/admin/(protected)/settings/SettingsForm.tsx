@@ -101,6 +101,7 @@ type Settings = {
   instagramUrl?: string | null
   vimeoUrl?: string | null
   maintenanceMode?: boolean | null
+  maintenanceText?: string | null
 }
 
 function SectionHead({ title, desc }: { title: string; desc: string }) {
@@ -139,6 +140,20 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             ) : null}
           </span>
         </label>
+
+        <div className="mt-6">
+          <Field
+            label="Texto sobre la portada (opcional)"
+            hint="Aviso que aparece bajo el nombre en mantenimiento (p. ej. «Volvemos pronto»). Vacío por defecto."
+          >
+            <TextArea
+              name="maintenanceText"
+              defaultValue={s.maintenanceText ?? ''}
+              className="min-h-[5rem]"
+              placeholder="Volvemos pronto"
+            />
+          </Field>
+        </div>
       </Card>
 
       <Card>

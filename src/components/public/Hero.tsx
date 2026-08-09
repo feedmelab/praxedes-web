@@ -21,6 +21,7 @@ export default function Hero({
   fadeBottom,
   scrollFade,
   hideScroll = false,
+  notice = null,
 }: {
   reelVimeoId?: string | null
   reelMp4Url?: string | null
@@ -32,6 +33,7 @@ export default function Hero({
   fadeBottom?: number | null
   scrollFade?: number | null
   hideScroll?: boolean
+  notice?: string | null
 }) {
   const darkenPct = (darken ?? 35) / 100
   const fadeBottomPct = (fadeBottom ?? 70) / 100
@@ -127,6 +129,11 @@ export default function Hero({
         <p className="mt-6 animate-fade-up text-[clamp(0.8rem,1.6vw,1rem)] uppercase tracking-[0.16em] text-soft">
           {t('claim')}
         </p>
+        {notice && (
+          <p className="mx-auto mt-8 max-w-[42ch] animate-fade-up whitespace-pre-line text-[clamp(0.72rem,1.4vw,0.9rem)] tracking-[0.14em] text-accent">
+            {notice}
+          </p>
+        )}
       </div>
 
       {!hideScroll && (

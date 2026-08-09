@@ -57,6 +57,7 @@ export default async function PublicLayout({
             fadeBottom={settings?.heroFadeBottom}
             scrollFade={settings?.heroScrollFade}
             hideScroll
+            notice={(settings as { maintenanceText?: string | null } | null)?.maintenanceText}
           />
         </main>
         <Analytics />

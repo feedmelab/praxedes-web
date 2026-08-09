@@ -125,6 +125,7 @@ const settingsSchema = z.object({
   vimeoUrl: z.string().url('URL inválida').or(z.literal('')).optional(),
   // Checkbox: llega "on" si está marcado, ausente si no.
   maintenanceMode: z.preprocess((v) => v === 'on' || v === 'true' || v === true, z.boolean()),
+  maintenanceText: z.string().max(600).optional(),
 })
 
 export async function updateSettings(
@@ -162,6 +163,7 @@ export async function updateSettings(
     instagramUrl: parsed.data.instagramUrl || null,
     vimeoUrl: parsed.data.vimeoUrl || null,
     maintenanceMode: parsed.data.maintenanceMode ?? false,
+    maintenanceText: parsed.data.maintenanceText?.trim() || null,
   }
 
   await prisma.siteSettings.upsert({
