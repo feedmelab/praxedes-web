@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveAboutImage, type AboutSlot } from './actions'
 import { KindIcon, type Kind } from '../_components/FileButton'
+import BackgroundVideo from '@/components/public/BackgroundVideo'
 
 const NEXT_KIND: Record<Kind, Kind> = { all: 'image', image: 'video', video: 'all' }
 const ACCEPT: Record<Kind, string> = {
@@ -89,14 +90,7 @@ function SlotUpload({
         {url ? (
           <>
             {isVideoUrl(url) ? (
-              <video
-                src={url}
-                className="h-full w-full object-cover"
-                muted
-                loop
-                autoPlay
-                playsInline
-              />
+              <BackgroundVideo src={url} className="h-full w-full object-cover" />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={url} alt={label} className="h-full w-full object-cover" />

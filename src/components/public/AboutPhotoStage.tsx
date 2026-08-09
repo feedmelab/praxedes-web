@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import BackgroundVideo from './BackgroundVideo'
 
 type Imgs = {
   center: string
@@ -23,7 +24,9 @@ function Media({
 }) {
   const cls = 'absolute inset-0 h-full w-full object-cover'
   return isVideo(src) ? (
-    <video src={src} className={cls} style={style} autoPlay muted loop playsInline />
+    <div className={cls} style={style}>
+      <BackgroundVideo src={src} className="h-full w-full object-cover" />
+    </div>
   ) : (
     // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={alt} className={cls} style={style} />

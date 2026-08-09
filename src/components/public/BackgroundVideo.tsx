@@ -6,6 +6,15 @@ import { useEffect, useRef } from 'react'
 // requiere `muted` como PROPIEDAD (no solo atributo), `playsInline` y a menudo
 // un `play()` explícito; y puede pausarlo al volver de segundo plano. Fija todo
 // eso y reintenta al montar, al primer toque y al volver a primer plano.
+// Deduce el type MIME a partir de la extensión (ayuda a iOS a decidir).
+function videoType(src: string): string {
+  const m = src.toLowerCase().match(/\.(mp4|webm|mov|m4v)(\?|$)/)
+  const ext = m?.[1]
+  if (ext === 'webm') return 'video/webm'
+  if (ext === 'mov') return 'video/quicktime'
+  return 'video/mp4' // mp4 y m4v
+}
+
 export default function BackgroundVideo({ src, className }: { src: string; className?: string }) {
   const ref = useRef<HTMLVideoElement>(null)
 
@@ -49,7 +58,7 @@ export default function BackgroundVideo({ src, className }: { src: string; class
   return (
     <video ref={ref} autoPlay muted loop playsInline preload="auto" className={className}>
       {/* La <source> con type explícito ayuda a iOS a decidir reproducir. */}
-      <source src={src} type="video/mp4" />
+      <source src={src} type={videoType(src)} />
     </video>
   )
 }
