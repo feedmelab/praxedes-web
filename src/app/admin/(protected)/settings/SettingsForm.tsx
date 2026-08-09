@@ -102,6 +102,7 @@ type Settings = {
   vimeoUrl?: string | null
   maintenanceMode?: boolean | null
   maintenanceText?: string | null
+  maintenanceTextEn?: string | null
 }
 
 function SectionHead({ title, desc }: { title: string; desc: string }) {
@@ -141,16 +142,27 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           </span>
         </label>
 
-        <div className="mt-6">
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
           <Field
-            label="Texto sobre la portada (opcional)"
-            hint="Aviso que aparece bajo el nombre en mantenimiento (p. ej. «Volvemos pronto»). Vacío por defecto."
+            label="Texto sobre la portada — ES (opcional)"
+            hint="Aviso bajo el nombre en mantenimiento. Vacío por defecto."
           >
             <TextArea
               name="maintenanceText"
               defaultValue={s.maintenanceText ?? ''}
               className="min-h-[5rem]"
-              placeholder="Volvemos pronto"
+              placeholder="Estamos ultimando detalles, vuelve pronto."
+            />
+          </Field>
+          <Field
+            label="Text over the cover — EN (optional)"
+            hint="Se muestra a los visitantes en inglés. Si lo dejas vacío, se usa el texto en ES."
+          >
+            <TextArea
+              name="maintenanceTextEn"
+              defaultValue={s.maintenanceTextEn ?? ''}
+              className="min-h-[5rem]"
+              placeholder="We're putting on the finishing touches — back soon."
             />
           </Field>
         </div>

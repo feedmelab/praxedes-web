@@ -126,6 +126,7 @@ const settingsSchema = z.object({
   // Checkbox: llega "on" si está marcado, ausente si no.
   maintenanceMode: z.preprocess((v) => v === 'on' || v === 'true' || v === true, z.boolean()),
   maintenanceText: z.string().max(600).optional(),
+  maintenanceTextEn: z.string().max(600).optional(),
 })
 
 export async function updateSettings(
@@ -164,6 +165,7 @@ export async function updateSettings(
     vimeoUrl: parsed.data.vimeoUrl || null,
     maintenanceMode: parsed.data.maintenanceMode ?? false,
     maintenanceText: parsed.data.maintenanceText?.trim() || null,
+    maintenanceTextEn: parsed.data.maintenanceTextEn?.trim() || null,
   }
 
   try {

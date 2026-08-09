@@ -226,7 +226,8 @@ model SiteSettings {
   instagramUrl String?
   vimeoUrl     String?
   maintenanceMode Boolean @default(false) // si true, la web pública muestra solo el hero de la home
-  maintenanceText String? @db.Text // aviso opcional sobre la portada en mantenimiento (vacío por defecto)
+  maintenanceText   String? @db.Text // aviso de mantenimiento (ES); vacío por defecto
+  maintenanceTextEn String? @db.Text // aviso de mantenimiento (EN); vacío por defecto
   updatedAt    DateTime @updatedAt
 }
 

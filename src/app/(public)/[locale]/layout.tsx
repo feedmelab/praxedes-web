@@ -13,6 +13,7 @@ import HtmlLang from '@/components/public/HtmlLang'
 import MediaProtection from '@/components/public/MediaProtection'
 import Intro from '@/components/public/Intro'
 import Hero from '@/components/public/Hero'
+import LanguageSwitch from '@/components/public/LanguageSwitch'
 import { MIC_INFO_DEFAULT } from '@/lib/mic-info'
 import type { Locale } from '@/lib/public-data'
 
@@ -40,6 +41,11 @@ export default async function PublicLayout({
     const loc = locale as Locale
     const micInfo =
       (loc === 'en' ? settings?.micInfoEn : settings?.micInfoEs) || MIC_INFO_DEFAULT[loc]
+    // Aviso según idioma, con reserva al texto en ES si el de EN está vacío.
+    // (cast puntual: el campo EN existe en el cliente Prisma tras regenerar).
+    const mEn = (settings as { maintenanceTextEn?: string | null } | null)?.maintenanceTextEn
+    const mEs = settings?.maintenanceText
+    const notice = (loc === 'en' ? mEn : mEs) || mEs || mEn
     return (
       <NextIntlClientProvider messages={messages}>
         <HtmlLang locale={locale} />
@@ -57,8 +63,12 @@ export default async function PublicLayout({
             fadeBottom={settings?.heroFadeBottom}
             scrollFade={settings?.heroScrollFade}
             hideScroll
-            notice={settings?.maintenanceText}
+            notice={notice}
           />
+          {/* Selector de idioma flotante (no hay menú en mantenimiento). */}
+          <div className="fixed right-6 top-6 z-[60]">
+            <LanguageSwitch />
+          </div>
         </main>
         <Analytics />
       </NextIntlClientProvider>
