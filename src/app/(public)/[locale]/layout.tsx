@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
 import { getSettings } from '@/lib/public-data'
+import { auth } from '@/lib/auth'
 import Nav from '@/components/public/Nav'
 import Footer from '@/components/public/Footer'
 import SiteWaterBackdrop from '@/components/public/SiteWaterBackdrop'
@@ -42,8 +43,14 @@ export default async function PublicLayout({
   const host = (await headers()).get('host') || ''
   const isLocalHost =
     /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?$/i.test(host) || host.endsWith('.local')
-  const maintenance =
+  let maintenance =
     settings?.maintenanceMode === true && process.env.NODE_ENV === 'production' && !isLocalHost
+  // Excepción: un admin con sesión válida ve la web completa aunque esté en
+  // mantenimiento (para poder previsualizar y verificar antes de desactivarlo).
+  if (maintenance) {
+    const session = await auth()
+    if (session) maintenance = false
+  }
   if (maintenance) {
     const loc = locale as Locale
     const micInfo =
