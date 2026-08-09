@@ -15,6 +15,7 @@ import {
   type Locale,
 } from '@/lib/public-data'
 import { CLIENTS_FALLBACK, parseClients } from '@/lib/clients'
+import { listAboutMedia } from '@/lib/about-media'
 import { signedDisplayUrl } from '@/lib/imagekit'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -23,11 +24,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   setRequestLocale(locale)
 
   const t = await getTranslations('home')
-  const [settings, projects, clientRows] = await Promise.all([
+  const [settings, projects, clientRows, aboutItems] = await Promise.all([
     getSettings(),
     getFeaturedProjects(),
     getClients(),
+    listAboutMedia(),
   ])
+  const aboutSources = aboutItems.map((m) => signedDisplayUrl(m.url))
   // Pool de clientes: lista curada en Ajustes → clientes de proyectos → respaldo.
   const curated = parseClients(settings?.clientsList)
   const clients =
@@ -103,18 +106,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           className="mx-auto aspect-[4/5] w-full max-w-[460px] self-center overflow-hidden border border-border"
           as="div"
         >
-          {settings?.aboutImage ? (
-            <AboutPhotoStage
-              images={{
-                center: signedDisplayUrl(settings.aboutImage),
-                top: settings.aboutImageTop ? signedDisplayUrl(settings.aboutImageTop) : null,
-                bottom: settings.aboutImageBottom
-                  ? signedDisplayUrl(settings.aboutImageBottom)
-                  : null,
-                left: settings.aboutImageLeft ? signedDisplayUrl(settings.aboutImageLeft) : null,
-                right: settings.aboutImageRight ? signedDisplayUrl(settings.aboutImageRight) : null,
-              }}
-            />
+          {aboutSources.length > 0 ? (
+            <AboutPhotoStage sources={aboutSources} />
           ) : (
             <div
               className="h-full w-full"

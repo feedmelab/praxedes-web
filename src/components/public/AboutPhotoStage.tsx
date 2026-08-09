@@ -3,14 +3,6 @@
 import { useEffect, useState } from 'react'
 import BackgroundVideo from './BackgroundVideo'
 
-type Imgs = {
-  center: string
-  top?: string | null
-  bottom?: string | null
-  left?: string | null
-  right?: string | null
-}
-
 const isVideo = (src: string) => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(src)
 
 function Media({ src, alt = '' }: { src: string; alt?: string }) {
@@ -29,14 +21,8 @@ function Media({ src, alt = '' }: { src: string; alt?: string }) {
 // opacidad: la entrante (cur) se funde por encima de la anterior (prev), que
 // queda opaca debajo hasta terminar. Con «reduce motion» queda fija en la
 // primera.
-export default function AboutPhotoStage({ images }: { images: Imgs }) {
-  const pics = Array.from(
-    new Set(
-      [images.center, images.top, images.bottom, images.left, images.right].filter(
-        (s): s is string => !!s
-      )
-    )
-  )
+export default function AboutPhotoStage({ sources }: { sources: string[] }) {
+  const pics = Array.from(new Set(sources.filter((s): s is string => !!s)))
 
   const [reduce] = useState(
     () =>

@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server'
 import Reveal from '@/components/public/Reveal'
 import AboutPhotoStage from '@/components/public/AboutPhotoStage'
 import { getSettings, getClients, type Locale } from '@/lib/public-data'
+import { listAboutMedia } from '@/lib/about-media'
 import { CLIENTS_FALLBACK, parseClients } from '@/lib/clients'
 import { signedDisplayUrl } from '@/lib/imagekit'
 import Clients from '@/components/public/Clients'
@@ -28,7 +29,12 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   setRequestLocale(locale)
 
   const t = await getTranslations('about')
-  const [settings, clientRows] = await Promise.all([getSettings(), getClients()])
+  const [settings, clientRows, aboutItems] = await Promise.all([
+    getSettings(),
+    getClients(),
+    listAboutMedia(),
+  ])
+  const aboutSources = aboutItems.map((m) => signedDisplayUrl(m.url))
   const bio = (locale === 'en' ? settings?.bioEn : settings?.bioEs) ?? FALLBACK_BIO[locale]
   const curated = parseClients(settings?.clientsList)
   const clients =
@@ -41,18 +47,8 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           className="aspect-[4/5] max-w-[340px] overflow-hidden border border-border md:max-w-none"
           as="div"
         >
-          {settings?.aboutImage ? (
-            <AboutPhotoStage
-              images={{
-                center: signedDisplayUrl(settings.aboutImage),
-                top: settings.aboutImageTop ? signedDisplayUrl(settings.aboutImageTop) : null,
-                bottom: settings.aboutImageBottom
-                  ? signedDisplayUrl(settings.aboutImageBottom)
-                  : null,
-                left: settings.aboutImageLeft ? signedDisplayUrl(settings.aboutImageLeft) : null,
-                right: settings.aboutImageRight ? signedDisplayUrl(settings.aboutImageRight) : null,
-              }}
-            />
+          {aboutSources.length > 0 ? (
+            <AboutPhotoStage sources={aboutSources} />
           ) : (
             <div
               className="h-full w-full"

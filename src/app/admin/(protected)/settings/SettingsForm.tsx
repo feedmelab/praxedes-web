@@ -4,7 +4,6 @@ import { useActionState, useState } from 'react'
 import { Field, TextInput, TextArea, Card } from '../_components/ui'
 import SubmitButton from '../_components/SubmitButton'
 import { updateSettings } from './actions'
-import AboutImageUpload from './AboutImageUpload'
 import { EFFECT_COLORS_DEFAULT } from '@/lib/effect-colors'
 
 function ColorField({
@@ -323,15 +322,6 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             <TextArea name="bioEn" defaultValue={s.bioEn ?? ''} className="min-h-[12rem]" />
           </Field>
         </div>
-        <AboutImageUpload
-          images={{
-            center: s.aboutImage,
-            top: s.aboutImageTop,
-            bottom: s.aboutImageBottom,
-            left: s.aboutImageLeft,
-            right: s.aboutImageRight,
-          }}
-        />
       </Card>
 
       <Card>

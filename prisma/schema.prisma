@@ -231,6 +231,17 @@ model SiteSettings {
   updatedAt    DateTime @updatedAt
 }
 
+// Fotos/vídeos de «Sobre mí» como lista ordenable (sustituye a los 5 campos
+// fijos aboutImage* de SiteSettings). El primero es la imagen principal.
+model AboutMedia {
+  id        String   @id @default(cuid())
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([order])
+}
+
 // Usuario con acceso privado al «Archivo» (catálogo de vestuario).
 model ArchiveUser {
   id        String   @id @default(cuid())

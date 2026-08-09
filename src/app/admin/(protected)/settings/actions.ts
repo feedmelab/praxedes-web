@@ -5,7 +5,9 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { listFiles, deleteFile } from '@/lib/imagekit'
+import { aboutMedia, listAboutMedia, type AboutMediaRow } from '@/lib/about-media'
 export type HeroVideo = { fileId: string; name: string; url: string; size: number }
+export type { AboutMediaRow }
 
 // Lista los vídeos subidos a la carpeta del hero en ImageKit.
 export async function listHeroVideos(): Promise<HeroVideo[]> {
@@ -86,6 +88,52 @@ export async function saveAboutImage(url: string, slot: AboutSlot = 'center') {
     update: data,
     create: { id: 'singleton', ...data },
   })
+  revalidatePath('/admin/settings')
+  revalidatePath('/', 'layout')
+  return { ok: true }
+}
+
+// ── Medios de «Sobre mí» (lista ordenable) ──────────────────────────────────
+const IK_URL = /^https:\/\/[^/]*imagekit\.io\//
+
+export async function listAboutMediaAdmin(): Promise<AboutMediaRow[]> {
+  const session = await auth()
+  if (!session) return []
+  return listAboutMedia()
+}
+
+export async function addAboutMedia(url: string) {
+  const session = await auth()
+  if (!session) return { error: 'No autorizado' }
+  const clean = url.trim()
+  if (!IK_URL.test(clean)) return { error: 'URL no válida' }
+  const max = await aboutMedia().aggregate({ _max: { order: true } })
+  const order = (max._max.order ?? -1) + 1
+  await aboutMedia().create({ data: { url: clean, order } })
+  revalidatePath('/admin/settings')
+  revalidatePath('/', 'layout')
+  return { ok: true }
+}
+
+export async function deleteAboutMedia(id: string) {
+  const session = await auth()
+  if (!session) return { error: 'No autorizado' }
+  try {
+    await aboutMedia().delete({ where: { id } })
+  } catch {
+    /* ya borrado */
+  }
+  revalidatePath('/admin/settings')
+  revalidatePath('/', 'layout')
+  return { ok: true }
+}
+
+export async function reorderAboutMedia(ids: string[]) {
+  const session = await auth()
+  if (!session) return { error: 'No autorizado' }
+  for (let i = 0; i < ids.length; i++) {
+    await aboutMedia().update({ where: { id: ids[i] }, data: { order: i } })
+  }
   revalidatePath('/admin/settings')
   revalidatePath('/', 'layout')
   return { ok: true }
