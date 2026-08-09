@@ -163,13 +163,22 @@ export async function updateSettings(
     instagramUrl: parsed.data.instagramUrl || null,
     vimeoUrl: parsed.data.vimeoUrl || null,
     maintenanceMode: parsed.data.maintenanceMode ?? false,
+    maintenanceText: parsed.data.maintenanceText?.trim() || null,
   }
 
-  await prisma.siteSettings.upsert({
-    where: { id: 'singleton' },
-    update: data,
-    create: { id: 'singleton', ...data },
-  })
+  try {
+    await prisma.siteSettings.upsert({
+      where: { id: 'singleton' },
+      update: data,
+      create: { id: 'singleton', ...data },
+    })
+  } catch (e) {
+    console.error('updateSettings upsert failed', e)
+    return {
+      error:
+        'No se pudieron guardar los ajustes. ¿Falta aplicar migraciones? (prisma migrate deploy)',
+    }
+  }
 
   revalidatePath('/admin/settings')
   // Los ajustes (reel, bio, redes, email) aparecen en home, footer, sobre mí y
