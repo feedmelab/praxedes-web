@@ -15,8 +15,8 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-10">
       <PageHeader title="Ajustes del sitio" />
-      <HeroVideoUpload current={settings?.reelMp4Url} videos={videos} />
       <SettingsForm settings={settings ?? {}} />
+      <HeroVideoUpload current={settings?.reelMp4Url} videos={videos} />
     </div>
   )
 }

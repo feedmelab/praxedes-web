@@ -163,7 +163,6 @@ export async function updateSettings(
     instagramUrl: parsed.data.instagramUrl || null,
     vimeoUrl: parsed.data.vimeoUrl || null,
     maintenanceMode: parsed.data.maintenanceMode ?? false,
-    maintenanceText: parsed.data.maintenanceText?.trim() || null,
   }
 
   await prisma.siteSettings.upsert({
