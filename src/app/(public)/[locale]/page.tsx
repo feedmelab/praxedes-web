@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import Hero from '@/components/public/Hero'
 import { MIC_INFO_DEFAULT } from '@/lib/mic-info'
+import AboutPhotoStage from '@/components/public/AboutPhotoStage'
 import ProjectCard from '@/components/public/ProjectCard'
 import Clients from '@/components/public/Clients'
 import Reveal from '@/components/public/Reveal'
@@ -103,11 +104,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           as="div"
         >
           {settings?.aboutImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={signedDisplayUrl(settings.aboutImage)}
-              alt=""
-              className="h-full w-full object-cover"
+            <AboutPhotoStage
+              images={{
+                center: signedDisplayUrl(settings.aboutImage),
+                top: settings.aboutImageTop ? signedDisplayUrl(settings.aboutImageTop) : null,
+                bottom: settings.aboutImageBottom
+                  ? signedDisplayUrl(settings.aboutImageBottom)
+                  : null,
+                left: settings.aboutImageLeft ? signedDisplayUrl(settings.aboutImageLeft) : null,
+                right: settings.aboutImageRight ? signedDisplayUrl(settings.aboutImageRight) : null,
+              }}
             />
           ) : (
             <div

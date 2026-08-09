@@ -35,7 +35,7 @@ export default async function PublicLayout({
 
   // Modo mantenimiento: la web pública se reduce a la portada (vídeo + nombre),
   // sin menú, sin footer y sin el resto de contenido ni el resto de páginas.
-  const maintenance = (settings as { maintenanceMode?: boolean } | null)?.maintenanceMode === true
+  const maintenance = settings?.maintenanceMode === true
   if (maintenance) {
     const loc = locale as Locale
     const micInfo =
@@ -57,7 +57,7 @@ export default async function PublicLayout({
             fadeBottom={settings?.heroFadeBottom}
             scrollFade={settings?.heroScrollFade}
             hideScroll
-            notice={(settings as { maintenanceText?: string | null } | null)?.maintenanceText}
+            notice={settings?.maintenanceText}
           />
         </main>
         <Analytics />
