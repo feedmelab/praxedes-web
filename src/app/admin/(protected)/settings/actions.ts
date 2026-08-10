@@ -102,14 +102,23 @@ export async function listAboutMediaAdmin(): Promise<AboutMediaRow[]> {
   return listAboutMedia()
 }
 
+const NOT_READY =
+  'Base de datos no lista: ejecuta «npx prisma migrate deploy && npx prisma generate» y reinicia.'
+
 export async function addAboutMedia(url: string) {
   const session = await auth()
   if (!session) return { error: 'No autorizado' }
+  const model = aboutMedia()
+  if (!model) return { error: NOT_READY }
   const clean = url.trim()
   if (!IK_URL.test(clean)) return { error: 'URL no válida' }
-  const max = await aboutMedia().aggregate({ _max: { order: true } })
-  const order = (max._max.order ?? -1) + 1
-  await aboutMedia().create({ data: { url: clean, order } })
+  try {
+    const max = await model.aggregate({ _max: { order: true } })
+    const order = (max._max.order ?? -1) + 1
+    await model.create({ data: { url: clean, order } })
+  } catch {
+    return { error: NOT_READY }
+  }
   revalidatePath('/admin/settings')
   revalidatePath('/', 'layout')
   return { ok: true }
@@ -118,8 +127,10 @@ export async function addAboutMedia(url: string) {
 export async function deleteAboutMedia(id: string) {
   const session = await auth()
   if (!session) return { error: 'No autorizado' }
+  const model = aboutMedia()
+  if (!model) return { error: NOT_READY }
   try {
-    await aboutMedia().delete({ where: { id } })
+    await model.delete({ where: { id } })
   } catch {
     /* ya borrado */
   }
@@ -131,8 +142,14 @@ export async function deleteAboutMedia(id: string) {
 export async function reorderAboutMedia(ids: string[]) {
   const session = await auth()
   if (!session) return { error: 'No autorizado' }
-  for (let i = 0; i < ids.length; i++) {
-    await aboutMedia().update({ where: { id: ids[i] }, data: { order: i } })
+  const model = aboutMedia()
+  if (!model) return { error: NOT_READY }
+  try {
+    for (let i = 0; i < ids.length; i++) {
+      await model.update({ where: { id: ids[i] }, data: { order: i } })
+    }
+  } catch {
+    return { error: NOT_READY }
   }
   revalidatePath('/admin/settings')
   revalidatePath('/', 'layout')

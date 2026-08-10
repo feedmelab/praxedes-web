@@ -13,13 +13,15 @@ type AboutMediaModel = {
   aggregate: (args: unknown) => Promise<{ _max: { order: number | null } }>
 }
 
-export const aboutMedia = (): AboutMediaModel =>
-  (prisma as unknown as { aboutMedia: AboutMediaModel }).aboutMedia
+export const aboutMedia = (): AboutMediaModel | undefined =>
+  (prisma as unknown as { aboutMedia?: AboutMediaModel }).aboutMedia
 
 /** Lista ordenada de medios de «Sobre mí» (vacía si falla/no hay). */
 export async function listAboutMedia(): Promise<AboutMediaRow[]> {
+  const model = aboutMedia()
+  if (!model) return []
   try {
-    return await aboutMedia().findMany({ orderBy: { order: 'asc' } })
+    return await model.findMany({ orderBy: { order: 'asc' } })
   } catch {
     return []
   }
