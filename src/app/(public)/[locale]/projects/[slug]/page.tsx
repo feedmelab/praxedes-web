@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
-import { Link } from '@/i18n/navigation'
+import ProjectBack from '@/components/public/ProjectBack'
 import ProjectGallery from '@/components/public/ProjectGallery'
 import ProjectHeroText from '@/components/public/ProjectHeroText'
 import { SetNavSection } from '@/components/public/NavSection'
@@ -73,6 +73,8 @@ export default async function ProjectPage({
   return (
     <>
       <SetNavSection href={sectionHref[project.category] ?? '/gallery'} />
+      {/* «Volver» que aparece al llegar a la galería y acompaña el scroll. */}
+      <ProjectBack label={tc('back')} />
       {/* Hero */}
       <header className="relative flex h-[82vh] min-h-[520px] items-end overflow-hidden px-6 pb-10 pt-32 sm:px-10 lg:px-16 lg:pb-20">
         <div
@@ -146,16 +148,7 @@ export default async function ProjectPage({
         </section>
       )}
 
-      {/* Volver */}
-      <div className="px-6 py-16 sm:px-10 lg:px-16">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-3 text-[0.7rem] uppercase tracking-[0.2em] text-soft transition-colors hover:text-accent"
-        >
-          <span className="h-px w-6 bg-current" />
-          {tc('back')}
-        </Link>
-      </div>
+      <div className="pb-16" />
     </>
   )
 }

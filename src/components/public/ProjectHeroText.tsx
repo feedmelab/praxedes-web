@@ -1,13 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Anima EN SU SITIO el texto que ya tiene la portada del proyecto (cliente,
-// título y categoría/año), al cargar la página, al estilo de una secuencia de
-// créditos. Sin cortina ni overlay. Una variante al azar en cada visita; se
-// desactiva con «reduce motion» (media query en el CSS).
+// título y categoría/año), al cargar. Sin cortina. Una variante al azar en cada
+// visita. La variante se elige TRAS montar (no en SSR) para evitar mismatch de
+// hidratación; hasta entonces el texto se muestra plano.
 
 const VARIANTS = 3
+const TITLE_CLS = 'font-display text-[clamp(2.4rem,7vw,5rem)] font-normal leading-[1.02]'
+const CLIENT_CLS = 'mb-4 text-[0.72rem] uppercase tracking-[0.28em] text-accent'
+const META_CLS = 'mt-5 flex flex-wrap gap-6 text-[0.72rem] uppercase tracking-[0.16em] text-soft'
 
 function Words({ text, base, step }: { text: string; base: number; step: number }) {
   const words = text.split(/\s+/)
@@ -37,13 +40,34 @@ export default function ProjectHeroText({
   title: string
   meta: string[]
 }) {
-  const [v] = useState(() => Math.floor(Math.random() * VARIANTS))
+  const [v, setV] = useState<number | null>(null)
+
+  useEffect(() => {
+    setV(Math.floor(Math.random() * VARIANTS))
+  }, [])
+
+  const metaEl = (animate: boolean) => (
+    <div className={`${META_CLS} ${animate ? 'v-fadeup' : ''}`} style={{ animationDelay: '1s' }}>
+      {meta.map((m, i) => (
+        <span key={i}>{m}</span>
+      ))}
+    </div>
+  )
+
+  // SSR y primer render: texto plano (sin animación) → hidratación estable.
+  if (v === null) {
+    return (
+      <>
+        <div className={CLIENT_CLS}>{client}</div>
+        <h1 className={TITLE_CLS}>{title}</h1>
+        {metaEl(false)}
+      </>
+    )
+  }
 
   const clientEl = (
     <div
-      className={`mb-4 text-[0.72rem] uppercase tracking-[0.28em] text-accent ${
-        v === 2 ? 'v-track' : v === 1 ? 'v-slideL' : 'v-fadeup'
-      }`}
+      className={`${CLIENT_CLS} ${v === 2 ? 'v-track' : v === 1 ? 'v-slideL' : 'v-fadeup'}`}
       style={{ animationDelay: '0.15s' }}
     >
       {client}
@@ -52,18 +76,12 @@ export default function ProjectHeroText({
 
   const titleEl =
     v === 0 ? (
-      <h1 className="font-display text-[clamp(2.4rem,7vw,5rem)] font-normal leading-[1]">
+      <h1 className={TITLE_CLS}>
         <Words text={title} base={0.35} step={0.07} />
       </h1>
     ) : (
       <div className="overflow-hidden">
-        <h1
-          className={`font-display text-[clamp(2.4rem,7vw,5rem)] font-normal leading-[1.02] ${
-            v === 1 ? 'v-slideup' : 'v-rise'
-          }`}
-        >
-          {title}
-        </h1>
+        <h1 className={`${TITLE_CLS} ${v === 1 ? 'v-slideup' : 'v-rise'}`}>{title}</h1>
       </div>
     )
 
@@ -71,14 +89,7 @@ export default function ProjectHeroText({
     <>
       {clientEl}
       {titleEl}
-      <div
-        className="v-fadeup mt-5 flex flex-wrap gap-6 text-[0.72rem] uppercase tracking-[0.16em] text-soft"
-        style={{ animationDelay: '1s' }}
-      >
-        {meta.map((m, i) => (
-          <span key={i}>{m}</span>
-        ))}
-      </div>
+      {metaEl(true)}
 
       <style>{`
         @keyframes vFadeUp { from { opacity:0; transform: translateY(1.1em); } to { opacity:1; transform: translateY(0); } }
@@ -96,9 +107,7 @@ export default function ProjectHeroText({
         .v-track  { animation: vTrack .9s ease both; }
 
         @media (prefers-reduced-motion: reduce) {
-          .v-fadeup, .v-word, .v-rise, .v-slideup, .v-slideL, .v-track {
-            animation: none !important;
-          }
+          .v-fadeup, .v-word, .v-rise, .v-slideup, .v-slideL, .v-track { animation: none !important; }
         }
       `}</style>
     </>
