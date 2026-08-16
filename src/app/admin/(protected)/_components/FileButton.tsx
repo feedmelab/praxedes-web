@@ -87,7 +87,23 @@ export default function FileButton({
       onChange(e)
       return
     }
-    if (autoSubmit && e.currentTarget.files?.length) e.currentTarget.form?.requestSubmit()
+    if (autoSubmit && e.currentTarget.files?.length) {
+      const form = e.currentTarget.form
+      if (!form) return
+      // `requestSubmit` no existe en Safari antiguo/iPad → provocaría un
+      // "client-side exception". Fallback: pulsar un botón submit temporal
+      // (dispara la Server Action igual que requestSubmit).
+      if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit()
+      } else {
+        const b = document.createElement('button')
+        b.type = 'submit'
+        b.style.display = 'none'
+        form.appendChild(b)
+        b.click()
+        form.removeChild(b)
+      }
+    }
   }
 
   return (
