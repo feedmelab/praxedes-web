@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import ProjectGallery from '@/components/public/ProjectGallery'
+import ProjectHeroText from '@/components/public/ProjectHeroText'
 import { SetNavSection } from '@/components/public/NavSection'
 import {
   getProjectBySlug,
@@ -102,16 +103,11 @@ export default async function ProjectPage({
         {/* Velo suave solo para legibilidad del texto (no solidifica el fondo). */}
         <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-bg/45 via-transparent to-transparent" />
         <div className="relative z-[2] w-full max-w-[1100px]">
-          <div className="mb-4 text-[0.72rem] uppercase tracking-[0.28em] text-accent">
-            {project.client}
-          </div>
-          <h1 className="font-display text-[clamp(2.4rem,7vw,5rem)] font-normal leading-[1]">
-            {title}
-          </h1>
-          <div className="mt-5 flex flex-wrap gap-6 text-[0.72rem] uppercase tracking-[0.16em] text-soft">
-            <span>{CATEGORY_LABELS[locale][project.category]}</span>
-            <span>{project.year}</span>
-          </div>
+          <ProjectHeroText
+            client={project.client}
+            title={title}
+            meta={[CATEGORY_LABELS[locale][project.category], String(project.year)]}
+          />
         </div>
       </header>
 
