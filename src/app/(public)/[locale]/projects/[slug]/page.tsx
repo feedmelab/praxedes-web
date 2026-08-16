@@ -55,6 +55,12 @@ export default async function ProjectPage({
   const tc = await getTranslations('common')
   const title = localizedTitle(project, locale)
   const desc = localizedDesc(project, locale)
+  // Divide la descripción en párrafos (por líneas en blanco) para dar ritmo de
+  // lectura en textos largos, en vez de un único bloque muy alto.
+  const paragraphs = (desc ?? '')
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
 
   // Sección del menú a resaltar según la categoría del proyecto.
   const sectionHref: Record<string, string> = {
@@ -110,14 +116,18 @@ export default async function ProjectPage({
       </header>
 
       {/* Descripción */}
-      {desc && (
-        <section className="mx-auto grid max-w-[1200px] grid-cols-1 gap-6 px-6 pt-16 sm:px-10 md:grid-cols-[1fr_1.4fr] lg:gap-20 lg:px-16 lg:pt-24">
-          <div className="text-[0.68rem] uppercase tracking-[0.22em] text-muted">
+      {paragraphs.length > 0 && (
+        <section className="mx-auto grid max-w-[1200px] grid-cols-1 items-start gap-6 px-6 pt-16 sm:px-10 md:grid-cols-[1fr_1.4fr] lg:gap-20 lg:px-16 lg:pt-24">
+          <div className="text-[0.68rem] uppercase tracking-[0.22em] text-muted md:sticky md:top-28">
             {t('overview')}
           </div>
-          <p className="max-w-[60ch] whitespace-pre-line text-[clamp(1rem,1.6vw,1.15rem)] text-soft">
-            {desc}
-          </p>
+          <div className="max-w-[62ch] space-y-5 text-[clamp(1rem,1.5vw,1.12rem)] leading-relaxed text-soft">
+            {paragraphs.map((p, i) => (
+              <p key={i} className="whitespace-pre-line">
+                {p}
+              </p>
+            ))}
+          </div>
         </section>
       )}
 
