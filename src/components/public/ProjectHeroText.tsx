@@ -7,7 +7,7 @@ import { useState } from 'react'
 // créditos. Sin cortina ni overlay. Una variante al azar en cada visita; se
 // desactiva con «reduce motion» (media query en el CSS).
 
-const VARIANTS = 4
+const VARIANTS = 3
 
 function Words({ text, base, step }: { text: string; base: number; step: number }) {
   const words = text.split(/\s+/)
@@ -42,7 +42,7 @@ export default function ProjectHeroText({
   const clientEl = (
     <div
       className={`mb-4 text-[0.72rem] uppercase tracking-[0.28em] text-accent ${
-        v === 3 ? 'v-track' : v === 2 ? 'v-slideL' : 'v-fadeup'
+        v === 2 ? 'v-track' : v === 1 ? 'v-slideL' : 'v-fadeup'
       }`}
       style={{ animationDelay: '0.15s' }}
     >
@@ -59,7 +59,7 @@ export default function ProjectHeroText({
       <div className="overflow-hidden">
         <h1
           className={`font-display text-[clamp(2.4rem,7vw,5rem)] font-normal leading-[1.02] ${
-            v === 1 ? 'v-clip' : v === 2 ? 'v-slideup' : 'v-rise'
+            v === 1 ? 'v-slideup' : 'v-rise'
           }`}
         >
           {title}
@@ -84,7 +84,6 @@ export default function ProjectHeroText({
         @keyframes vFadeUp { from { opacity:0; transform: translateY(1.1em); } to { opacity:1; transform: translateY(0); } }
         @keyframes vWord { from { opacity:0; transform: translateY(105%); } to { opacity:1; transform: translateY(0); } }
         @keyframes vRise { from { opacity:0; transform: translateY(115%); } to { opacity:1; transform: translateY(0); } }
-        @keyframes vClip { from { opacity:.15; clip-path: inset(0 50% 0 50%); } to { opacity:1; clip-path: inset(0 0 0 0); } }
         @keyframes vSlideUp { from { opacity:0; transform: translateY(1em) skewY(3deg); } to { opacity:1; transform: translateY(0) skewY(0); } }
         @keyframes vSlideL { from { opacity:0; transform: translateX(-1.4em); } to { opacity:1; transform: translateX(0); } }
         @keyframes vTrack { from { opacity:0; letter-spacing:.7em; } to { opacity:1; letter-spacing:.28em; } }
@@ -92,13 +91,12 @@ export default function ProjectHeroText({
         .v-fadeup { animation: vFadeUp .8s cubic-bezier(.16,1,.3,1) both; }
         .v-word   { animation: vWord .75s cubic-bezier(.16,1,.3,1) both; }
         .v-rise   { animation: vRise .85s cubic-bezier(.16,1,.3,1) .3s both; }
-        .v-clip   { animation: vClip .95s cubic-bezier(.76,0,.24,1) .3s both; }
         .v-slideup{ animation: vSlideUp .85s cubic-bezier(.16,1,.3,1) .3s both; }
         .v-slideL { animation: vSlideL .8s cubic-bezier(.16,1,.3,1) both; }
         .v-track  { animation: vTrack .9s ease both; }
 
         @media (prefers-reduced-motion: reduce) {
-          .v-fadeup, .v-word, .v-rise, .v-clip, .v-slideup, .v-slideL, .v-track {
+          .v-fadeup, .v-word, .v-rise, .v-slideup, .v-slideL, .v-track {
             animation: none !important;
           }
         }
