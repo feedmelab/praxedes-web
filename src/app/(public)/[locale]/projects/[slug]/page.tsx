@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 import ProjectBack from '@/components/public/ProjectBack'
+import ProjectHero from '@/components/public/ProjectHero'
 import ProjectGallery from '@/components/public/ProjectGallery'
-import ProjectHeroText from '@/components/public/ProjectHeroText'
 import { SetNavSection } from '@/components/public/NavSection'
 import {
   getProjectBySlug,
@@ -76,42 +76,14 @@ export default async function ProjectPage({
       {/* «Volver» que aparece al llegar a la galería y acompaña el scroll. */}
       <ProjectBack label={tc('back')} />
       {/* Hero */}
-      <header className="relative flex h-[82vh] min-h-[520px] items-end overflow-hidden px-6 pb-10 pt-32 sm:px-10 lg:px-16 lg:pb-20">
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            // La imagen del fondo se FUNDE A TRANSPARENTE en la parte inferior
-            // (deja ver el color/página detrás), en vez de taparse con un color.
-            maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
-          }}
-        >
-          {project.coverImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={project.coverImage}
-              alt=""
-              className={`h-full w-full object-cover brightness-[0.55] ${
-                project.coverLetterbox ? '' : 'scale-[1.12]'
-              }`}
-            />
-          ) : (
-            <div
-              className="h-full w-full"
-              style={{ background: 'linear-gradient(135deg,#1a1714,#2a2118 55%,#0e0d0c)' }}
-            />
-          )}
-        </div>
-        {/* Velo suave solo para legibilidad del texto (no solidifica el fondo). */}
-        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-bg/45 via-transparent to-transparent" />
-        <div className="relative z-[2] w-full max-w-[1100px]">
-          <ProjectHeroText
-            client={project.client}
-            title={title}
-            meta={[CATEGORY_LABELS[locale][project.category], String(project.year)]}
-          />
-        </div>
-      </header>
+      <ProjectHero
+        coverImage={project.coverImage}
+        coverLetterbox={project.coverLetterbox}
+        vimeoId={project.vimeoId}
+        client={project.client}
+        title={title}
+        meta={[CATEGORY_LABELS[locale][project.category], String(project.year)]}
+      />
 
       {/* Descripción */}
       {paragraphs.length > 0 && (

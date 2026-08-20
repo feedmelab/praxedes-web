@@ -8,7 +8,18 @@ import { useEffect, useState } from 'react'
 // hidratación; hasta entonces el texto se muestra plano.
 
 const VARIANTS = 3
-const TITLE_CLS = 'font-display text-[clamp(2.4rem,7vw,5rem)] font-normal leading-[1.02]'
+// Tamaño del título según su longitud: los títulos largos se reducen para que
+// no queden desproporcionados.
+function titleClass(title: string): string {
+  const n = title.length
+  const size =
+    n > 28
+      ? 'text-[clamp(1.7rem,4.4vw,3rem)]'
+      : n > 16
+        ? 'text-[clamp(2rem,5.5vw,3.9rem)]'
+        : 'text-[clamp(2.4rem,7vw,5rem)]'
+  return `font-display ${size} font-normal leading-[1.03]`
+}
 const CLIENT_CLS = 'mb-4 text-[0.72rem] uppercase tracking-[0.28em] text-accent'
 const META_CLS = 'mt-5 flex flex-wrap gap-6 text-[0.72rem] uppercase tracking-[0.16em] text-soft'
 
@@ -41,6 +52,7 @@ export default function ProjectHeroText({
   meta: string[]
 }) {
   const [v, setV] = useState<number | null>(null)
+  const titleCls = titleClass(title)
 
   useEffect(() => {
     setV(Math.floor(Math.random() * VARIANTS))
@@ -59,7 +71,7 @@ export default function ProjectHeroText({
     return (
       <>
         <div className={CLIENT_CLS}>{client}</div>
-        <h1 className={TITLE_CLS}>{title}</h1>
+        <h1 className={titleCls}>{title}</h1>
         {metaEl(false)}
       </>
     )
@@ -76,12 +88,12 @@ export default function ProjectHeroText({
 
   const titleEl =
     v === 0 ? (
-      <h1 className={TITLE_CLS}>
+      <h1 className={titleCls}>
         <Words text={title} base={0.35} step={0.07} />
       </h1>
     ) : (
       <div className="overflow-hidden">
-        <h1 className={`${TITLE_CLS} ${v === 1 ? 'v-slideup' : 'v-rise'}`}>{title}</h1>
+        <h1 className={`${titleCls} ${v === 1 ? 'v-slideup' : 'v-rise'}`}>{title}</h1>
       </div>
     )
 

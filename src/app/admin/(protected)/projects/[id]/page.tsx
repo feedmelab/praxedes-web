@@ -88,6 +88,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           images={media}
           coverFocal={project.coverFocal}
           coverLetterbox={project.coverLetterbox}
+          coverVideoId={project.vimeoId}
         />
       </Card>
 

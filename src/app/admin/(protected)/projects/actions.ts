@@ -256,6 +256,18 @@ export async function setCoverImage(projectId: string, url: string) {
   revalidatePublic()
 }
 
+// Fija (o quita, con vimeoId vacío) un vídeo de Vimeo como portada del proyecto.
+// Se guarda en Project.vimeoId; en la web tiene prioridad sobre la imagen.
+export async function setCoverVideo(projectId: string, vimeoId: string) {
+  await requireAuth()
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { vimeoId: vimeoId.trim() || null },
+  })
+  revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePublic()
+}
+
 // Alterna si un item de la galería ocupa 2 columnas (ancho completo) o 1.
 export async function toggleImageWide(imageId: string, value: boolean) {
   await requireAuth()

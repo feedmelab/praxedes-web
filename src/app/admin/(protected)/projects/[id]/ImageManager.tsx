@@ -10,6 +10,7 @@ import {
   addProjectVideo,
   deleteProjectImage,
   setCoverImage,
+  setCoverVideo,
   setCoverFocal,
   setCoverLetterbox,
   setImageFocal,
@@ -67,11 +68,13 @@ export default function ImageManager({
   images,
   coverFocal,
   coverLetterbox,
+  coverVideoId,
 }: {
   projectId: string
   images: ImageVM[]
   coverFocal: Focal
   coverLetterbox: boolean
+  coverVideoId?: string | null
 }) {
   const [pending, startTransition] = useTransition()
   const [videoInput, setVideoInput] = useState('')
@@ -180,6 +183,11 @@ export default function ImageManager({
                             <span className="text-[8px] uppercase tracking-wider text-muted">
                               Vídeo
                             </span>
+                            {coverVideoId === img.vimeoId && (
+                              <span className="absolute left-1 top-1 rounded-full border border-accent/60 bg-bg/80 px-1.5 py-0.5 text-[8px] uppercase tracking-wider text-accent">
+                                Portada
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <>
@@ -190,7 +198,7 @@ export default function ImageManager({
                               sizes="96px"
                               className="object-cover"
                             />
-                            {img.isCover && (
+                            {img.isCover && !coverVideoId && (
                               <span className="absolute left-1 top-1 rounded-full border border-accent/60 bg-bg/80 px-1.5 py-0.5 text-[8px] uppercase tracking-wider text-accent">
                                 Portada
                               </span>
@@ -244,6 +252,25 @@ export default function ImageManager({
                               className="text-accent hover:underline disabled:opacity-40"
                             >
                               Portada
+                            </button>
+                          )}
+                          {img.kind === 'VIDEO' && img.vimeoId && (
+                            <button
+                              disabled={pending}
+                              onClick={() =>
+                                startTransition(() =>
+                                  setCoverVideo(
+                                    projectId,
+                                    coverVideoId === img.vimeoId ? '' : img.vimeoId
+                                  )
+                                )
+                              }
+                              title="Usar este vídeo como portada del proyecto"
+                              className={`hover:underline disabled:opacity-40 ${
+                                coverVideoId === img.vimeoId ? 'text-accent' : 'text-muted'
+                              }`}
+                            >
+                              {coverVideoId === img.vimeoId ? 'Portada ✓' : 'Portada (vídeo)'}
                             </button>
                           )}
                           <button
