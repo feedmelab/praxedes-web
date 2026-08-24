@@ -39,7 +39,42 @@ export class VimeoError extends Error {
   }
 }
 
+import { parseVimeo } from '@/lib/utils'
 export { parseVimeo } from '@/lib/utils'
+
+// ¿Permite Vimeo incrustar este vídeo? (API oEmbed pública, sin token). Sirve
+// para no cargar en la web un vídeo privado/no incrustable como portada, y para
+// avisar en el admin. `fresh` desactiva la caché (útil al comprobar en el admin).
+export async function checkVimeoEmbed(
+  vimeoId: string,
+  opts?: { fresh?: boolean }
+): Promise<{ ok: boolean; error?: string }> {
+  const { id, hash } = parseVimeo(vimeoId)
+  if (!id) return { ok: false, error: 'ID no válido' }
+  const videoUrl = hash ? `https://vimeo.com/${id}/${hash}` : `https://vimeo.com/${id}`
+  const init: RequestInit = opts?.fresh
+    ? { cache: 'no-store' }
+    : { next: { revalidate: 3600 } as never }
+  try {
+    const res = await fetch(
+      `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(videoUrl)}`,
+      init
+    )
+    if (!res.ok) {
+      const reason =
+        res.status === 403
+          ? 'privado o incrustación no permitida'
+          : res.status === 404
+            ? 'no encontrado'
+            : `no accesible (${res.status})`
+      return { ok: false, error: reason }
+    }
+    const data = (await res.json()) as { html?: string }
+    return data.html ? { ok: true } : { ok: false, error: 'sin incrustación disponible' }
+  } catch {
+    return { ok: false, error: 'no se pudo comprobar' }
+  }
+}
 
 function authHeaders(): Record<string, string> {
   const token = process.env.VIMEO_ACCESS_TOKEN

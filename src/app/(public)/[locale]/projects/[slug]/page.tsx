@@ -13,6 +13,7 @@ import {
   CATEGORY_LABELS,
   type Locale,
 } from '@/lib/public-data'
+import { checkVimeoEmbed } from '@/lib/vimeo'
 
 export async function generateStaticParams() {
   const slugs = await getPublishedSlugs()
@@ -52,6 +53,11 @@ export default async function ProjectPage({
   const project = await getProjectBySlug(slug)
   if (!project) notFound()
 
+  // Solo cargamos el vídeo de portada si Vimeo permite su incrustación; si es
+  // privado/no incrustable, no se carga y se muestra la imagen.
+  const coverVideoId =
+    project.vimeoId && (await checkVimeoEmbed(project.vimeoId)).ok ? project.vimeoId : null
+
   const t = await getTranslations('project')
   const tc = await getTranslations('common')
   const title = localizedTitle(project, locale)
@@ -79,7 +85,7 @@ export default async function ProjectPage({
       <ProjectHero
         coverImage={project.coverImage}
         coverLetterbox={project.coverLetterbox}
-        vimeoId={project.vimeoId}
+        vimeoId={coverVideoId}
         client={project.client}
         title={title}
         meta={[CATEGORY_LABELS[locale][project.category], String(project.year)]}

@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { uploadFile, deleteFile } from '@/lib/imagekit'
-import { isVimeoImageHost } from '@/lib/vimeo'
+import { isVimeoImageHost, checkVimeoEmbed } from '@/lib/vimeo'
 import { slugify, parseVimeo } from '@/lib/utils'
 import type { ProjectCategory } from '@prisma/client'
 
@@ -254,6 +254,15 @@ export async function setCoverImage(projectId: string, url: string) {
   await prisma.project.update({ where: { id: projectId }, data: { coverImage: url } })
   revalidatePath(`/admin/projects/${projectId}`)
   revalidatePublic()
+}
+
+// Comprueba con la API oEmbed de Vimeo si el vídeo permite incrustación. Si no,
+// nunca funcionará como portada (mostrará banner/enlace en vez de reproducirse).
+export async function checkVimeoEmbeddable(
+  vimeoId: string
+): Promise<{ ok: boolean; error?: string }> {
+  await requireAuth()
+  return checkVimeoEmbed(vimeoId, { fresh: true })
 }
 
 // Fija (o quita, con vimeoId vacío) un vídeo de Vimeo como portada del proyecto.

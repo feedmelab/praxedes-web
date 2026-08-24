@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import Image from 'next/image'
 import { Field, TextInput } from '../../_components/ui'
 import FileButton from '../../_components/FileButton'
@@ -8,6 +8,7 @@ import { useSortableList, SortableArea, SortableItem, DragHandle } from '../../_
 import {
   addProjectImage,
   addProjectVideo,
+  checkVimeoEmbeddable,
   deleteProjectImage,
   setCoverImage,
   setCoverVideo,
@@ -19,6 +20,7 @@ import {
   reorderProjectImages,
 } from '../actions'
 import { FOCALS, FOCAL_LABEL, type Focal } from '@/lib/focal'
+import VimeoCover from '@/components/public/VimeoCover'
 
 export type ImageVM = {
   id: string
@@ -79,6 +81,22 @@ export default function ImageManager({
   const [pending, startTransition] = useTransition()
   const [videoInput, setVideoInput] = useState('')
   const [videoErr, setVideoErr] = useState<string | null>(null)
+  // Comprobación oEmbed del vídeo de portada (¿permite incrustación?).
+  const [embed, setEmbed] = useState<{ ok: boolean; error?: string } | null>(null)
+  useEffect(() => {
+    if (!coverVideoId) {
+      setEmbed(null)
+      return
+    }
+    let active = true
+    setEmbed(null)
+    checkVimeoEmbeddable(coverVideoId).then((r) => {
+      if (active) setEmbed(r)
+    })
+    return () => {
+      active = false
+    }
+  }, [coverVideoId])
   const upload = addProjectImage.bind(null, projectId)
   const byId = new Map(images.map((img) => [img.id, img]))
 
@@ -134,6 +152,37 @@ export default function ImageManager({
         </div>
       </div>
       {videoErr && <p className="text-xs text-red-400">{videoErr}</p>}
+
+      {/* Vista previa de la portada-vídeo: así se verá en la web. Si en vez de
+          reproducirse solo aparece el banner de Vimeo o un botón de play, ese
+          vídeo NO sirve como portada (privacidad/plan). */}
+      {coverVideoId && (
+        <div className="rounded border border-amber-400/40 bg-amber-400/5 p-3">
+          <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-amber-300">
+            Vista previa de la portada (vídeo)
+          </p>
+          {embed === null ? (
+            <p className="mb-2 text-[11px] text-muted">Comprobando el vídeo en Vimeo…</p>
+          ) : embed.ok ? (
+            <p className="mb-2 text-[11px] text-green-400">
+              ✓ El vídeo permite incrustación. Verifica abajo que se reproduce solo (sin banner).
+            </p>
+          ) : (
+            <p className="mb-2 text-[11px] text-red-400">
+              ✗ Este vídeo no sirve como portada: {embed.error}. Ajusta su privacidad/incrustación
+              en Vimeo o elige otro.
+            </p>
+          )}
+          <div className="relative aspect-[16/10] w-full max-w-[440px] overflow-hidden rounded border border-border bg-black [container-type:size]">
+            <VimeoCover vimeoId={coverVideoId} />
+          </div>
+          <p className="mt-2 text-[11px] text-muted">
+            Comprueba que el vídeo se reproduce solo. Si aparece el banner de Vimeo o un botón de
+            play, ese vídeo no vale como portada: en Vimeo permite la incrustación/reproducción
+            «background» (o baja la privacidad), o elige otro vídeo y quita esta portada.
+          </p>
+        </div>
+      )}
 
       {/* Encuadre de la portada (cómo se recorta en las tarjetas de la web) */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded border border-border bg-bg/40 px-3 py-2">
